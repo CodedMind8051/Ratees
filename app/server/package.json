@@ -1,0 +1,64 @@
+{
+  "name": "@ratees/backend",
+  "version": "1.0.0",
+  "description": "Backend server for Ratees handling authentication, content management, ratings, reviews, playlists, watch tracking, and social features.",
+  "keywords": [
+    "movie",
+    "social-media",
+    "movie-app",
+    "fullstack",
+    "mern",
+    "react",
+    "typescript",
+    "nodejs",
+    "express",
+    "postgresql",
+    "prisma",
+    "watchlist",
+    "movie-tracker",
+    "movie-reviews",
+    "playlist",
+    "recommendation-system",
+    "content-discovery",
+    "social-platform",
+    "anime",
+    "movies",
+    "web-series"
+  ],
+  "homepage": "https://github.com/CodedMind8051/Ratees#readme",
+  "bugs": {
+    "url": "https://github.com/CodedMind8051/Ratees/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CodedMind8051/Ratees.git"
+  },
+  "license": "Apache-2.0",
+  "author": "Coded_Mind__",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "npm run build && node dist/index.js",
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@apollo/server": "^5.5.1",
+    "@as-integrations/express5": "^1.1.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.6.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/dotenv": "^6.1.1",
+    "@types/express": "^5.0.6",
+    "@types/mongoose": "^5.11.96",
+    "@types/node": "^25.8.0",
+    "nodemon": "^3.1.14",
+    "tsx": "^4.22.1",
+    "typescript": "^6.0.3"
+  }
+}
