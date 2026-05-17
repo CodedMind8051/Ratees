@@ -15,16 +15,21 @@ app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ limit: "2mb", extended: true }));
 app.use(express.static("public"));
 
-const server = await CreateApolloServer()
+const startGraphqlServer = async () => {
+    try {
+        const server = await CreateApolloServer()
+        app.use(
+            '/graphql',
+            expressMiddleware(server, {
+                context: async ({ req, res }) => {
+                    return { req, res }
+                }
+            }),
+        );
+    } catch (error) {
+        console.log("❌ Failed to start Apollo server", error)
+    }
+}
 
-app.use(
-    '/graphql',
-    expressMiddleware(server, {
-        context: async ({ req, res }) => {
-            return { req, res }
-        }
-    }),
-);
 
-
-export { app }
+export { app, startGraphqlServer }

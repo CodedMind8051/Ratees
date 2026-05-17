@@ -13,6 +13,8 @@ const CreateApolloServer = async () => {
         });
 
         await server.start();
+
+        console.log("✅ Apollo server started successfully and running at /graphql")
         return server
 
     } catch (error) {

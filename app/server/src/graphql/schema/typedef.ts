@@ -7,7 +7,7 @@ const User = `#graphql
 
 
   type Query{
-        GetUser(_id:Int!):User
+        Getuser(_id:Int!):String!
       }
 
 `
