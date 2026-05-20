@@ -1,6 +1,6 @@
 import { ApolloServer } from '@apollo/server';
 import { typeDefs } from './schema/index';
-import { ApiError } from '../utils/AppError';
+import { ApiError } from '../utils/AppError.utils';
 import { resolvers } from "./resolvers/index"
 import type { MyContextType } from '../types/graphql.types';
 

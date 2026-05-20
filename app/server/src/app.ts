@@ -3,7 +3,9 @@ import cors from "cors";
 import { expressMiddleware } from '@as-integrations/express5';
 import { CreateApolloServer } from "./graphql/index";
 import { toNodeHandler } from "better-auth/node";
-import { auth } from "./utils/auth";
+import { auth } from "./utils/auth.utils";
+import { serve } from "inngest/express";
+import { inngest, functions } from "./inngest/index.inngest"
 
 
 const app = express();
@@ -21,6 +23,12 @@ app.use(express.static("public"));
 app.all('/api/auth/*any', toNodeHandler(auth));
 
 
+app.use("/api/inngest", serve({
+    client: inngest,
+    functions
+}));
+
+
 const startGraphqlServer = async () => {
     try {
         const server = await CreateApolloServer()
@@ -36,6 +44,5 @@ const startGraphqlServer = async () => {
         console.log("❌ Failed to start Apollo server", error)
     }
 }
-
 
 export { app, startGraphqlServer }

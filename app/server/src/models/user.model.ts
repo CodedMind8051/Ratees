@@ -2,12 +2,7 @@ import z from "zod"
 import mongoose, { Schema } from "mongoose"
 
 export const UserAdditionalField = {
-
-    image: {
-        type: "string",
-        required: true,
-    },
-
+    
     genre: {
         type: "string[]",
         validator: {
@@ -73,4 +68,4 @@ const UserSchema = new Schema(
     }
 )
 
-export const User = mongoose.model("User", UserSchema)
+export const User = mongoose.model("Users", UserSchema)
