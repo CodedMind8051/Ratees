@@ -4,10 +4,10 @@ import {
     organizationClient,
 } from "better-auth/client/plugins";
 
-export const authClient = createAuthClient({
-    baseURL: "http://localhost:5000",
+export const authClient: ReturnType<typeof createAuthClient> = createAuthClient({
+    baseURL: import.meta.env.VITE_BETTER_AUTH_URL,
     plugins: [
         organizationClient({
             schema: inferOrgAdditionalFields(),
         }),]
-})
+}) 

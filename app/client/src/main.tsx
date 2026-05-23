@@ -2,22 +2,18 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
 
-import {BrowserRouter} from "react-router-dom"
-import {ThemeProvider} from "./context/ThemeProvider"
+import { BrowserRouter } from "react-router-dom"
+import { Toaster } from './components/ui/sonner'
+
 
 ReactDOM.createRoot(
-document.getElementById('root')!
+    document.getElementById('root')!
 
 ).render(
 
-<BrowserRouter>
-
-<ThemeProvider>
-
-<App/>
-
-</ThemeProvider>
-
-</BrowserRouter>
+    <BrowserRouter>
+        <App />
+        <Toaster />
+    </BrowserRouter>
 
 )

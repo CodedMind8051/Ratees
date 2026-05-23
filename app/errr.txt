@@ -1,0 +1,118 @@
+✅ Server is running successfully on port: 5000
+2026-05-22T16:34:30.316Z ERROR [Better Auth]: Failed to create user MongoServerError: E11000 duplicate key error collection: Ratees.users index: name_1 dup key: { name: null }
+    at InsertOneOperation.handleOk (/home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at executeOperationWithRetries (/home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/mongodb/src/operations/execute_operation.ts:267:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async executeOperation (/home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/mongodb/src/operations/execute_operation.ts:127:12)
+    at async Collection.insertOne (/home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/mongodb/src/collection.ts:294:12)
+    at async Object.create (file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/@better-auth/mongo-adapter/dist/index.mjs:247:12)
+    at async Object.create (file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/@better-auth/core/dist/db/adapter/factory.mjs:431:16)
+    at async createWithHooks (file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/better-auth/dist/db/with-hooks.mjs:25:66)
+    at async Object.createUser (file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/better-auth/dist/db/internal-adapter.mjs:76:11)
+    at async file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/better-auth/dist/api/routes/sign-up.mjs:218:18 {
+  errorLabelSet: Set(0) {},
+  errorResponse: {
+    index: 0,
+    code: 11000,
+    errmsg: 'E11000 duplicate key error collection: Ratees.users index: name_1 dup key: { name: null }',
+    keyPattern: { name: 1 },
+    keyValue: { name: null }
+  },
+  index: 0,
+  code: 11000,
+  keyPattern: { name: 1 },
+  keyValue: { name: null }
+}
+2026-05-22T16:34:59.148Z ERROR [Better Auth]: Failed to create user MongoServerError: E11000 duplicate key error collection: Ratees.users index: name_1 dup key: { name: null }
+    at InsertOneOperation.handleOk (/home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at executeOperationWithRetries (/home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/mongodb/src/operations/execute_operation.ts:267:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async executeOperation (/home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/mongodb/src/operations/execute_operation.ts:127:12)
+    at async Collection.insertOne (/home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/mongodb/src/collection.ts:294:12)
+    at async Object.create (file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/@better-auth/mongo-adapter/dist/index.mjs:247:12)
+    at async Object.create (file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/@better-auth/core/dist/db/adapter/factory.mjs:431:16)
+    at async createWithHooks (file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/better-auth/dist/db/with-hooks.mjs:25:66)
+    at async Object.createUser (file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/better-auth/dist/db/internal-adapter.mjs:76:11)
+    at async file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/better-auth/dist/api/routes/sign-up.mjs:218:18 {
+  errorLabelSet: Set(0) {},
+  errorResponse: {
+    index: 0,
+    code: 11000,
+    errmsg: 'E11000 duplicate key error collection: Ratees.users index: name_1 dup key: { name: null }',
+    keyPattern: { name: 1 },
+    keyValue: { name: null }
+  },
+  index: 0,
+  code: 11000,
+  keyPattern: { name: 1 },
+  keyValue: { name: null }
+}
+2026-05-22T16:35:22.732Z ERROR [Better Auth]: Failed to create user MongoServerError: E11000 duplicate key error collection: Ratees.users index: name_1 dup key: { name: null }
+    at InsertOneOperation.handleOk (/home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at executeOperationWithRetries (/home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/mongodb/src/operations/execute_operation.ts:267:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async executeOperation (/home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/mongodb/src/operations/execute_operation.ts:127:12)
+    at async Collection.insertOne (/home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/mongodb/src/collection.ts:294:12)
+    at async Object.create (file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/@better-auth/mongo-adapter/dist/index.mjs:247:12)
+    at async Object.create (file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/@better-auth/core/dist/db/adapter/factory.mjs:431:16)
+    at async createWithHooks (file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/better-auth/dist/db/with-hooks.mjs:25:66)
+    at async Object.createUser (file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/better-auth/dist/db/internal-adapter.mjs:76:11)
+    at async file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/better-auth/dist/api/routes/sign-up.mjs:218:18 {
+  errorLabelSet: Set(0) {},
+  errorResponse: {
+    index: 0,
+    code: 11000,
+    errmsg: 'E11000 duplicate key error collection: Ratees.users index: name_1 dup key: { name: null }',
+    keyPattern: { name: 1 },
+    keyValue: { name: null }
+  },
+  index: 0,
+  code: 11000,
+  keyPattern: { name: 1 },
+  keyValue: { name: null }
+}
+2026-05-22T16:35:36.722Z ERROR [Better Auth]: Failed to create user MongoServerError: E11000 duplicate key error collection: Ratees.users index: name_1 dup key: { name: null }
+    at InsertOneOperation.handleOk (/home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/mongodb/src/operations/insert.ts:79:13)
+    at executeOperationWithRetries (/home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/mongodb/src/operations/execute_operation.ts:267:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async executeOperation (/home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/mongodb/src/operations/execute_operation.ts:127:12)
+    at async Collection.insertOne (/home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/mongodb/src/collection.ts:294:12)
+    at async Object.create (file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/@better-auth/mongo-adapter/dist/index.mjs:247:12)
+    at async Object.create (file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/@better-auth/core/dist/db/adapter/factory.mjs:431:16)
+    at async createWithHooks (file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/better-auth/dist/db/with-hooks.mjs:25:66)
+    at async Object.createUser (file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/better-auth/dist/db/internal-adapter.mjs:76:11)
+    at async file:///home/coded-mind/Programming/Webdev/Projects/Ratees/app/server/node_modules/better-auth/dist/api/routes/sign-up.mjs:218:18 {
+  errorLabelSet: Set(0) {},
+  errorResponse: {
+    index: 0,
+    code: 11000,
+    errmsg: 'E11000 duplicate key error collection: Ratees.users index: name_1 dup key: { name: null }',
+    keyPattern: { name: 1 },
+    keyValue: { name: null }
+  },
+  index: 0,
+  code: 11000,
+  keyPattern: { name: 1 },
+  keyValue: { name: null }
+}
+
+
+
+
+
+
+
+
+✅ Connected to MongoDB: ac-asueggd-shard-00-00.fsfu1en.mongodb.net
+✅ Apollo server started successfully and running at /graphql
+✅ Server is running successfully on port: 5000
+[TypeError: fetch failed] {
+  [cause]: Error: connect ECONNREFUSED 127.0.0.1:8288
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1645:16) {
+    errno: -111,
+    code: 'ECONNREFUSED',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 8288
+  }
+}

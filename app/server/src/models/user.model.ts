@@ -23,7 +23,7 @@ export const UserAdditionalField = {
 
 const UserSchema = new Schema(
     {
-        name: {
+        username: {
             type: String,
             required: true,
             unique: true
@@ -46,7 +46,7 @@ const UserSchema = new Schema(
         }
         ,
 
-        image: {
+        profileImage: {
             type: String,
             required: true
         },

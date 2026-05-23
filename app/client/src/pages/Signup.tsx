@@ -1,95 +1,80 @@
-import AuthCard from "../components/auth/AuthCard"
-import GlowBackground from "../components/auth/GlowBackground"
-import ThemeToggle from "../components/auth/ThemeToggle"
-import GoogleButton from "../components/auth/GoogleButton"
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { handelSignUpWithFiled } from "@/functions/auth.function";
 
-import {Input} from "@/components/ui/input"
-
-import {Button} from "@/components/ui/button"
-
-import {useNavigate} from "react-router-dom"
-
-export default function Signup(){
-
-const navigate=useNavigate()
-
-return(
-
-<div
-className="
-min-h-screen
-flex
-items-center
-justify-center
-relative
-bg-black
-px-5
-"
->
-
-<GlowBackground/>
-
-<ThemeToggle/>
-
-<AuthCard>
-
-<h1 className="text-4xl font-bold text-center">
-
-Ratees
-
-</h1>
-
-<p className="text-zinc-400 text-center mb-7">
-
-Create account
-
-</p>
+import AuthNavbar from "@/components/navbar/AuthNavbar";
+import GlowBackground from "@/components/background/GlowBackground";
 
 
-<GoogleButton/>
+// Import modular step components
+import FormStep, { FormState } from "@/components/auth/FormStep";
+import AvatarStep from "@/components/auth/AvatarStep";
+import VerificationStep from "@/components/auth/VerificationStep";
 
+export type FlowStep = "FORM" | "AVATAR" | "VERIFY";
+const CUBIC_EASE = [0.16, 1, 0.3, 1];
 
-<div className="my-5 text-center text-zinc-500">
+export default function Signup() {
+  const [currentStep, setCurrentStep] = useState<FlowStep>("FORM");
+  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
 
-OR
+  const [form, setForm] = useState<FormState>({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
 
-</div>
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
 
-<div className="space-y-4">
+  const handleFinalSubmit = async () => {
+    await handelSignUpWithFiled(form, selectedAvatar!, setCurrentStep)
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+  };
 
-<Input
-placeholder="Username"
-/>
+  return (
+    <main className="min-h-screen bg-zinc-950 text-white overflow-x-hidden relative flex flex-col items-center justify-center">
+      <GlowBackground style="cinema" intensity="medium" animated={true} />
+      <AuthNavbar />
 
-<Input
-placeholder="Email"
-/>
+      <div className="w-full flex items-center justify-center pt-24 pb-12 px-4 relative z-10">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.4, ease: CUBIC_EASE }}
+            className="w-full max-w-[420px] p-8 rounded-2xl backdrop-blur-xl bg-zinc-950/40 border border-white/[0.06] shadow-[0_24px_60px_-15px_rgba(0,0,0,0.8)] relative"
+          >
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-<Input
-type="password"
-placeholder="Password"
-/>
+            {currentStep === "FORM" && (
+              <FormStep
+                form={form}
+                onChange={handleInputChange}
+                onNext={() => setCurrentStep("AVATAR")}
+              />
+            )}
 
-<Button
-onClick={()=>navigate("/avatar")}
-className="
-w-full
-bg-white
-text-black
-hover:bg-zinc-300
-"
->
+            {currentStep === "AVATAR" && (
+              <AvatarStep
+                selectedAvatar={selectedAvatar}
+                onSelectAvatar={setSelectedAvatar}
+                onBack={() => setCurrentStep("FORM")}
+                onSubmit={handleFinalSubmit}
+              />
+            )}
 
-Sign Up
-
-</Button>
-
-</div>
-
-</AuthCard>
-
-</div>
-
-)
-
+            {currentStep === "VERIFY" && (
+              <VerificationStep email={form.email} />
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </main>
+  );
 }

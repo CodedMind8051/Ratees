@@ -3,7 +3,8 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { MongoClient } from "mongodb";
 import { DbName } from "../constants";
 import { UserAdditionalField } from "../models/user.model";
-import { inngest } from "../inngest/index.inngest"
+import { UserSessionExpiresIn, UserSessionUpdateIn } from "../constants"
+
 
 
 const mongoClient = new MongoClient(`${process.env.MongoDb_Url}/${DbName}`);
@@ -27,28 +28,18 @@ export const auth = betterAuth({
 
     emailAndPassword: {
         enabled: true,
-        requireEmailVerification: true
+        requireEmailVerification: false
     },
-    emailVerification: {
-        sendVerificationEmail: async ({ user, url, token }, request) => {
-            console.log("ok", url)
-            await inngest.send({
-                name: "EmailVerify/send.email",
-                data: {
-                    email: user.email,
-                    url: url
-                },
-            }).catch(err => console.log(err));
-
+    socialProviders: {
+        google: {
+            prompt: "select_account",
+            clientId: process.env.GOOGLE_CLIENT_ID as string,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
         },
-        socialProviders: {
-            google: {
-                prompt: "select_account",
-                clientId: process.env.GOOGLE_CLIENT_ID as string,
-                clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-            },
-        },
-
+    },
+    session: {
+        expiresIn: UserSessionExpiresIn,
+        updateAge: UserSessionUpdateIn
     }
 }
 )

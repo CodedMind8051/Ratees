@@ -2,6 +2,7 @@ import { authClient } from './lib/auth-client'
 import './App.css'
 import AppRoutes from "./routes/AppRoutes"
 
+
 function App() {
 
   const signInEmail = async () => {
@@ -48,7 +49,7 @@ function App() {
 
   return (
     <>
-      <AppRoutes/>
+      <AppRoutes />
     </>
   );
 }
