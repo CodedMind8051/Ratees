@@ -60,7 +60,6 @@ const handelSignInWithFiled = async (form: formSignIn, setSuccess: React.Dispatc
 
 
 const handelSignUpWithGoogle = async () => {
-    console.log("Google Sign-In initiated");
     const { data, error } = await authClient.signIn.social({
         provider: "google",
         callbackURL: "http://localhost:5173"

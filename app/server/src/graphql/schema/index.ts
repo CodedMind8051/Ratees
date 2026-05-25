@@ -1,5 +1,5 @@
-import { User } from "./typedef";
+import { content } from "./searchContent.schema";
 
-const typeDefs=[User]
+const typeDefs = [content]
 
-export {typeDefs}
+export { typeDefs }

@@ -7,7 +7,7 @@ import { auth } from "./utils/auth.utils";
 import { serve } from "inngest/express";
 import { inngest, functions } from "./inngest/index.inngest"
 import type { Request, Response, NextFunction } from "express";
-import { isAuthenticated, sessionMiddleware } from "./middlewares/auth.middleware"
+import { sessionMiddleware } from "./middlewares/auth.middleware"
 
 const app = express();
 

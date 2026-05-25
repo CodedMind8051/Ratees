@@ -1,5 +1,5 @@
-import { userresolver } from "./resolver";
+import { contentResolver } from "./searchContent.resolver";
 
-const resolvers=[userresolver]
+const resolvers=[contentResolver]
 
 export {resolvers}
