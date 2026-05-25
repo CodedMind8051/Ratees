@@ -10,7 +10,7 @@ type Content{
 }
 
 type Query{
-   getContentsList(query:String!, page:String):String
+   getContentsList(query:String!, page:String):[Content]!
 }
 
 `

@@ -2,6 +2,7 @@ import { inngest } from "../client.inngest";
 import { fetchContentListUrl } from "../../constants";
 
 
+
 const fetchContentsInfo: ReturnType<typeof inngest.createFunction> = inngest.createFunction(
     { id: "fetchContentsInfo", timeouts: { start: "5s" ,  finish: "9s",}, triggers: [{ event: "Contents/info.fetch" }], retries: 2 },
     async ({ event, step }) => {

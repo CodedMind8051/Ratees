@@ -17,7 +17,28 @@ async function searchMovie(name) {
 }
 
 const movie = await searchMovie("Attack on titan")
-    
 
+
+
+console.log(movie)
+
+async function searchMovie2(id) {
+
+    const response = await fetch(
+        `https://api.themoviedb.org/3/multi/${id}`,
+        {
+            headers: {
+                Authorization: `Bearer ${TOKEN}`
+            }
+        }
+    )
+
+    const data = await response.json()
+    console.log(response)
+
+    return data
+}
+
+const m = await searchMovie2(1429)
 
 console.log(movie)
