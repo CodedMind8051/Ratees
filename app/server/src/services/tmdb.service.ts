@@ -4,7 +4,7 @@ import axios from "axios";
 import { GraphQLError } from "graphql";
 
 
-const token = process.env.TMDB_TOKEN || "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmMjc1ZDFjYjdiZDMyM2Q5NDY1OWNkZjc4N2QxMDNmYSIsIm5iZiI6MTc3ODc0MDUzNS4zNDQsInN1YiI6IjZhMDU2ZDM3NWRkNTM2YzNkZTI5MTliZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.b72A9zVTjK0vWAtx5VGtvWj7YYt4FiGqMcT0itpmz5I"
+const token = process.env.TMDB_TOKEN 
 
 if (!token) {
     throw new Error("TMDB token missing")
