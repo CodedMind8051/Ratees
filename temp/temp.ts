@@ -6,6 +6,7 @@ import { GraphQLError } from "graphql";
 
 const token = process.env.TMDB_TOKEN || "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmMjc1ZDFjYjdiZDMyM2Q5NDY1OWNkZjc4N2QxMDNmYSIsIm5iZiI6MTc3ODc0MDUzNS4zNDQsInN1YiI6IjZhMDU2ZDM3NWRkNTM2YzNkZTI5MTliZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.b72A9zVTjK0vWAtx5VGtvWj7YYt4FiGqMcT0itpmz5I"
 
+
 if (!token) {
     throw new Error("TMDB token missing")
 }
@@ -45,24 +46,20 @@ const FetchContentDataFromTmDb = async (contentName: string) => {
             })
         }
 
-        const ContentsDetails = []
-
         const actualLength = response1st?.data?.results.length >= 5 ? 5 : response1st?.data?.results.length
 
+        const ContentPromises = response1st?.data?.results.slice(0, actualLength).map((element: any) => {
 
-        for (let index = 0; index < actualLength; index++) {
-            const element = response1st?.data?.results[index];
+            if (!element?.id || !element?.media_type) return null
 
-            if (!element?.id || !element?.media_type) continue
-
-
-            const response2nd = await axiosInstance.get(
+            return axiosInstance.get(
                 `${fetchContentDetailUrl}${element?.media_type}/${element?.id}?append_to_response=credits,watch/providers`
             )
-            ContentsDetails.push(response2nd?.data)
-        }
+        })
 
-        console.log(ContentsDetails)
+        const response2nd = await Promise.all(ContentPromises)
+
+        const ContentsDetails = response2nd.map((res) => res?.data).filter((data) => data)
 
         return ContentsDetails
 
@@ -92,6 +89,8 @@ const FetchContentDataFromTmDb = async (contentName: string) => {
     }
 }
 
-await FetchContentDataFromTmDb("avengers")
+const a=await FetchContentDataFromTmDb("avengers")
+
+console.log(a , "a")
 
 export { FetchContentDataFromTmDb }

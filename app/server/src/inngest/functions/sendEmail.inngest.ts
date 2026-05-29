@@ -1,5 +1,5 @@
 import { inngest } from "../client.inngest";
-import { SendEmail } from "../../utils/sendEmail.utils";
+import { SendEmail } from "../../services/sendEmail.utils";
 import { VerifyEmailTemplate , VERIFY_EMAIL_SUBJECT} from "../../Templates/VerifyEmail.template";
 
 const VerificationEmailSend: ReturnType<typeof inngest.createFunction> = inngest.createFunction(
