@@ -92,6 +92,6 @@ const FetchContentDataFromTmDb = async (contentName: string) => {
     }
 }
 
-await FetchContentDataFromTmDb("avengers")
+
 
 export { FetchContentDataFromTmDb }
