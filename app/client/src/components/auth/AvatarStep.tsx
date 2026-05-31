@@ -4,12 +4,12 @@ import { Check, AlertCircle, Loader2 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const AVATAR_OPTIONS = [
-  { id: "cinema-1", url: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80", fallback: "A1" },
-  { id: "cinema-2", url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80", fallback: "A2" },
-  { id: "cinema-3", url: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80", fallback: "A3" },
-  { id: "cinema-4", url: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&q=80", fallback: "A4" },
-  { id: "cinema-5", url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80", fallback: "A5" },
-  { id: "cinema-6", url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80", fallback: "A6" },
+  { id: "cinema-1", url: "https://play-lh.googleusercontent.com/HHJb4ew7S16SHjqNjp1nEkVKn8L2j1rXPjVmF4fqf-mGjZYYIjhHYKjUJSLbB7SRx1HS", fallback: "A1" },
+  { id: "cinema-2", url: "https://cdn.polyspeak.ai/speakmaster/poly-sdispatcher/images/1c02c77b-4a49-48b7-9d47-11c5f83da98b.WEBP", fallback: "A2" },
+  { id: "cinema-3", url: "https://avatarfiles.alphacoders.com/856/thumb-1920-85662.jpg", fallback: "A3" },
+  { id: "cinema-4", url: "https://i.redd.it/some-death-note-pfps-ive-gathered-v0-mszkgdgr769g1.jpg?width=1200&format=pjpg&auto=webp&s=99a84d4b36e4571eb53cf55cafae87e7c9ea7c5e", fallback: "A4" },
+  { id: "cinema-5", url: "https://i.pinimg.com/564x/f3/c3/a4/f3c3a4be7a3b0d2e1ed754bbb40fc705.jpg", fallback: "A5" },
+  { id: "cinema-6", url: "https://static.wikia.nocookie.net/f73a1ea9-07b2-4d8d-bd97-7664c90ce1cf", fallback: "A6" },
 ];
 
 interface AvatarStepProps {
