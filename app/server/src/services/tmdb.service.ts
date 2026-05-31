@@ -4,7 +4,7 @@ import axios from "axios";
 import { GraphQLError } from "graphql";
 
 
-const token = process.env.TMDB_TOKEN 
+const token = process.env.TMDB_TOKEN
 
 if (!token) {
     throw new Error("TMDB token missing")
@@ -59,6 +59,9 @@ const FetchContentDataFromTmDb = async (contentName: string) => {
             const response2nd = await axiosInstance.get(
                 `${fetchContentDetailUrl}${element?.media_type}/${element?.id}?append_to_response=credits,watch/providers`
             )
+
+            response2nd.data.media_type = element?.media_type
+
             ContentsDetails.push(response2nd?.data)
         }
 
@@ -68,6 +71,7 @@ const FetchContentDataFromTmDb = async (contentName: string) => {
 
     } catch (error) {
 
+        console.log("Error in FetchContentDataFromTmDb:", error)
         if (error instanceof GraphQLError) {
             throw error
         }

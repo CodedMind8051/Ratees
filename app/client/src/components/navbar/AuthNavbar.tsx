@@ -23,7 +23,7 @@ export default function AuthNavbar() {
       <div className="pointer-events-none absolute left-[10%] top-[-120px] h-[220px] w-[220px] rounded-full bg-violet-500/10 blur-[100px]" />
 
       <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-between px-5 md:px-10">
-        
+
         {/* Logo */}
         <a
           href="/"
@@ -51,7 +51,7 @@ export default function AuthNavbar() {
 
         {/* right actions */}
         <a href="/login" className="group relative">
-          
+
           {/* button ambient glow */}
           <div className="absolute inset-0 rounded-full bg-white/[0.03] blur-md opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
@@ -101,7 +101,7 @@ export default function AuthNavbar() {
             />
 
             <span className="relative z-10">
-              Sign In
+              Login
             </span>
           </Button>
         </a>

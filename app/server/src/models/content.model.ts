@@ -1,4 +1,6 @@
 import mongoose, { Schema } from "mongoose"
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"
+import { required } from "zod/mini"
 
 const ContentSchema = new Schema(
     {
@@ -27,10 +29,12 @@ const ContentSchema = new Schema(
         },
         whereTOwatch: [{
             platform: {
-                type: String
+                type: String,
+                required: true
             },
-            link: {
-                type: String
+            logo: {
+                type: String,
+                required: true
             }
         }],
 
@@ -95,5 +99,7 @@ const ContentSchema = new Schema(
         timestamps: true
     }
 )
+
+ContentSchema.plugin(mongooseAggregatePaginate)
 
 export const Content = mongoose.model("Content", ContentSchema)

@@ -57,6 +57,7 @@
     "inngest": "^4.4.0",
     "mongodb": "^7.2.0",
     "mongoose": "^9.6.2",
+    "mongoose-aggregate-paginate-v2": "^1.1.4",
     "resend": "^6.12.3",
     "zod": "^4.4.3"
   },
