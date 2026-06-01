@@ -1,4 +1,4 @@
-import { content } from "./searchContent.schema";
+import { content } from "./content.schema";
 
 const typeDefs = [content]
 

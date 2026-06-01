@@ -65,13 +65,12 @@ const FetchContentDataFromTmDb = async (contentName: string) => {
             ContentsDetails.push(response2nd?.data)
         }
 
-        console.log(ContentsDetails)
+
 
         return ContentsDetails
 
     } catch (error) {
 
-        console.log("Error in FetchContentDataFromTmDb:", error)
         if (error instanceof GraphQLError) {
             throw error
         }

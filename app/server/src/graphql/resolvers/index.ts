@@ -1,4 +1,4 @@
-import { contentResolver } from "./searchContent.resolver";
+import { contentResolver } from "./content.resolver";
 
 const resolvers=[contentResolver]
 

@@ -1,23 +1,59 @@
 import { GraphQLError } from "graphql";
 import { Content } from "../models/content.model";
 import { FetchContentDataFromTmDb } from "../services/tmdb.service";
+import { validate } from "../utils/validate.utils";
+import { SearchContentsSchema } from "../validators/content.validator";
+import mongoose from "mongoose";
+import { inngest } from "../inngest/client.inngest";
+
+
+const SaveContentsDataToDB = async (ContentsToInsert: any) => {
+    try {
+
+        if (!ContentsToInsert || ContentsToInsert.length === 0) {
+            throw new GraphQLError("No content data to save", {
+                extensions: {
+                    code: "TMDB_DATA_ERROR",
+                    http: { status: 500 }
+                }
+            })
+        }
+
+        await Content.bulkWrite(
+            ContentsToInsert.map((content: any) => ({
+                updateOne: {
+                    filter: { _id: content.title },
+                    update: { $setOnInsert: content },
+                    upsert: true
+                }
+            })),
+            { ordered: false }
+        );
+
+    } catch (error) {
+        throw new Error(
+            `Failed to save content data to DB: ${error instanceof Error ? error.message : String(error)
+            }`
+        );
+    }
+}
 
 const SearchMoviesController = async (query: string, page?: number) => {
     try {
 
-        if (!query || query.trim() === '') {
-            throw new GraphQLError('Name is required');
-        }
-
-        if (page !== undefined && (isNaN(page) || page < 1)) {
-            throw new GraphQLError('Invalid page number');
-        }
+        const { query: validatedQuery, page: validatedPage } = validate(
+            SearchContentsSchema,
+            {
+                query,
+                page
+            }
+        )
 
         const aggregateResult = Content.aggregate(
             [
                 {
                     $match: {
-                        title: { $regex: query, $options: 'i' }
+                        title: { $regex: validatedQuery, $options: 'i' }
                     }
                 },
                 {
@@ -35,15 +71,24 @@ const SearchMoviesController = async (query: string, page?: number) => {
         )
 
         const options = {
-            page: page || 1,
+            page: validatedPage || 1,
             limit: 10,
         }
-
+           
         const ContentsData = await Content.aggregatePaginate(aggregateResult, options)
+
+        if (ContentsData.totalPages<validatedPage) {
+            throw new GraphQLError('Page not found', {
+                extensions: {
+                    code: 'Page_NOT_FOUND',
+                    http: { status: 404 }
+                }
+            })
+        }
 
         if (!ContentsData || ContentsData.docs.length === 0) {
 
-            const tmdbData = await FetchContentDataFromTmDb(query)
+            const tmdbData = await FetchContentDataFromTmDb(validatedQuery)
 
             if (!tmdbData || tmdbData.length === 0) {
 
@@ -62,6 +107,7 @@ const SearchMoviesController = async (query: string, page?: number) => {
                 }
 
                 return {
+                    _id: new mongoose.Types.ObjectId(),
                     title: content?.title || content?.name,
                     description: content?.overview || "N/A",
                     poster: content?.poster_path || "N/A",
@@ -94,11 +140,16 @@ const SearchMoviesController = async (query: string, page?: number) => {
                 }
             }).filter((content: any) => content !== null)
 
-            const insertedContents = await Content.insertMany(ContentsToInsert)
 
+            await inngest.send({
+                name: "Contents/data.save",
+                data: {
+                    ContentsToInsert
+                }
+            })
 
-            return insertedContents.map(content => ({
-                _id: content._id,
+            return ContentsToInsert.map(content => ({
+                _id: content?._id,
                 title: content?.title,
                 description: content?.description,
                 release_date: content?.release_date,
@@ -109,9 +160,7 @@ const SearchMoviesController = async (query: string, page?: number) => {
             }))
         }
 
-
         return ContentsData?.docs
-
 
     }
     catch (error) {
@@ -119,7 +168,7 @@ const SearchMoviesController = async (query: string, page?: number) => {
         if (error instanceof GraphQLError) {
             throw error
         }
-        console.log("Error in SearchMoviesController:", error)
+
         throw new GraphQLError("something went wrong please try again..", {
             extensions: {
                 code: "INTERNAL_SERVER_ERROR",
@@ -129,4 +178,4 @@ const SearchMoviesController = async (query: string, page?: number) => {
     }
 }
 
-export { SearchMoviesController };
+export { SearchMoviesController, SaveContentsDataToDB }

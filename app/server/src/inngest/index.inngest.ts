@@ -1,10 +1,10 @@
 import { type InngestFunction } from "inngest";
 import { VerificationEmailSend } from "./functions/sendEmail.inngest";
-import {fetchContentsInfo} from "./functions/searchContent.inngest"
+import {SaveContentsDataToDBJob} from "./functions/content.inngest"
 
 export { inngest } from "./client.inngest";
 
 export const functions: InngestFunction.Any[] = [
     VerificationEmailSend,
-    fetchContentsInfo
+    SaveContentsDataToDBJob
 ] as const;

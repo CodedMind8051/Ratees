@@ -12,7 +12,10 @@ const content = `#graphql
     }
 
     type Query{
-           getContentsList(query:String!, page:Int!):[Contents]!
+           getContentsList(
+           query:String!, 
+           page:Int!
+           ):[Contents]!
     }
 
 `
