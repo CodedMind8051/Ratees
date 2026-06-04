@@ -4,7 +4,7 @@ import axios from "axios";
 import { GraphQLError } from "graphql";
 
 
-const token = process.env.TMDB_TOKEN 
+const token = process.env.TMDB_TOKEN
 
 
 if (!token) {
@@ -89,8 +89,72 @@ const FetchContentDataFromTmDb = async (contentName: string) => {
     }
 }
 
-const a=await FetchContentDataFromTmDb("avengers")
+const a = await FetchContentDataFromTmDb("avengers")
 
-console.log(a , "a")
+console.log(a, "a")
 
 export { FetchContentDataFromTmDb }
+
+
+
+
+
+
+/*   
+const contentResolver = {
+
+    Query: {
+
+        getContentsList: async (
+
+            _: any, args: SearchContentInput,
+
+            context: MyContextType) => {
+
+
+
+            const contents = await SearchContentsController(args)
+
+
+
+            return contents
+
+        },
+
+
+
+        getContentDetails: async (
+
+            _: any,
+
+            args: MongooseIdInput,
+
+            context: MyContextType) => {
+
+
+
+            validate(MongooseIdSchema, args)
+
+
+
+
+
+        }
+
+
+
+    }
+
+}
+
+
+
+
+
+not just want to do args i want to specify what and where data comes like 1st but also want to use SearchContentInput
+
+
+
+because it is very difficult for other to understand and not readable 
+
+*/

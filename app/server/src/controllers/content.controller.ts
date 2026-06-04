@@ -2,9 +2,10 @@ import { GraphQLError } from "graphql";
 import { Content } from "../models/content.model";
 import { FetchContentDataFromTmDb } from "../services/tmdb.service";
 import { validate } from "../utils/validate.utils";
-import { SearchContentsSchema } from "../validators/content.validator";
+import { SearchContentsSchema, MongooseIdSchema } from "../validators/content.validator";
 import mongoose from "mongoose";
 import { inngest } from "../inngest/client.inngest";
+import type { MongooseIdInput, SearchContentInput } from "../validators/content.validator";
 
 
 const SaveContentsDataToDB = async (ContentsToInsert: any) => {
@@ -19,18 +20,21 @@ const SaveContentsDataToDB = async (ContentsToInsert: any) => {
             })
         }
 
-        await Content.bulkWrite(
+        console.log(ContentsToInsert)
+
+        const a = await Content.bulkWrite(
             ContentsToInsert.map((content: any) => ({
                 updateOne: {
-                    filter: { _id: content.title },
+                    filter: { title: content.title },
                     update: { $setOnInsert: content },
                     upsert: true
                 }
             })),
             { ordered: false }
         );
-
+        console.log(a)
     } catch (error) {
+        console.log(error)
         throw new Error(
             `Failed to save content data to DB: ${error instanceof Error ? error.message : String(error)
             }`
@@ -38,7 +42,7 @@ const SaveContentsDataToDB = async (ContentsToInsert: any) => {
     }
 }
 
-const SearchMoviesController = async (query: string, page?: number) => {
+const SearchContentsController = async ({ query, page }: SearchContentInput) => {
     try {
 
         const { query: validatedQuery, page: validatedPage } = validate(
@@ -74,10 +78,10 @@ const SearchMoviesController = async (query: string, page?: number) => {
             page: validatedPage || 1,
             limit: 10,
         }
-           
+
         const ContentsData = await Content.aggregatePaginate(aggregateResult, options)
 
-        if (ContentsData.totalPages<validatedPage) {
+        if (ContentsData.totalPages < validatedPage) {
             throw new GraphQLError('Page not found', {
                 extensions: {
                     code: 'Page_NOT_FOUND',
@@ -178,4 +182,40 @@ const SearchMoviesController = async (query: string, page?: number) => {
     }
 }
 
-export { SearchMoviesController, SaveContentsDataToDB }
+const FetchContentDetailsController = async ({ _id }: MongooseIdInput) => {
+
+    const { _id: verifiedId } = validate(MongooseIdSchema, { _id })
+
+    console.log(verifiedId)
+
+    const contentDetails = await Content.aggregate([
+
+        {
+            $match: {
+                _id: { verifiedId }
+            }
+        },
+        {
+            $project: {
+
+            }
+        }
+    ])
+
+    if (!contentDetails) {
+        throw new GraphQLError("Content Details not found", {
+            extensions: {
+                code: "NOT_FOUND",
+                http: { status: 404 }
+            }
+        })
+    }
+
+    return contentDetails
+
+
+}
+
+
+
+export { SearchContentsController, SaveContentsDataToDB, FetchContentDetailsController }

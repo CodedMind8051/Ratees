@@ -11,11 +11,28 @@ const content = `#graphql
             runtime: String!
     }
 
+        type ContentDetails{
+            _id: ID!,
+            title: String!,
+            description: String!,
+            release_date: String!,
+            genre: [String!]!,
+            poster: String!,
+            Content_Type: String!,
+            runtime: String!
+    }
+
     type Query{
+
            getContentsList(
            query:String!, 
            page:Int!
-           ):[Contents]!
+           ):[Contents]!,
+
+
+           getContentDetails(
+           _id:ID!
+           ):ContentDetails!
     }
 
 `

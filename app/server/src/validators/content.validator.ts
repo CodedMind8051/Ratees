@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { z } from "zod";
 
 export const SearchContentsSchema = z.object({
@@ -23,5 +24,13 @@ export const SearchContentsSchema = z.object({
         .positive("Page number must be greater than 0")
 });
 
-export type SearchContentInput =
-    z.infer<typeof SearchContentsSchema>;
+export const MongooseIdSchema = z.object({
+    _id: z.string().refine(
+        Types.ObjectId.isValid, {
+        message: "Invalid objectId"
+    }
+    )
+})
+
+export type SearchContentInput = z.infer<typeof SearchContentsSchema>;
+export type MongooseIdInput = z.infer<typeof MongooseIdSchema>;
