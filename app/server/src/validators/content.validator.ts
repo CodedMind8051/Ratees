@@ -32,5 +32,3 @@ export const MongooseIdSchema = z.object({
     )
 })
 
-export type SearchContentInput = z.infer<typeof SearchContentsSchema>;
-export type MongooseIdInput = z.infer<typeof MongooseIdSchema>;

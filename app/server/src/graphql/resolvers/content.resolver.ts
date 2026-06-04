@@ -1,6 +1,6 @@
 import type { MyContextType } from "../../types/graphql.types"
 import { SearchContentsController, FetchContentDetailsController } from "../../controllers/content.controller"
-import type { MongooseIdInput, SearchContentInput } from "../../validators/content.validator";
+import type { MongooseIdInput, SearchContentInput } from "../../types/content.types";
 
 
 const contentResolver = {

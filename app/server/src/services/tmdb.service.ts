@@ -2,6 +2,8 @@ import axiosRetry from "axios-retry";
 import { fetchContentListUrl, fetchContentDetailUrl } from "../constants";
 import axios from "axios";
 import { GraphQLError } from "graphql";
+import { throwGraphqlError } from "../utils/throwGraphqlError.utils";
+import { th } from "zod/locales";
 
 
 const token = process.env.TMDB_TOKEN
@@ -35,14 +37,8 @@ const FetchContentDataFromTmDb = async (contentName: string) => {
             `${fetchContentListUrl}${contentName}`
         )
 
-
         if (!response1st?.data?.results || response1st?.data?.results.length === 0) {
-            throw new GraphQLError("No data received ", {
-                extensions: {
-                    code: "INTERNAL_SERVER_ERROR",
-                    http: { status: 500 }
-                }
-            })
+            throwGraphqlError("No content found with the given name", "NOT_FOUND", 404, true)
         }
 
         const ContentsDetails = []
@@ -60,37 +56,24 @@ const FetchContentDataFromTmDb = async (contentName: string) => {
                 `${fetchContentDetailUrl}${element?.media_type}/${element?.id}?append_to_response=credits,watch/providers`
             )
 
-            response2nd.data.media_type = element?.media_type
+            response2nd.data.Content_Type = element?.media_type
 
             ContentsDetails.push(response2nd?.data)
         }
-
-
 
         return ContentsDetails
 
     } catch (error) {
 
         if (error instanceof GraphQLError) {
-            throw error
+            throwGraphqlError(error.message, "INTERNAL_SERVER_ERROR", 500, false)
         }
 
         if (axios.isAxiosError(error)) {
-            const status = error?.response?.status || 503
-            const message = "Failed to fetch content"
-            throw new GraphQLError(message, {
-                extensions: {
-                    code: status >= 500 ? "INTERNAL_SERVER_ERROR" : "BAD_REQUEST",
-                    http: { status: status }
-                }
-            })
+            throwGraphqlError("Failed to fetch data , please try again later", "TMDB_DATA_ERROR", 500, true)
         }
-        throw new GraphQLError("something went wrong please try again..", {
-            extensions: {
-                code: "INTERNAL_SERVER_ERROR",
-                http: { status: 500 }
-            }
-        })
+
+        throwGraphqlError("Something went wrong, please try again later", "INTERNAL_SERVER_ERROR", 500, false)
 
     }
 }

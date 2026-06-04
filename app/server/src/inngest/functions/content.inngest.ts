@@ -7,9 +7,11 @@ const SaveContentsDataToDBJob: ReturnType<typeof inngest.createFunction> = innge
         const { ContentsToInsert } = event?.data
 
         await step.run("Saving contents data to DB", async () => {
-
-           await SaveContentsDataToDB(ContentsToInsert)
-
+            try {
+                await SaveContentsDataToDB(ContentsToInsert)
+            } catch (error) {
+                return error
+            }
 
         })
 

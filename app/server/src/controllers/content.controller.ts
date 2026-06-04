@@ -1,29 +1,24 @@
-import { GraphQLError } from "graphql";
+
 import { Content } from "../models/content.model";
 import { FetchContentDataFromTmDb } from "../services/tmdb.service";
 import { validate } from "../utils/validate.utils";
 import { SearchContentsSchema, MongooseIdSchema } from "../validators/content.validator";
 import mongoose from "mongoose";
 import { inngest } from "../inngest/client.inngest";
-import type { MongooseIdInput, SearchContentInput } from "../validators/content.validator";
+import type { MongooseIdInput, SearchContentInput, ContentDetailsType } from "../types/content.types";
+import { throwGraphqlError } from "../utils/throwGraphqlError.utils";
+import { handelGraphqlError } from "../utils/handelError.utils";
 
 
-const SaveContentsDataToDB = async (ContentsToInsert: any) => {
+const SaveContentsDataToDB = async (ContentsToInsert: ContentDetailsType[]) => {
     try {
 
         if (!ContentsToInsert || ContentsToInsert.length === 0) {
-            throw new GraphQLError("No content data to save", {
-                extensions: {
-                    code: "TMDB_DATA_ERROR",
-                    http: { status: 500 }
-                }
-            })
+            return throwGraphqlError("No content data to save", "TMDB_DATA_ERROR", 500, true)
         }
 
-        console.log(ContentsToInsert)
-
-        const a = await Content.bulkWrite(
-            ContentsToInsert.map((content: any) => ({
+        await Content.bulkWrite(
+            ContentsToInsert.map((content: ContentDetailsType) => ({
                 updateOne: {
                     filter: { title: content.title },
                     update: { $setOnInsert: content },
@@ -32,13 +27,8 @@ const SaveContentsDataToDB = async (ContentsToInsert: any) => {
             })),
             { ordered: false }
         );
-        console.log(a)
     } catch (error) {
-        console.log(error)
-        throw new Error(
-            `Failed to save content data to DB: ${error instanceof Error ? error.message : String(error)
-            }`
-        );
+        return handelGraphqlError(error)
     }
 }
 
@@ -82,12 +72,7 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
         const ContentsData = await Content.aggregatePaginate(aggregateResult, options)
 
         if (ContentsData.totalPages < validatedPage) {
-            throw new GraphQLError('Page not found', {
-                extensions: {
-                    code: 'Page_NOT_FOUND',
-                    http: { status: 404 }
-                }
-            })
+            throwGraphqlError('Page not found', 'PAGE_NOT_FOUND', 404, true)
         }
 
         if (!ContentsData || ContentsData.docs.length === 0) {
@@ -96,17 +81,13 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
 
             if (!tmdbData || tmdbData.length === 0) {
 
-                throw new GraphQLError('No content found', {
-                    extensions: {
-                        code: 'NOT_FOUND',
-                        http: { status: 404 }
-                    }
-                })
+                return throwGraphqlError('No content found', 'NOT_FOUND', 404, true)
+
             }
 
-            const ContentsToInsert = tmdbData.map((content: any) => {
+            const ContentsToInsert = tmdbData?.map((content) => {
 
-                if (!["movie", "tv"].includes(content?.media_type)) {
+                if (!["movie", "tv"].includes(content?.Content_Type)) {
                     return null
                 }
 
@@ -144,6 +125,9 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
                 }
             }).filter((content: any) => content !== null)
 
+            if (!ContentsToInsert || ContentsToInsert.length === 0) {
+                return throwGraphqlError('No content found', 'NOT_FOUND', 404, true)
+            }
 
             await inngest.send({
                 name: "Contents/data.save",
@@ -152,7 +136,7 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
                 }
             })
 
-            return ContentsToInsert.map(content => ({
+            return ContentsToInsert?.map(content => ({
                 _id: content?._id,
                 title: content?.title,
                 description: content?.description,
@@ -168,51 +152,38 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
 
     }
     catch (error) {
-
-        if (error instanceof GraphQLError) {
-            throw error
-        }
-
-        throw new GraphQLError("something went wrong please try again..", {
-            extensions: {
-                code: "INTERNAL_SERVER_ERROR",
-                http: { status: 500 }
-            }
-        })
+        handelGraphqlError(error)
     }
 }
 
-const FetchContentDetailsController = async ({ _id }: MongooseIdInput) => {
+const FetchContentDetailsController = async ({ _id }: MongooseIdInput): Promise<ContentDetailsType> => {
 
-    const { _id: verifiedId } = validate(MongooseIdSchema, { _id })
+    try {
+        const { _id: verifiedId } = validate(MongooseIdSchema, { _id })
 
-    console.log(verifiedId)
+        const contentDetails = await Content.aggregate([
 
-    const contentDetails = await Content.aggregate([
-
-        {
-            $match: {
-                _id: { verifiedId }
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(verifiedId)
+                }
+            },
+            {
+                $project: {
+                    total_number_of_ratings: 0
+                }
             }
-        },
-        {
-            $project: {
+        ])
 
-            }
+        if (!contentDetails || contentDetails.length === 0) {
+            throwGraphqlError("Content Details not found", "NOT_FOUND", 404, true)
         }
-    ])
 
-    if (!contentDetails) {
-        throw new GraphQLError("Content Details not found", {
-            extensions: {
-                code: "NOT_FOUND",
-                http: { status: 404 }
-            }
-        })
+        return contentDetails[0]
+
+    } catch (error) {
+        return handelGraphqlError(error)
     }
-
-    return contentDetails
-
 
 }
 

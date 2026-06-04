@@ -1,25 +1,36 @@
 const content = `#graphql
 
-    type Contents{
-            _id: ID!,
-            title: String!,
-            description: String!,
-            release_date: String!,
-            genre: [String!]!,
-            poster: String!,
-            Content_Type: String!,
-            runtime: String!
-    }
+    type WatchPlatform {
+          platform: String!
+          logo: String!
+      }
+    
+    type Cast {
+          name: String!
+          character: String!
+          profile_path: String!
+      }
+    
+    type Director {
+          name: String!
+          profile_path: String!
+      }
+    
 
         type ContentDetails{
             _id: ID!,
             title: String!,
-            description: String!,
-            release_date: String!,
+            description: String,
+            release_date: String,
             genre: [String!]!,
             poster: String!,
             Content_Type: String!,
-            runtime: String!
+            runtime: String,
+            whereTOwatch:[WatchPlatform]
+            casts:[Cast],
+            director:[Director]
+            total_seasons:Int,
+            total_episodes:Int
     }
 
     type Query{
@@ -27,8 +38,7 @@ const content = `#graphql
            getContentsList(
            query:String!, 
            page:Int!
-           ):[Contents]!,
-
+           ):[ContentDetails]!,
 
            getContentDetails(
            _id:ID!

@@ -2,8 +2,8 @@ import { auth } from "../utils/auth.utils";
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response, NextFunction } from "express";
 import { asyncHandler } from "../utils/AsyncHandler.utils";
-import { GraphQLError } from "graphql";
 import type { MyContextType } from "../types/graphql.types";
+import { throwGraphqlError } from "../utils/throwGraphqlError.utils";
 
 
 const sessionMiddleware = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
@@ -17,12 +17,7 @@ const sessionMiddleware = asyncHandler(async (req: Request, res: Response, next:
 
 const isAuthenticated = (context: MyContextType) => {
     if (!context.req.session) {
-        throw new GraphQLError("Unauthorized", {
-            extensions: {
-                code: "UNAUTHENTICATED",
-                http: { status: 401 }
-            }
-        });
+        throwGraphqlError("Unauthorized", "UNAUTHENTICATED", 401, false)
     }
 }
 
