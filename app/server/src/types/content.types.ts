@@ -1,8 +1,8 @@
 import { z } from "zod"
-import { SearchContentsSchema, MongooseIdSchema } from "../validators/content.validator"
+import { SearchContentsSchema, SearchContentDetailsSchema } from "../validators/validator"
 
 export type SearchContentInput = z.infer<typeof SearchContentsSchema>
-export type MongooseIdInput = z.infer<typeof MongooseIdSchema>
+export type SearchContentDetailsInput = z.infer<typeof SearchContentDetailsSchema>
 
 type WatchPlatform = {
     platform: string;
@@ -21,7 +21,7 @@ type Director = {
 };
 
 export type ContentDetailsType = {
-    _id: MongooseIdInput;
+    _id: SearchContentDetailsInput;
     title: string;
     description: string;
     release_date: string;

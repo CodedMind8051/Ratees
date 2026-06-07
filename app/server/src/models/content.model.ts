@@ -1,6 +1,5 @@
 import mongoose, { Schema } from "mongoose"
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"
-import { required } from "zod/mini"
 
 const ContentSchema = new Schema(
     {
@@ -76,10 +75,6 @@ const ContentSchema = new Schema(
                     return value.length <= 2
                 }
             }
-        },
-        total_number_of_ratings: {
-            type: Number,
-            default: 0
         },
         total_seasons: {
             type: Number,

@@ -1,6 +1,15 @@
 import { Types } from "mongoose";
 import { z } from "zod";
 
+export const objectIdSchema = (fieldName: string) => {
+    return z.string().refine(
+        Types.ObjectId.isValid, {
+        message: `Invalid ${fieldName}`
+    }
+    )
+}
+
+
 export const SearchContentsSchema = z.object({
     query: z
         .string()
@@ -24,11 +33,16 @@ export const SearchContentsSchema = z.object({
         .positive("Page number must be greater than 0")
 });
 
-export const MongooseIdSchema = z.object({
-    _id: z.string().refine(
-        Types.ObjectId.isValid, {
-        message: "Invalid objectId"
-    }
-    )
+export const SearchContentDetailsSchema = z.object({
+    ContentId: objectIdSchema("ContentId")
+})
+
+
+export const RateSchema = z.object({
+    userId: objectIdSchema("userId"),
+    ContentId: objectIdSchema("ContentId"),
+    rating: z.number().int().positive().min(1).max(5, {
+        message: "Invalid rating value. Rating must be an integer between 1 and 5."
+    })
 })
 

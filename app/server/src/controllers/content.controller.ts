@@ -2,10 +2,10 @@
 import { Content } from "../models/content.model";
 import { FetchContentDataFromTmDb } from "../services/tmdb.service";
 import { validate } from "../utils/validate.utils";
-import { SearchContentsSchema, MongooseIdSchema } from "../validators/content.validator";
+import { SearchContentsSchema, SearchContentDetailsSchema } from "../validators/validator";
 import mongoose from "mongoose";
 import { inngest } from "../inngest/client.inngest";
-import type { MongooseIdInput, SearchContentInput, ContentDetailsType } from "../types/content.types";
+import type { SearchContentDetailsInput, SearchContentInput, ContentDetailsType } from "../types/content.types";
 import { throwGraphqlError } from "../utils/throwGraphqlError.utils";
 import { handelGraphqlError } from "../utils/handelError.utils";
 
@@ -156,10 +156,10 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
     }
 }
 
-const FetchContentDetailsController = async ({ _id }: MongooseIdInput): Promise<ContentDetailsType> => {
+const FetchContentDetailsController = async ({ ContentId }: SearchContentDetailsInput): Promise<ContentDetailsType> => {
 
     try {
-        const { _id: verifiedId } = validate(MongooseIdSchema, { _id })
+        const { ContentId: verifiedId } = validate(SearchContentDetailsSchema, { ContentId })
 
         const contentDetails = await Content.aggregate([
 
@@ -186,6 +186,8 @@ const FetchContentDetailsController = async ({ _id }: MongooseIdInput): Promise<
     }
 
 }
+
+
 
 
 

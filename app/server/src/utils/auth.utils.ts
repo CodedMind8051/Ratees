@@ -40,6 +40,9 @@ export const auth = betterAuth({
     session: {
         expiresIn: UserSessionExpiresIn,
         updateAge: UserSessionUpdateIn
+    },
+    advanced:{
+        useSecureCookies:true
     }
 }
 )
