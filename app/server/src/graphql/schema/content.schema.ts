@@ -1,4 +1,4 @@
-const content = `#graphql
+const contentTypeDefs = `#graphql
 
     type WatchPlatform {
           platform: String!
@@ -47,4 +47,4 @@ const content = `#graphql
 
 `
 
-export { content }
+export { contentTypeDefs }

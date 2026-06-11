@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { SearchContentsSchema, SearchContentDetailsSchema } from "../validators/validator"
+import { SearchContentsSchema, SearchContentDetailsSchema } from "../validators/content.validator"
 
 export type SearchContentInput = z.infer<typeof SearchContentsSchema>
 export type SearchContentDetailsInput = z.infer<typeof SearchContentDetailsSchema>

@@ -2,7 +2,7 @@
 import { Content } from "../models/content.model";
 import { FetchContentDataFromTmDb } from "../services/tmdb.service";
 import { validate } from "../utils/validate.utils";
-import { SearchContentsSchema, SearchContentDetailsSchema } from "../validators/validator";
+import { SearchContentsSchema, SearchContentDetailsSchema } from "../validators/content.validator";
 import mongoose from "mongoose";
 import { inngest } from "../inngest/client.inngest";
 import type { SearchContentDetailsInput, SearchContentInput, ContentDetailsType } from "../types/content.types";

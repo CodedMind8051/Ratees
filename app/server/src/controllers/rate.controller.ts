@@ -1,7 +1,7 @@
 import { Rate, RatingState } from "../models/rating.model";
-import type { SubmitRatingInput } from "../types/ratingAndReview.types";
+import type { SubmitRatingInput } from "../types/rating.types";
 import { validate } from "../utils/validate.utils";
-import { RateSchema } from "../validators/validator";
+import { RateSchema } from "../validators/content.validator";
 import { throwGraphqlError } from "../utils/throwGraphqlError.utils";
 import { handelGraphqlError } from "../utils/handelError.utils";
 import mongoose from "mongoose";
@@ -18,8 +18,8 @@ const SubmitRatingController = async ({ userId, ContentId, rating }: SubmitRatin
 
         const existingUserRating = await Rate.findOne(
             {
-                userId: verifiedUserId,
-                ContentId: verifiedContentId
+                userId: new mongoose.Types.ObjectId(verifiedUserId),
+                ContentId: new mongoose.Types.ObjectId(verifiedContentId)
             },
             {},
             {
@@ -36,11 +36,11 @@ const SubmitRatingController = async ({ userId, ContentId, rating }: SubmitRatin
 
         const contentRatings = await RatingState.findOneAndUpdate(
             {
-                ContentId: verifiedContentId
+                ContentId: new mongoose.Types.ObjectId(verifiedContentId)
             },
             {
                 $setOnInsert: {
-                    ContentId: verifiedContentId
+                    ContentId: new mongoose.Types.ObjectId(verifiedContentId)
                 }
             },
             {
@@ -75,8 +75,8 @@ const SubmitRatingController = async ({ userId, ContentId, rating }: SubmitRatin
 
         const UserRating = await Rate.create(
             {
-                userId: verifiedUserId,
-                ContentId: verifiedContentId,
+                userId: new mongoose.Types.ObjectId(verifiedUserId),
+                ContentId: new mongoose.Types.ObjectId(verifiedContentId),
                 rating: verifiedRating
             },
             { session })
@@ -100,11 +100,11 @@ const SubmitRatingController = async ({ userId, ContentId, rating }: SubmitRatin
 
         return handelGraphqlError(error)
 
-
-
     } finally {
         await session.endSession()
     }
 }
+
+
 
 export { SubmitRatingController }

@@ -1,6 +1,7 @@
-import { content } from "./content.schema";
-import {rateAndReviewTypeDefs} from "./rateAndReview.schema";
+import { contentTypeDefs } from "./content.schema";
+import {rateTypeDefs} from "./rate.schema";
+import { reviewTypeDefs } from "./review.schema";
 
-const typeDefs = [content ,rateAndReviewTypeDefs]
+const typeDefs = [contentTypeDefs ,rateTypeDefs , reviewTypeDefs]
 
 export { typeDefs }

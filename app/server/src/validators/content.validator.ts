@@ -9,7 +9,6 @@ export const objectIdSchema = (fieldName: string) => {
     )
 }
 
-
 export const SearchContentsSchema = z.object({
     query: z
         .string()
@@ -45,4 +44,5 @@ export const RateSchema = z.object({
         message: "Invalid rating value. Rating must be an integer between 1 and 5."
     })
 })
+
 

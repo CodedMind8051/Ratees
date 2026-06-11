@@ -1,6 +1,7 @@
 import { contentResolver } from "./content.resolver";
-import {RateAndReviewResolver} from "./rateAndReview.resolver";
+import { rateResolver } from "./rate.resolver";
+import { reviewResolver } from "./review.resolver";
 
-const resolvers=[contentResolver, RateAndReviewResolver]
+const resolvers = [contentResolver, rateResolver, reviewResolver]
 
-export {resolvers}
+export { resolvers }
