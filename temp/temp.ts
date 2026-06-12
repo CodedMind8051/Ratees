@@ -161,3 +161,19 @@ because it is very difficult for other to understand and not readable
 
 
 // git commit -m "Implement the Fetch Content Details , Also imporve type saftywith zod and make coustom zod schemas with reuseablity "
+
+
+
+
+// Make a home page whcih shows movies , web series etc with a profile image in which user can click then a username change , password change , and logout option come  , search option and also  , with nav bar such as home , firends , Watchlist , playlists (user can add movies to playlist , change playlist name , delete it , update the list )
+
+
+
+// when user click on any movie , other page open without redirect and shows , movie poster  , description , release date , gener , content type movie/web series etc , run time , (director , catses) with thier image , where to watch , also a meter which contain rating % waste of time , time pass , good watch , master piece ,  and also just after poster their is some icons or btn such as watched , watching , watch later in which user click to add it in their watch list and also a btn to add coustom playlist , and also a review or comment section with option like update comment , delete it , write new comment ,also options like to rate movie on the scale of waste of time , time pass , good watch , master piece , 
+
+
+
+// when user click of friends another page open without redirect with a search and some user lists with profiles images , name and current watching content when user click any of the another user then other user profile opens whichs just shows playlists and their watchlist 
+
+
+
