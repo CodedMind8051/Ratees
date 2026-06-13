@@ -1,8 +1,11 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { Flame, Sparkles, LayoutGrid, ChevronRight, ChevronLeft } from 'lucide-react';
 import { allContent, ContentItem, WatchlistEntry, ALL_GENRES } from '@/data/mockData';
 import ContentCard from '@/components/ContentCard';
 import HeroBanner from './HeroBanner';
+import { FETCH_CONTENTS_FOR_HOMEPAGE } from "@/functions/fetchContainlist.function";
+import { useLazyQuery } from "@apollo/client/react";
+import { useQuery } from "@apollo/client/react";
 
 interface HomePageContentProps {
   onSelectMovie: (content: ContentItem) => void;
@@ -63,6 +66,11 @@ function SectionHeader({
   title: string;
   showSeeAll?: boolean;
 }) {
+
+  const [fetchContents, { loading, error, data }] = useLazyQuery(FETCH_CONTENTS_FOR_HOMEPAGE);
+  console.log(data)
+  const contents = (data as any)?.FetchContentsForHomepage ?? [];
+
   return (
     <div className="flex items-center justify-between mb-4">
       <div className="flex items-center gap-2">
@@ -70,7 +78,8 @@ function SectionHeader({
         <h2 className="text-base sm:text-lg font-semibold text-foreground">{title}</h2>
       </div>
       {showSeeAll && (
-        <button className="flex items-center gap-1 hover:cursor-pointer text-xs sm:text-sm text-primary hover:text-amber-400 transition-colors font-medium">
+        <button
+          className="flex items-center gap-1 hover:cursor-pointer text-xs sm:text-sm text-primary hover:text-amber-400 transition-colors font-medium">
           See all <ChevronRight size={13} />
         </button>
       )}
@@ -78,8 +87,12 @@ function SectionHeader({
   );
 }
 
+
+
 export default function HomePageContent({ onSelectMovie, watchlist, onStatusChange }: HomePageContentProps) {
+
   const [activeGenre, setActiveGenre] = useState('All');
+  const [contentk, setcontentk] = useState([])
 
   const filteredContent = useMemo(() => {
     if (activeGenre === 'All') return allContent;
@@ -87,6 +100,21 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
   }, [activeGenre]);
 
   const featuredContent = allContent[0];
+
+  const { loading, error, data } = useQuery(
+    FETCH_CONTENTS_FOR_HOMEPAGE,
+    {
+      variables: { page: 1 },
+    }
+  );
+  console.log(data)
+  useEffect(() => {
+    if (data) {
+      setcontentk(
+        (data as any)?.FetchContentsForHomepage ?? []
+      );
+    }
+  }, [data]);
   const trendingContent = allContent.slice(0, 6);
   const newReleases = allContent.filter(c => c.year >= 2024).slice(0, 6);
 
@@ -140,7 +168,7 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
         <section>
           <SectionHeader icon={Flame} iconClass="text-accent" title="Trending Now" showSeeAll />
           <ScrollRow>
-            {trendingContent.map(c => snapCard(c, 'trending'))}
+            {contentk.map(c => snapCard(c, 'trending'))}
           </ScrollRow>
         </section>
       )}

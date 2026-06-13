@@ -33,6 +33,17 @@ const contentTypeDefs = `#graphql
             total_episodes:Int
     }
 
+
+        type ContentDetails2{
+            _id: ID!,
+            title: String!,
+            description: String,
+            release_date: String,
+            genre: [String!]!,
+            poster: String!,
+            Content_Type: String!,
+    }
+
     type Query{
 
            getContentsList(
@@ -46,7 +57,7 @@ const contentTypeDefs = `#graphql
 
            FetchContentsForHomepage(
            page:Int!
-           ):[]
+           ):[ContentDetails2]
     }
 
 `

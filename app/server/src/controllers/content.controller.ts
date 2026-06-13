@@ -141,7 +141,7 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
                 title: content?.title,
                 description: content?.description,
                 release_date: content?.release_date,
-                genre: content?.genre,
+                genre: content?.genre==="Science Fiction" ? "Sci-FI" : content?.genre,
                 poster: content?.poster,
                 Content_Type: content?.Content_Type,
                 runtime: content?.runtime,

@@ -35,6 +35,8 @@ export interface Review {
 export interface ContentItem {
   id: string;
   title: string;
+  release_date?:string
+  _id?:string;
   year: number;
   genre: string[];
   type: 'Movie' | 'Series';

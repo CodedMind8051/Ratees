@@ -27,7 +27,11 @@ export default function ContentCard({ content, onClick, watchStatus }: ContentCa
       {/* Poster */}
       <div className="relative aspect-[2/3] overflow-hidden bg-secondary">
         <img
-          src={content.poster}
+          src={
+            content.poster?.startsWith("/")
+              ? `https://image.tmdb.org/t/p/w500${content.poster}`
+              : content.poster
+          }
           alt={`${content.title} poster`}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
@@ -35,9 +39,8 @@ export default function ContentCard({ content, onClick, watchStatus }: ContentCa
 
         {/* Type badge */}
         <div className="absolute top-2 left-2">
-          <span className={`flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border ${
-            content.type === 'Movie' ?'bg-card/90 border-border text-muted-foreground' :'bg-blue-500/20 border-blue-500/40 text-blue-400'
-          }`}>
+          <span className={`flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border ${content.type === 'Movie' ? 'bg-card/90 border-border text-muted-foreground' : 'bg-blue-500/20 border-blue-500/40 text-blue-400'
+            }`}>
             {content.type === 'Movie' ? <Film size={10} /> : <Tv size={10} />}
             {content.type}
           </span>
@@ -46,10 +49,9 @@ export default function ContentCard({ content, onClick, watchStatus }: ContentCa
         {/* Watch status */}
         {watchStatus && (
           <div className="absolute top-2 right-2">
-            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${
-              watchStatus === 'watched' ? 'bg-green-500/20 border-green-500/40 text-green-400' :
-              watchStatus === 'watching'? 'bg-blue-500/20 border-blue-500/40 text-blue-400' : 'bg-primary/20 border-primary/40 text-primary'
-            }`}>
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${watchStatus === 'watched' ? 'bg-green-500/20 border-green-500/40 text-green-400' :
+              watchStatus === 'watching' ? 'bg-blue-500/20 border-blue-500/40 text-blue-400' : 'bg-primary/20 border-primary/40 text-primary'
+              }`}>
               {watchStatus === 'watched' ? '✓' : watchStatus === 'watching' ? '▶' : '⏱'}
             </span>
           </div>
@@ -66,19 +68,19 @@ export default function ContentCard({ content, onClick, watchStatus }: ContentCa
 
       {/* Info */}
       <div className="p-3">
-        <h3 className="text-sm font-semibold text-foreground leading-tight truncate">{content.title}</h3>
+        <h3 className="text-sm font-semibold text-foreground leading-tight truncate">{content?.title}</h3>
         <div className="flex items-center justify-between mt-1">
-          <span className="text-xs text-muted-foreground">{content.year}</span>
+          <span className="text-xs text-muted-foreground">{content?.release_date}</span>
           <span
             className="text-xs font-semibold"
-            style={{ color: RATING_COLORS[content.aggregateRating] }}
+            style={{ color: RATING_COLORS[content?.aggregateRating] }}
           >
-            {RATING_LABELS[content.aggregateRating].split(' ')[0]}
+            {/* {RATING_LABELS[content?.aggregateRating].split(' ')[0]} */}
           </span>
         </div>
-        <div className="flex flex-wrap gap-1 mt-1.5">
+        <div className="flex flex-wrap gap-1 mt-1.5 ">
           {content.genre.slice(0, 2).map(g => (
-            <span key={`card-genre-${content.id}-${g}`} className="text-xs px-1.5 py-0.5 bg-secondary rounded text-muted-foreground">
+            <span key={`card-genre-${content?._id}-${g}`} className="truncate text-xs px-1.5 py-0.5 bg-secondary rounded text-muted-foreground">
               {g}
             </span>
           ))}
