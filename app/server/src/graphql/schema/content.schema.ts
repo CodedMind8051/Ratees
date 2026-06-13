@@ -43,6 +43,10 @@ const contentTypeDefs = `#graphql
            getContentDetails(
            _id:ID!
            ):ContentDetails!
+
+           FetchContentsForHomepage(
+           page:Int!
+           ):[]
     }
 
 `

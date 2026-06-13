@@ -1,123 +1,75 @@
 'use client';
-
-import {
-  RadialBarChart,
-  RadialBar,
-  ResponsiveContainer,
-  Tooltip,
-} from 'recharts';
-
-import {
-  RatingKey,
-  RATING_LABELS,
-  RATING_COLORS,
-} from '@/data/mockData';
+import { RadialBarChart, RadialBar, ResponsiveContainer, Tooltip } from 'recharts';
+import { RatingKey, RATING_LABELS, RATING_COLORS } from '@/data/mockData';
 
 interface Props {
   distribution: Record<RatingKey, number>;
 }
 
-export default function RatingDistributionChart({
-  distribution,
-}: Props) {
-  // Ordered from outer ring down to inner ring
-  const data = [
-    {
-      name: RATING_LABELS.masterpiece,
-      value: distribution.masterpiece,
-      fill: RATING_COLORS.masterpiece,
-    },
-    {
-      name: RATING_LABELS.good,
-      value: distribution.good,
-      fill: RATING_COLORS.good,
-    },
-    {
-      name: RATING_LABELS.timepass,
-      value: distribution.timepass,
-      fill: RATING_COLORS.timepass,
-    },
-    {
-      name: RATING_LABELS.waste,
-      value: distribution.waste,
-      fill: RATING_COLORS.waste,
-    },
-  ];
+const RATING_ORDER: RatingKey[] = ['masterpiece', 'good', 'timepass', 'waste'];
 
-  const topRating = data.reduce((prev, current) =>
-    current.value > prev.value ? current : prev,
-    data[0]
+export default function RatingDistributionChart({ distribution }: Props) {
+  const data = RATING_ORDER.map(key => ({
+    name: RATING_LABELS[key],
+    value: distribution[key],
+    fill: RATING_COLORS[key],
+  }));
+
+  const topRating = data.reduce((prev, cur) =>
+    cur.value > prev.value ? cur : prev, data[0]
   );
 
   return (
-    <div className="w-full h-full grid grid-cols-1 sm:grid-cols-12 gap-4 items-center select-none p-1">
-      
-      {/* Left Column: Radial Chart Matrix (Takes up 5/12 of space) */}
-      <div className="sm:col-span-5 h-36 w-full relative flex items-center justify-center">
-        <ResponsiveContainer width="100%" height="100%">
-          <RadialBarChart
-            data={data}
-            cx="50%"
-            cy="50%"
-            innerRadius="30%"
-            outerRadius="100%"
-            barSize={7}
-            startAngle={90}
-            endAngle={-270}
-            className="cursor-pointer"
-          >
-            <RadialBar
-              dataKey="value"
-              cornerRadius={12}
-              background={{ fill: 'var(--secondary)', opacity: 0.12 }}
-              animationDuration={800}
-            />
-            <Tooltip
-              cursor={false}
-              content={({ active, payload }) => {
-                if (!active || !payload?.length) return null;
-                const item = payload[0].payload;
-                return (
-                  <div className="bg-card/95 border border-border rounded-xl px-2.5 py-1.5 shadow-2xl backdrop-blur-md pointer-events-none z-50">
-                    <p className="font-bold text-[10px] uppercase tracking-wide" style={{ color: item.fill }}>
-                      {item.name}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">
-                      {item.value}% of users
-                    </p>
-                  </div>
-                );
-              }}
-            />
-          </RadialBarChart>
-        </ResponsiveContainer>
-      </div>
+    <div className="relative w-36 h-36 sm:w-40 sm:h-40 select-none shrink-0">
+      <ResponsiveContainer width="100%" height="100%">
+        <RadialBarChart
+          data={data}
+          cx="50%"
+          cy="50%"
+          innerRadius="32%"
+          outerRadius="100%"
+          barSize={8}
+          startAngle={90}
+          endAngle={-270}
+        >
+          <RadialBar
+            dataKey="value"
+            cornerRadius={10}
+            background={{ fill: 'hsl(var(--secondary) / 0.25)' }}
+            animationDuration={900}
+            animationEasing="ease-out"
+          />
+          <Tooltip
+            cursor={false}
+            content={({ active, payload }) => {
+              if (!active || !payload?.length) return null;
+              const item = payload[0].payload;
+              return (
+                <div className="bg-card/95 border border-border rounded-xl px-3 py-2 shadow-2xl backdrop-blur-md pointer-events-none z-50">
+                  <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: item.fill }}>
+                    {item.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5 tabular-nums">
+                    {item.value}%
+                  </p>
+                </div>
+              );
+            }}
+          />
+        </RadialBarChart>
+      </ResponsiveContainer>
 
-      {/* Right Column: Dynamic Text Showcase & Clean Legend (Takes up 7/12 of space) */}
-      <div className="sm:col-span-7 flex flex-col justify-center h-full pl-0 sm:pl-2">
-        
-        {/* Top Choice Highlights Panel Container */}
-        <div className="mb-3 p-2.5 bg-secondary/30 border border-border/40 rounded-xl max-w-xs">
-          <p className="text-[9px] font-bold text-muted-foreground/70 uppercase tracking-widest">
-            Community Choice
-          </p>
-          <div className="flex items-baseline gap-2 mt-0.5">
-            <span 
-              className="text-2xl font-black tracking-tight"
-              style={{ color: topRating.fill }}
-            >
-              {topRating.value}%
-            </span>
-            <span 
-              className="text-xs font-bold uppercase tracking-wide truncate max-w-[120px]"
-              style={{ color: topRating.fill }}
-            >
-              {topRating.name}
-            </span>
-          </div>
-        </div>
-
-
+      {/* Centre: top rating % */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+        <span
+          className="text-xl font-black tabular-nums leading-none"
+          style={{ color: topRating.fill }}
+        >
+          {topRating.value}%
+        </span>
+        <span className="text-[9px] text-muted-foreground/60 font-semibold uppercase tracking-wider mt-0.5 leading-none">
+          top
+        </span>
       </div>
     </div>
   );

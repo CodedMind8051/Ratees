@@ -45,4 +45,13 @@ export const RateSchema = z.object({
     })
 })
 
+export const FetchContentsForHomepageSchema = z.object({
+    page: z
+        .number({
+            error: "Page number is required"
+        })
+        .int("Page number must be an integer")
+        .positive("Page number must be greater than 0")
+})
+
 

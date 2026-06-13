@@ -1,5 +1,5 @@
 import type { MyContextType } from "../../types/graphql.types"
-import { SearchContentsController, FetchContentDetailsController } from "../../controllers/content.controller"
+import { SearchContentsController, FetchContentDetailsController,FetchContentsForHomepage } from "../../controllers/content.controller"
 import type { SearchContentDetailsInput, SearchContentInput } from "../../types/content.types";
 
 
@@ -22,6 +22,18 @@ const contentResolver = {
             const contentDetails = await FetchContentDetailsController({ ContentId: ContentId ?? "" })
 
             return contentDetails
+
+        },
+
+        FetchContentsForHomepage: async (
+            _: any, { query, page }: SearchContentInput,
+            context: MyContextType) => {
+
+            const contents = await FetchContentsForHomepage({ page })
+
+            console.log(contents)
+            
+            return contents
 
         }
 

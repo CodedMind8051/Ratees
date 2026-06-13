@@ -91,7 +91,7 @@ export default function Navbar({ onSelectMovie }: NavbarProps) {
             {/* Search — desktop pill */}
             <button
               onClick={() => setSearchOpen(true)}
-              className="hidden md:flex items-center  gap-2  px-3 h-8 rounded-lg border border-border bg-secondary/60 text-muted-foreground text-[13px] hover:border-border/80 hover:bg-secondary transition-colors duration-150"
+              className="hidden hover:cursor-pointer md:flex items-center  gap-2  px-3 h-8 rounded-lg border border-border bg-secondary/60 text-muted-foreground text-[13px] hover:border-border/80 hover:bg-secondary transition-colors duration-150"
               aria-label="Search"
             >
               <Search size={13} />
@@ -104,7 +104,7 @@ export default function Navbar({ onSelectMovie }: NavbarProps) {
             {/* Search — mobile icon */}
             <button
               onClick={() => setSearchOpen(true)}
-              className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              className="md:hidden hover:cursor-pointer p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
               aria-label="Search"
             >
               <Search size={17} />
@@ -115,7 +115,7 @@ export default function Navbar({ onSelectMovie }: NavbarProps) {
 
             {/* Notifications */}
             <button
-              className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              className="relative hover:cursor-pointer p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
               aria-label="Notifications"
             >
               <Bell size={17} />
@@ -126,7 +126,7 @@ export default function Navbar({ onSelectMovie }: NavbarProps) {
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center gap-2 pl-1.5 pr-2 py-1 rounded-lg hover:bg-secondary transition-colors"
+                className="flex items-center hover:cursor-pointer gap-2 pl-1.5 pr-2 py-1 rounded-lg hover:bg-secondary transition-colors"
                 aria-label="Profile menu"
                 aria-expanded={profileOpen}
               >
@@ -147,7 +147,7 @@ export default function Navbar({ onSelectMovie }: NavbarProps) {
             {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              className="md:hidden p-2 hover:cursor-pointer rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
               aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             >
               {mobileMenuOpen ? <X size={17} /> : <Menu size={17} />}
@@ -179,7 +179,7 @@ export default function Navbar({ onSelectMovie }: NavbarProps) {
             {/* Mobile search shortcut */}
             <button
               onClick={() => { setSearchOpen(true); setMobileMenuOpen(false); }}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors mt-1 border-t border-border pt-3"
+              className="flex hover:cursor-pointer items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors mt-1 border-t border-border pt-3"
             >
               <Search size={17} strokeWidth={1.8} />
               Search movies, shows, anime…

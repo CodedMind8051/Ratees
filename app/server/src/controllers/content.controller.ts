@@ -2,10 +2,10 @@
 import { Content } from "../models/content.model";
 import { FetchContentDataFromTmDb } from "../services/tmdb.service";
 import { validate } from "../utils/validate.utils";
-import { SearchContentsSchema, SearchContentDetailsSchema } from "../validators/content.validator";
+import { SearchContentsSchema, SearchContentDetailsSchema, FetchContentsForHomepageSchema } from "../validators/content.validator";
 import mongoose from "mongoose";
 import { inngest } from "../inngest/client.inngest";
-import type { SearchContentDetailsInput, SearchContentInput, ContentDetailsType } from "../types/content.types";
+import type { SearchContentDetailsInput, SearchContentInput, ContentDetailsType, FetchContentsForHomepageInput } from "../types/content.types";
 import { throwGraphqlError } from "../utils/throwGraphqlError.utils";
 import { handelGraphqlError } from "../utils/handelError.utils";
 
@@ -187,8 +187,41 @@ const FetchContentDetailsController = async ({ ContentId }: SearchContentDetails
 
 }
 
+const FetchContentsForHomepage = async ({
+    page
+}: FetchContentsForHomepageInput) => {
+    try {
+
+        const { page: validatedPage } = validate(FetchContentsForHomepageSchema, { page })
+
+        const aggregateResult = Content.aggregate([
+            {
+                $sort: {
+                    createdAt: -1
+                }
+            }
+        ])
+
+        const options = {
+            page: validatedPage || 1,
+            limit: 30,
+        }
+
+        const ContentsData = await Content.aggregatePaginate(aggregateResult, options)
+
+        if(!ContentsData || ContentsData.docs.length===0){
+            throwGraphqlError("No data found" , "NOT_FOUND",404,true)
+        }
+
+        return ContentsData.docs
+
+    } catch (error) {
+        handelGraphqlError(error)
+    }
+
+}
 
 
 
 
-export { SearchContentsController, SaveContentsDataToDB, FetchContentDetailsController }
+export { SearchContentsController, SaveContentsDataToDB, FetchContentDetailsController, FetchContentsForHomepage }

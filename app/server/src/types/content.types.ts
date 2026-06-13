@@ -1,8 +1,9 @@
 import { z } from "zod"
-import { SearchContentsSchema, SearchContentDetailsSchema } from "../validators/content.validator"
+import { SearchContentsSchema, SearchContentDetailsSchema , FetchContentsForHomepageSchema } from "../validators/content.validator"
 
 export type SearchContentInput = z.infer<typeof SearchContentsSchema>
 export type SearchContentDetailsInput = z.infer<typeof SearchContentDetailsSchema>
+export type FetchContentsForHomepageInput = z.infer<typeof FetchContentsForHomepageSchema>
 
 type WatchPlatform = {
     platform: string;
@@ -37,4 +38,6 @@ export type ContentDetailsType = {
     total_seasons?: number;
     total_episodes?: number;
 };
+
+
 
