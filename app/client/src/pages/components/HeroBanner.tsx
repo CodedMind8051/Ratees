@@ -1,29 +1,109 @@
-import { Play, Plus, CheckCircle2, Film, Tv } from 'lucide-react';
-import { ContentItem, RATING_LABELS, RATING_COLORS } from '@/data/mockData';
+import { Play, Plus, CheckCircle2, Film, Tv, EyeOff } from 'lucide-react';
+import { RATING_LABELS, RATING_COLORS } from '@/data/mockData';
 import { toast } from 'sonner';
+import { ContentItemTypeHomePage } from '@/types/HomePage.types';
+
+
+
+
 
 interface HeroBannerProps {
-  content: ContentItem;
+  content: ContentItemTypeHomePage;
   onViewDetails: () => void;
   watchStatus?: 'watched' | 'watching' | 'watchlater' | null;
   onStatusChange: (contentId: string, status: 'watched' | 'watching' | 'watchlater' | null) => void;
 }
 
+
+function HeroBannerSkeleton() {
+  return (
+    <div className="relative w-full h-[300px] sm:h-[380px] lg:h-[480px] rounded-2xl overflow-hidden bg-card animate-pulse">
+
+      {/* Gradient overlays — mirrors the real banner */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent" />
+
+      <div className="absolute inset-0 flex flex-col justify-end p-5 sm:p-7 lg:p-10">
+        <div className="flex items-end justify-between gap-4 lg:gap-8">
+
+          {/* Left block */}
+          <div className="flex-1 min-w-0">
+
+            {/* "Featured Today" eyebrow */}
+            <div className="flex items-center gap-2 mb-3">
+              <div className="h-2.5 w-16 sm:w-20 rounded bg-white/20" />
+              <div className="h-px w-6 sm:w-10 bg-white/20" />
+            </div>
+
+            {/* Type badge + year */}
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-5 w-14 rounded-full bg-white/15" />
+              <div className="h-3 w-10 rounded bg-white/12" />
+            </div>
+
+            {/* Title — two lines on mobile, one on lg */}
+            <div className="space-y-2 mb-2">
+              <div className="h-7 sm:h-9 lg:h-10 w-3/4 rounded-md bg-white/20" />
+              <div className="h-7 sm:h-9 lg:h-10 w-1/2 rounded-md bg-white/15 sm:hidden" />
+            </div>
+
+            {/* Genre pills — hidden xs (mirrors real banner) */}
+            <div className="hidden xs:flex gap-1.5 mt-2 mb-2.5 flex-wrap">
+              <div className="h-5 w-14 rounded-full bg-white/12" />
+              <div className="h-5 w-16 rounded-full bg-white/12" />
+              <div className="h-5 w-12 rounded-full bg-white/12" />
+            </div>
+
+            {/* Description — md+ only (mirrors real banner) */}
+            <div className="hidden md:block space-y-1.5 mt-2.5 mb-4 max-w-lg">
+              <div className="h-3.5 w-full rounded bg-white/12" />
+              <div className="h-3.5 w-5/6 rounded bg-white/10" />
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-2.5 mt-4">
+              <div className="h-9 sm:h-10 w-28 sm:w-32 rounded-xl bg-white/20" />
+              <div className="h-9 sm:h-10 w-24 sm:w-32 rounded-xl bg-white/12" />
+            </div>
+          </div>
+
+          {/* Right: rating card — sm+ only (mirrors real banner) */}
+          <div className="hidden sm:flex flex-col items-center justify-center gap-2 px-4 py-3.5 bg-black/30 border border-white/10 rounded-2xl shrink-0 min-w-[80px]">
+            <div className="h-8 lg:h-9 w-12 rounded bg-white/20" />
+            <div className="h-2.5 w-14 rounded bg-white/15" />
+            <div className="h-2.5 w-10 rounded bg-white/12" />
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function HeroBanner({ content, onViewDetails, watchStatus, onStatusChange }: HeroBannerProps) {
+
+  if (!content) {
+    return <HeroBannerSkeleton />;
+  }
+
   const handleQuickAdd = () => {
     const next = watchStatus === 'watchlater' ? null : 'watchlater';
-    onStatusChange(content.id, next);
+    onStatusChange(content._id, next);
     toast.success(next ? 'Added to Watch Later' : 'Removed from Watch Later');
   };
 
-  const ratingColor = RATING_COLORS[content.aggregateRating];
+  const ratingColor = RATING_COLORS["masterpiece"];
 
   return (
     <div className="relative w-full h-[300px] sm:h-[380px] lg:h-[480px] rounded-2xl overflow-hidden">
       {/* Backdrop */}
       <img
-        src={content.backdrop}
-        alt={`${content.title} backdrop`}
+        src={
+          content?.backdrop?.startsWith("/")
+            ? `${import.meta.env.VITE_TMDB_BACKDROP_BASE_URL}${content?.backdrop}`
+            : content?.backdrop === "N/A" ? "/assets/images/no_image.png" : "/assets/images/no_image.png"
+        }
+        alt={`${content?.title} backdrop`}
         className="w-full h-full object-cover object-center scale-[1.02]"
       />
 
@@ -49,22 +129,22 @@ export default function HeroBanner({ content, onViewDetails, watchStatus, onStat
             {/* Type + year + runtime */}
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 border border-white/20 text-white/80 backdrop-blur-sm">
-                {content.type === 'Movie' ? <Film size={9} /> : <Tv size={9} />}
-                {content.type}
+                {content?.Content_Type === 'movie' ? <Film size={10} /> : content?.Content_Type === "tv" ? <Tv size={10} /> : <EyeOff size={11} />}
+                {content?.Content_Type}
               </span>
               <span className="text-[10px] sm:text-xs text-white/50 tabular-nums">
-                {content.year} · {content.runtime}
+                {content?.release_date}
               </span>
             </div>
 
             {/* Title */}
             <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight line-clamp-2">
-              {content.title}
+              {content?.title}
             </h1>
 
             {/* Genres — hide on smallest screens */}
             <div className="hidden xs:flex flex-wrap gap-1.5 mt-2">
-              {content.genre.map(g => (
+              {content?.genre?.map(g => (
                 <span
                   key={`hero-genre-${g}`}
                   className="text-[10px] sm:text-xs px-2 py-0.5 bg-white/10 backdrop-blur-sm rounded-full text-white/60"
@@ -117,13 +197,13 @@ export default function HeroBanner({ content, onViewDetails, watchStatus, onStat
               className="text-2xl lg:text-3xl font-black tabular-nums leading-none"
               style={{ color: ratingColor }}
             >
-              {content.ratingDistribution[content.aggregateRating]}%
+              55%
             </span>
             <span
               className="text-[10px] font-semibold uppercase tracking-wide text-center leading-tight max-w-[72px]"
               style={{ color: ratingColor }}
             >
-              {RATING_LABELS[content.aggregateRating]}
+              {RATING_LABELS["masterpiece"]}
             </span>
           </div>
         </div>

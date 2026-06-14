@@ -40,6 +40,7 @@ const contentTypeDefs = `#graphql
             description: String,
             release_date: String,
             genre: [String!]!,
+            backdrop:String,
             poster: String!,
             Content_Type: String!,
     }

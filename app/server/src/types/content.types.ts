@@ -28,6 +28,7 @@ export type ContentDetailsType = {
     release_date: string;
     genre: string[];
     poster: string;
+    backdrop:string;
     Content_Type: string;
     runtime?: string;
 

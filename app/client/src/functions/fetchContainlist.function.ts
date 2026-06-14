@@ -1,15 +1,31 @@
-import { gql } from "@apollo/client";
+import { apolloClient } from "@/graphql"
+import { FetchContentsForHomepage } from "@/graphql/query/content.query"
 
-export const FETCH_CONTENTS_FOR_HOMEPAGE = gql`
-  query FetchContentsForHomepage($page: Int!) {
-    FetchContentsForHomepage(page: $page) {
-      _id
-      title
-      poster
-      Content_Type
-      genre
-      release_date
-      description
+export const FetchContentsForHomepageFunction = async ({ page = 1, setLoading }) => {
+
+  try {
+    const { data } = await apolloClient.query({
+      query: FetchContentsForHomepage,
+      variables: { page }
+    })
+
+    if (data) {
+      setLoading(false)
     }
+
+    const contents =
+      (data as any).FetchContentsForHomepage ?? [];
+
+    return {
+      data:contents,
+      error: null,
+    };
+  } catch (error) {
+    console.log(error)
+    return {
+      data: [],
+      error,
+    };
   }
-`;
+
+} 

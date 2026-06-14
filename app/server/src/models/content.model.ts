@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose"
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"
+import { required } from "zod/mini"
 
 const ContentSchema = new Schema(
     {
@@ -17,7 +18,10 @@ const ContentSchema = new Schema(
             type: String,
             required: true
         },
-
+        backdrop: {
+            type: String,
+            required: true
+        },
         runtime: {
             type: String
         }

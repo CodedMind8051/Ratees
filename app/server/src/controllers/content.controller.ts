@@ -58,7 +58,8 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
                         genre: 1,
                         poster: 1,
                         Content_Type: 1,
-                        runtime: 1
+                        runtime: 1,
+                        backdrop: 1
                     }
                 }
             ]
@@ -96,9 +97,10 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
                     title: content?.title || content?.name,
                     description: content?.overview || "N/A",
                     poster: content?.poster_path || "N/A",
+                    backdrop: content?.backdrop_path || "N?A",
                     release_date: content?.release_date || content?.first_air_date || "N/A",
                     genre: content?.genres ? content.genres.map((genre: any) => genre.name) : [],
-                    Content_Type: content?.media_type || "N/A",
+                    Content_Type: content?.Content_Type || "N/A",
                     runtime: content?.runtime || "N/A",
                     whereTOwatch: content?.["watch/providers"]?.results?.IN?.flatrate ? content?.["watch/providers"]?.results?.IN?.flatrate.map((provider: any) => ({
                         platform: provider.provider_name,
@@ -125,6 +127,7 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
                 }
             }).filter((content: any) => content !== null)
 
+
             if (!ContentsToInsert || ContentsToInsert.length === 0) {
                 return throwGraphqlError('No content found', 'NOT_FOUND', 404, true)
             }
@@ -141,7 +144,7 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
                 title: content?.title,
                 description: content?.description,
                 release_date: content?.release_date,
-                genre: content?.genre==="Science Fiction" ? "Sci-FI" : content?.genre,
+                genre: content?.genre === "Science Fiction" ? "Sci-FI" : content?.genre,
                 poster: content?.poster,
                 Content_Type: content?.Content_Type,
                 runtime: content?.runtime,
@@ -197,20 +200,24 @@ const FetchContentsForHomepage = async ({
         const aggregateResult = Content.aggregate([
             {
                 $sort: {
-                    createdAt: -1
+                    release_date: -1
                 }
             }
         ])
 
         const options = {
             page: validatedPage || 1,
-            limit: 30,
+            limit: 60,
         }
 
         const ContentsData = await Content.aggregatePaginate(aggregateResult, options)
 
-        if(!ContentsData || ContentsData.docs.length===0){
-            throwGraphqlError("No data found" , "NOT_FOUND",404,true)
+        if (ContentsData.totalPages < validatedPage) {
+            throwGraphqlError('Page not found', 'PAGE_NOT_FOUND', 404, true)
+        }
+
+        if (!ContentsData || ContentsData.docs.length === 0) {
+            throwGraphqlError("No data found", "NOT_FOUND", 404, true)
         }
 
         return ContentsData.docs
@@ -221,6 +228,12 @@ const FetchContentsForHomepage = async ({
 
 }
 
+
+// const fetchNewReleaseContents = async ({
+//     page
+// }: FetchContentsForHomepageInput) => {
+//     console.log(page)
+// }
 
 
 
