@@ -1,11 +1,11 @@
-import { apolloClient } from "@/graphql"
-import { FetchContentsForHomepage } from "@/graphql/query/content.query"
+import { apolloClient } from "@/lib/graphql"
+import { FETCH_HOME_PAGE_DATA } from "@/lib/graphql/query/content.query"
 
 export const FetchContentsForHomepageFunction = async ({ page = 1, setLoading }) => {
 
   try {
     const { data } = await apolloClient.query({
-      query: FetchContentsForHomepage,
+      query: FETCH_HOME_PAGE_DATA,
       variables: { page }
     })
 
@@ -17,7 +17,7 @@ export const FetchContentsForHomepageFunction = async ({ page = 1, setLoading })
       (data as any).FetchContentsForHomepage ?? [];
 
     return {
-      data:contents,
+      data: contents,
       error: null,
     };
   } catch (error) {
@@ -28,4 +28,17 @@ export const FetchContentsForHomepageFunction = async ({ page = 1, setLoading })
     };
   }
 
-} 
+}
+
+export const fetchTreadingContents = ({
+  page = 1,
+  setLoading
+}: {
+  page: Number,
+  setLoading: Boolean
+}) => {
+
+
+
+
+}

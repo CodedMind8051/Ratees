@@ -1,11 +1,12 @@
 import  { useState } from 'react';
 import Navbar from '@/components/Navbar';
-import HomePageContent from '@/pages/components/HomePageContent';
+import HomePageContent from '@/pages/home-page/HomePageContent';
 import MovieDetailModal from '@/components/MovieDetailModal';
-import { ContentItem, mockWatchlist, WatchlistEntry } from '@/data/mockData';
+import { mockWatchlist, WatchlistEntry } from '@/data/mockData';
+import { ContentItemTypeHomePage } from '@/types/Content.types';
 
 export default function HomePage() {
-  const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
+  const [selectedContent, setSelectedContent] = useState<ContentItemTypeHomePage | null>(null);
   const [watchlist, setWatchlist] = useState<WatchlistEntry[]>(mockWatchlist);
 
   const getWatchStatus = (contentId: string) => {
@@ -32,7 +33,7 @@ export default function HomePage() {
         <MovieDetailModal
           content={selectedContent}
           onClose={() => setSelectedContent(null)}
-          initialStatus={getWatchStatus(selectedContent.id)}
+          initialStatus={getWatchStatus(selectedContent?._id)}
           onStatusChange={handleStatusChange}
         />
       )}

@@ -1,9 +1,10 @@
 import { z } from "zod"
-import { SearchContentsSchema, SearchContentDetailsSchema , FetchContentsForHomepageSchema } from "../validators/content.validator"
+import { SearchContentsSchema, SearchContentDetailsSchema, FetchContentsForHomepageSchema, pageSchema } from "../validators/content.validator"
 
 export type SearchContentInput = z.infer<typeof SearchContentsSchema>
 export type SearchContentDetailsInput = z.infer<typeof SearchContentDetailsSchema>
 export type FetchContentsForHomepageInput = z.infer<typeof FetchContentsForHomepageSchema>
+export type PageNumberType = z.infer<typeof pageSchema>
 
 type WatchPlatform = {
     platform: string;
@@ -28,7 +29,7 @@ export type ContentDetailsType = {
     release_date: string;
     genre: string[];
     poster: string;
-    backdrop:string;
+    backdrop: string;
     Content_Type: string;
     runtime?: string;
 

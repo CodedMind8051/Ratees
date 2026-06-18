@@ -1,13 +1,13 @@
-
-import { Content } from "../models/content.model";
+import { Content, TrendingContent } from "../models/content.model";
 import { FetchContentDataFromTmDb } from "../services/tmdb.service";
 import { validate } from "../utils/validate.utils";
-import { SearchContentsSchema, SearchContentDetailsSchema, FetchContentsForHomepageSchema } from "../validators/content.validator";
+import { SearchContentsSchema, SearchContentDetailsSchema, pageSchema } from "../validators/content.validator";
 import mongoose from "mongoose";
 import { inngest } from "../inngest/client.inngest";
-import type { SearchContentDetailsInput, SearchContentInput, ContentDetailsType, FetchContentsForHomepageInput } from "../types/content.types";
+import type { SearchContentDetailsInput, SearchContentInput, ContentDetailsType, FetchContentsForHomepageInput, PageNumberType } from "../types/content.types";
 import { throwGraphqlError } from "../utils/throwGraphqlError.utils";
 import { handelGraphqlError } from "../utils/handelError.utils";
+import { TmdbContentToContentDocument } from "../utils/content.utils"
 
 
 const SaveContentsDataToDB = async (ContentsToInsert: ContentDetailsType[]) => {
@@ -92,39 +92,7 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
                     return null
                 }
 
-                return {
-                    _id: new mongoose.Types.ObjectId(),
-                    title: content?.title || content?.name,
-                    description: content?.overview || "N/A",
-                    poster: content?.poster_path || "N/A",
-                    backdrop: content?.backdrop_path || "N?A",
-                    release_date: content?.release_date || content?.first_air_date || "N/A",
-                    genre: content?.genres ? content.genres.map((genre: any) => genre.name) : [],
-                    Content_Type: content?.Content_Type || "N/A",
-                    runtime: content?.runtime || "N/A",
-                    whereTOwatch: content?.["watch/providers"]?.results?.IN?.flatrate ? content?.["watch/providers"]?.results?.IN?.flatrate.map((provider: any) => ({
-                        platform: provider.provider_name,
-                        logo: provider.logo_path || "N/A"
-                    })) : [],
-                    casts: content?.credits?.cast ? content.credits.cast.slice(0, 4).map((cast: any) => ({
-                        name: cast.name,
-                        character: cast.character,
-                        profile_path: cast.profile_path || "N/A"
-                    })) : [],
-
-                    director: content?.credits?.crew ? content.credits.crew.filter((crew: any) => crew.job === "Director").slice(0, 2).map(
-                        (director: any) => ({
-                            name: director.name,
-                            profile_path: director.profile_path
-                        })
-                    ) : [],
-                    ...(content?.media_type === "tv" && {
-                        total_episodes: content?.number_of_episodes
-                    }),
-                    ...(content?.media_type === "tv" && {
-                        total_seasons: content?.number_of_seasons
-                    })
-                }
+                return TmdbContentToContentDocument(content)
             }).filter((content: any) => content !== null)
 
 
@@ -190,12 +158,106 @@ const FetchContentDetailsController = async ({ ContentId }: SearchContentDetails
 
 }
 
-const FetchContentsForHomepage = async ({
-    page
-}: FetchContentsForHomepageInput) => {
+const FetchTrendingContents = async () => {
+
     try {
 
-        const { page: validatedPage } = validate(FetchContentsForHomepageSchema, { page })
+        const TrendingContentsData = await TrendingContent.aggregate([
+            {
+                $lookup: {
+                    from: "contents",
+                    localField: "contentId",
+                    foreignField: "_id",
+                    as: "TrendingContents"
+                }
+            }, {
+                $unwind: {
+                    path: "$TrendingContents",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $project: {
+                    _id: "$TrendingContents._id",
+                    title: "$TrendingContents.title",
+                    description: "$TrendingContents.description",
+                    poster: "$TrendingContents.poster",
+                    release_date: "$TrendingContents.release_date",
+                    backdrop: "$TrendingContents.backdrop",
+                    genre: "$TrendingContents.genre",
+                    Content_Type: "$TrendingContents.Content_Type"
+                }
+            }
+        ])
+
+
+
+
+        if (!TrendingContentsData || TrendingContentsData.length === 0) {
+            throwGraphqlError('Contents not found', 'PAGE_NOT_FOUND', 404, true)
+        }
+
+        return TrendingContentsData
+
+
+    } catch (error) {
+        handelGraphqlError(error)
+    }
+
+
+}
+
+const fetchNewReleaseContents = async () => {
+    try {
+        const currentYear = String(new Date().getFullYear())
+        const NewReleaseContentsData = await Content.aggregate([
+
+            {
+                $match: {
+                    release_date: {
+                        $regex: `^${currentYear}`
+                    }
+                }
+            },
+
+            {
+                $project: {
+                    _id: 1,
+                    title: 1,
+                    description: 1,
+                    poster: 1,
+                    release_date: 1,
+                    backdrop: 1,
+                    genre: 1,
+                    Content_Type: 1
+
+                }
+            },
+            {
+                $sort: {
+                    release_date: 1
+                }
+            }
+        ])
+
+
+
+        if (!NewReleaseContentsData || NewReleaseContentsData.length === 0) {
+            throwGraphqlError('Contents not found', 'PAGE_NOT_FOUND', 404, true)
+        }
+
+        return NewReleaseContentsData
+
+
+    } catch (error) {
+        handelGraphqlError(error)
+    }
+}
+
+const FetchGeneralContentsForHomepage = async (page: PageNumberType) => {
+    try {
+
+        const validatedPage = validate(pageSchema, page)
 
         const aggregateResult = Content.aggregate([
             {
@@ -228,13 +290,11 @@ const FetchContentsForHomepage = async ({
 
 }
 
-
-// const fetchNewReleaseContents = async ({
-//     page
-// }: FetchContentsForHomepageInput) => {
-//     console.log(page)
-// }
-
-
-
-export { SearchContentsController, SaveContentsDataToDB, FetchContentDetailsController, FetchContentsForHomepage }
+export {
+    SearchContentsController,
+    SaveContentsDataToDB,
+    FetchContentDetailsController,
+    FetchGeneralContentsForHomepage,
+    FetchTrendingContents,
+    fetchNewReleaseContents
+}

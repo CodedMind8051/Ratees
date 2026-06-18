@@ -1,7 +1,7 @@
 import { Play, Plus, CheckCircle2, Film, Tv, EyeOff } from 'lucide-react';
 import { RATING_LABELS, RATING_COLORS } from '@/data/mockData';
 import { toast } from 'sonner';
-import { ContentItemTypeHomePage } from '@/types/HomePage.types';
+import { ContentItemTypeHomePage } from '@/types/Content.types';
 
 
 

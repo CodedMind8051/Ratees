@@ -9,6 +9,14 @@ export const objectIdSchema = (fieldName: string) => {
     )
 }
 
+export const pageSchema = z
+    .number({
+        error: "Page number is required"
+    })
+    .int("Page number must be an integer")
+    .positive("Page number must be greater than 0")
+
+
 export const SearchContentsSchema = z.object({
     query: z
         .string()
@@ -24,13 +32,10 @@ export const SearchContentsSchema = z.object({
             /^[a-zA-Z0-9\s'-]+$/,
             "Invalid search query"
         ),
-    page: z
-        .number({
-            error: "Page number is required"
-        })
-        .int("Page number must be an integer")
-        .positive("Page number must be greater than 0")
+    page: pageSchema
 });
+
+
 
 export const SearchContentDetailsSchema = z.object({
     ContentId: objectIdSchema("ContentId")
@@ -46,12 +51,7 @@ export const RateSchema = z.object({
 })
 
 export const FetchContentsForHomepageSchema = z.object({
-    page: z
-        .number({
-            error: "Page number is required"
-        })
-        .int("Page number must be an integer")
-        .positive("Page number must be greater than 0")
+    page: pageSchema
 })
 
 

@@ -1,5 +1,5 @@
 import { Film, Tv, Eye, EyeOff } from 'lucide-react';
-import { ContentItemTypeHomePage } from '@/types/HomePage.types';
+import { ContentItemTypeHomePage } from '@/types/Content.types';
 
 interface ContentCardProps {
   content: ContentItemTypeHomePage;

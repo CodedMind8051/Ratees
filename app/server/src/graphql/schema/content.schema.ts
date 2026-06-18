@@ -34,7 +34,7 @@ const contentTypeDefs = `#graphql
     }
 
 
-        type ContentDetails2{
+        type HomePageContent{
             _id: ID!,
             title: String!,
             description: String,
@@ -45,6 +45,7 @@ const contentTypeDefs = `#graphql
             Content_Type: String!,
     }
 
+
     type Query{
 
            getContentsList(
@@ -54,12 +55,18 @@ const contentTypeDefs = `#graphql
 
            getContentDetails(
            _id:ID!
-           ):ContentDetails!
+           ):ContentDetails!,
 
-           FetchContentsForHomepage(
+           FetchGeneralContentsForHomepage(
            page:Int!
-           ):[ContentDetails2]
+           ):[HomePageContent]!,
+
+           FetchTrendingContents:[HomePageContent]!,
+           
+           FetchNewReleaseContents:[HomePageContent]!,
     }
+
+
 
 `
 

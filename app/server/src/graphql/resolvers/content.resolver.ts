@@ -1,13 +1,10 @@
-import type { MyContextType } from "../../types/graphql.types"
-import { SearchContentsController, FetchContentDetailsController,FetchContentsForHomepage } from "../../controllers/content.controller"
-import type { SearchContentDetailsInput, SearchContentInput } from "../../types/content.types";
-
+import { SearchContentsController, FetchContentDetailsController, FetchGeneralContentsForHomepage, FetchTrendingContents, fetchNewReleaseContents } from "../../controllers/content.controller"
+import type { SearchContentDetailsInput, SearchContentInput, PageNumberType } from "../../types/content.types";
 
 const contentResolver = {
     Query: {
         getContentsList: async (
-            _: any, { query, page }: SearchContentInput,
-            context: MyContextType) => {
+            _: any, { query, page }: SearchContentInput) => {
 
             const contents = await SearchContentsController({ query, page })
 
@@ -16,8 +13,7 @@ const contentResolver = {
 
         getContentDetails: async (
             _: any,
-            { ContentId }: SearchContentDetailsInput,
-            context: MyContextType) => {
+            { ContentId }: SearchContentDetailsInput) => {
 
             const contentDetails = await FetchContentDetailsController({ ContentId: ContentId ?? "" })
 
@@ -25,16 +21,26 @@ const contentResolver = {
 
         },
 
-        FetchContentsForHomepage: async (
-            _: any, { query, page }: SearchContentInput,
-            context: MyContextType) => {
+        FetchGeneralContentsForHomepage: async (
+            _: any, { page }: { page: number }) => {
 
-            const contents = await FetchContentsForHomepage({ page })
+            const HomeContents = await FetchGeneralContentsForHomepage(page)
 
-            console.log(contents)
-            
-            return contents
+            return HomeContents
 
+        },
+
+        FetchTrendingContents: async (
+        ) => {
+            const TrendingContent = await FetchTrendingContents()
+            return TrendingContent
+        },
+
+        FetchNewReleaseContents: async (
+        ) => {
+            const NewReleaseContent = await fetchNewReleaseContents()
+
+            return NewReleaseContent
         }
 
     }

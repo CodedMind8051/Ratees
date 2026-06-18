@@ -1,10 +1,11 @@
-import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
+import { useState, useMemo, useRef, useCallback, } from 'react';
 import { Flame, Sparkles, LayoutGrid, ChevronRight, ChevronLeft } from 'lucide-react';
 import { WatchlistEntry, ALL_GENRES } from '@/data/mockData';
 import ContentCard, { ContentCardSkeleton } from '@/components/ContentCard';
 import HeroBanner from './HeroBanner';
-import { FetchContentsForHomepageFunction } from "@/functions/fetchContainlist.function";
-import { ContentItemTypeHomePage } from '@/types/HomePage.types';
+import { ContentItemTypeHomePage } from '@/types/Content.types';
+import { FETCH_TRENDING_CONTENTS, FETCH_COMPLETE_HOME_PAGE_DATA } from '@/lib/graphql/query/content.query';
+import { useQuery } from '@apollo/client/react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -110,42 +111,23 @@ function SkeletonGrid() {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function HomePageContent({ onSelectMovie, watchlist, onStatusChange }: HomePageContentProps) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [activeGenre, setActiveGenre] = useState('All');
-  const [contents, setContents] = useState<ContentItemTypeHomePage[]>([]);
 
   // ── Data fetching ──────────────────────────────────────────────────────────
+  const { loading, error, data: TrendingContentsData } = useQuery<{
+    FetchTrendingContents: ContentItemTypeHomePage[];
+    FetchNewReleaseContents: ContentItemTypeHomePage[];
+    FetchGeneralContentsForHomepage: ContentItemTypeHomePage[];
+  }>(FETCH_COMPLETE_HOME_PAGE_DATA, {
+    variables: {
+      page: 1
+    }
+  });
 
-  useEffect(() => {
-    let cancelled = false;
 
-    const loadData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const result = await FetchContentsForHomepageFunction({ page: 1, setLoading });
-        if (cancelled) return;
+  // Normalize to an array so the rest of the component can treat `contents` as an array
+  const contents: ContentItemTypeHomePage[] = TrendingContentsData?.FetchTrendingContents ?? [];
 
-        const data: ContentItemTypeHomePage[] = result?.data ?? [];
-        setContents(data);
-      } catch (err) {
-        if (cancelled) return;
-        console.error('[HomePageContent] Failed to load content:', err);
-        setError('Something went wrong. Please try again.');
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    loadData();
-    return () => { cancelled = true; };
-  }, []);
-
-  // ── Derived data ───────────────────────────────────────────────────────────
-
-  // Pick a featured item from the first batch (prefer index 0 for reliability)
-  const featuredContent = contents[16] ?? null;
 
   const filteredContent = useMemo(() => {
     if (activeGenre === 'All') return contents;
@@ -159,9 +141,10 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
   const newReleases = useMemo(() =>
     contents.filter(c => {
       const year = Number(c.release_date?.split('-')[0]);
-      return !isNaN(year) && year == 2025;
+      return !isNaN(year) && year == 2026;
     }),
-  [contents]);
+    [contents]);
+
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -189,7 +172,7 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
     return (
       <div className="flex flex-col items-center justify-center min-h-[40vh] gap-4 text-center px-4">
         <LayoutGrid size={36} className="text-muted-foreground/30" />
-        <p className="text-sm font-semibold text-foreground">{error}</p>
+        <p className="text-sm font-semibold text-foreground">{error.message}</p>
         <button
           onClick={() => window.location.reload()}
           className="text-xs text-primary hover:underline"
@@ -206,14 +189,14 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
     <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-6 sm:py-8 space-y-10">
 
       {/* ── Hero ── */}
-      {(loading || featuredContent) && (
-        <HeroBanner
-          content={featuredContent}
-          onViewDetails={() => featuredContent && onSelectMovie(featuredContent)}
-          watchStatus={featuredContent ? getWatchStatus(featuredContent._id) : null}
-          onStatusChange={onStatusChange}
-        />
-      )}
+
+      <HeroBanner
+        content={contents[0]}
+        onViewDetails={() => contents[0] && onSelectMovie(contents[0])}
+        watchStatus={contents[0] ? getWatchStatus(contents[0]._id) : null}
+        onStatusChange={onStatusChange}
+      />
+
 
       {/* ── Genre filter ── */}
       <div className="-mx-4 sm:mx-0">

@@ -1,6 +1,5 @@
 import mongoose, { Schema } from "mongoose"
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"
-import { required } from "zod/mini"
 
 const ContentSchema = new Schema(
     {
@@ -99,6 +98,22 @@ const ContentSchema = new Schema(
     }
 )
 
+const TrendingContentSchema = new Schema({
+
+    contentId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Content",
+        required: true,
+        
+    }
+
+}, {
+    timestamps: true
+})
+
+
 ContentSchema.plugin(mongooseAggregatePaginate)
+TrendingContentSchema.plugin(mongooseAggregatePaginate)
 
 export const Content = mongoose.model("Content", ContentSchema)
+export const TrendingContent = mongoose.model("TrendingContent", TrendingContentSchema)
