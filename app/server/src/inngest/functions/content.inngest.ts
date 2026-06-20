@@ -3,27 +3,10 @@ import { SaveContentsDataToDB } from "../../controllers/content.controller";
 import { FetchTrendingContentsDataFromTmdb } from "../../services/tmdb.service";
 import { TrendingContent } from "../../models/content.model";
 import { TmdbContentToContentDocument } from "../../utils/content.utils"
-
-const SaveContentsDataToDBJob: ReturnType<typeof inngest.createFunction> = inngest.createFunction(
-    { id: "saveContentData", timeouts: { start: "5s", finish: "10s", }, triggers: [{ event: "Contents/data.save" }], retries: 2 },
-    async ({ event, step }) => {
-        const { ContentsToInsert } = event?.data
-
-        await step.run("Saving contents data to DB", async () => {
-            try {
-                await SaveContentsDataToDB(ContentsToInsert)
-            } catch (error) {
-                throw error
-            }
-
-        })
-
-    },
-);
-
+import type { ContentDetailsType } from "../../types/content.types";
 
 const SaveTrendingContentsDataToDBCroneJob: ReturnType<typeof inngest.createFunction> = inngest.createFunction(
-    { id: "saveTrendingContentData_CroneJob", timeouts: { start: "5s", finish: "120s", }, triggers: { cron: "TZ=Asia/Kolkata */10 * * * *" }, retries: 3 },
+    { id: "saveTrendingContentData_CroneJob", timeouts: { start: "5s", finish: "120s", }, triggers: { cron: "TZ=Asia/Kolkata 0 0 * * *" }, retries: 3 },
 
     async ({ step }) => {
 
@@ -48,21 +31,13 @@ const SaveTrendingContentsDataToDBCroneJob: ReturnType<typeof inngest.createFunc
                     }
 
                     return TmdbContentToContentDocument(content)
-                }).filter((content: any) => content !== null)
-
+                }).filter((content: any): content is ContentDetailsType => content !== null)
 
                 if (!ContentsToInsert || ContentsToInsert.length === 0) {
                     return Error('No content found')
                 }
 
-                await inngest.send({
-                    name: "Contents/data.save",
-                    data: {
-                        ContentsToInsert
-                    }
-                })
-
-
+                await SaveContentsDataToDB(ContentsToInsert)
 
             } catch (error) {
                 throw error
@@ -74,7 +49,6 @@ const SaveTrendingContentsDataToDBCroneJob: ReturnType<typeof inngest.createFunc
 
             try {
 
-                await TrendingContent.deleteMany({})
 
                 const TrendingDataToInsert = TrendingContents.map((content: any) => {
 
@@ -82,13 +56,42 @@ const SaveTrendingContentsDataToDBCroneJob: ReturnType<typeof inngest.createFunc
                         return null
                     }
 
-                    return { contentId: content?.ContentId }
+                    return { contentId: content?.ContentId, title: content?.title, Content_Type: content?.Content_Type }
 
                 }).filter((content: any) => content !== null)
 
-                await TrendingContent.insertMany(
-                    TrendingDataToInsert
+                const existedTrendingData = await TrendingContent.find({})
+
+                if (!existedTrendingData || existedTrendingData.length === 0) {
+                    await TrendingContent.insertMany(
+                        TrendingDataToInsert
+                    )
+
+                    return "Success"
+                }
+
+                const MatchedData = existedTrendingData.filter(data => TrendingDataToInsert.some(
+                    (NewData: { title: "string", Content_Type: "string" }) => {
+                        return NewData?.title === data?.title && NewData?.Content_Type === data?.Content_Type
+                    }
+                ))
+
+
+                const MatchedId = MatchedData.map(data => data?._id)
+
+                const filteredTrendingData = TrendingDataToInsert.filter(
+                    (data: { title: "string", Content_Type: "string" }) => !MatchedData.some(NewData => NewData?.title === data?.title && NewData?.Content_Type === data?.Content_Type)
                 )
+
+                await TrendingContent.deleteMany({
+                    _id: { $nin: MatchedId }
+                })
+
+                await TrendingContent.insertMany(
+                    filteredTrendingData
+                )
+
+                return "Success"
 
             } catch (error) {
                 throw error
@@ -104,4 +107,4 @@ const SaveTrendingContentsDataToDBCroneJob: ReturnType<typeof inngest.createFunc
 
 
 
-export { SaveContentsDataToDBJob, SaveTrendingContentsDataToDBCroneJob }
+export { SaveTrendingContentsDataToDBCroneJob }

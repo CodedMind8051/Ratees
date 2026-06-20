@@ -100,7 +100,9 @@ const FetchTrendingContentsDataFromTmdb = async () => {
 
         const ContentsDetails = await FetchCompleteContentDetail(response1st, response1st?.data?.results.length)
 
+
         return ContentsDetails
+
     } catch (error) {
         if (error instanceof GraphQLError) {
             throwGraphqlError(error.message, "INTERNAL_SERVER_ERROR", 500, false)

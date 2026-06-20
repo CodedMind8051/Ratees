@@ -1,8 +1,8 @@
-import mongoose from "mongoose"
+import type { ContentDetailsType } from "../types/content.types"
 
-export const TmdbContentToContentDocument = (content: any) => {
+export const TmdbContentToContentDocument = (content: any): ContentDetailsType => {
     return {
-        _id: new mongoose.Types.ObjectId(),
+        _id: content?.ContentId,
         title: content?.title || content?.name,
         description: content?.overview || "N/A",
         poster: content?.poster_path || "N/A",

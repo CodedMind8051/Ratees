@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { SearchContentsSchema, SearchContentDetailsSchema, FetchContentsForHomepageSchema, pageSchema } from "../validators/content.validator"
+import mongoose from "mongoose"
 
 export type SearchContentInput = z.infer<typeof SearchContentsSchema>
 export type SearchContentDetailsInput = z.infer<typeof SearchContentDetailsSchema>
@@ -23,7 +24,7 @@ type Director = {
 };
 
 export type ContentDetailsType = {
-    _id: SearchContentDetailsInput;
+    _id: mongoose.Types.ObjectId,
     title: string;
     description: string;
     release_date: string;

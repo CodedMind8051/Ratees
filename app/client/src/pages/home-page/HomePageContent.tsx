@@ -114,7 +114,7 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
   const [activeGenre, setActiveGenre] = useState('All');
 
   // ── Data fetching ──────────────────────────────────────────────────────────
-  const { loading, error, data: TrendingContentsData } = useQuery<{
+  const { loading, error, data } = useQuery<{
     FetchTrendingContents: ContentItemTypeHomePage[];
     FetchNewReleaseContents: ContentItemTypeHomePage[];
     FetchGeneralContentsForHomepage: ContentItemTypeHomePage[];
@@ -124,10 +124,17 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
     }
   });
 
-
+  if (!loading) {
+    console.log(data)
+  }
   // Normalize to an array so the rest of the component can treat `contents` as an array
-  const contents: ContentItemTypeHomePage[] = TrendingContentsData?.FetchTrendingContents ?? [];
+  const contents: ContentItemTypeHomePage[] = data?.FetchTrendingContents ?? [];
+  const NewReleaseContent: ContentItemTypeHomePage[] = data?.FetchNewReleaseContents ?? []
 
+
+  if(!loading){
+    console.log(NewReleaseContent)
+  }
 
   const filteredContent = useMemo(() => {
     if (activeGenre === 'All') return contents;
@@ -173,9 +180,10 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
       <div className="flex flex-col items-center justify-center min-h-[40vh] gap-4 text-center px-4">
         <LayoutGrid size={36} className="text-muted-foreground/30" />
         <p className="text-sm font-semibold text-foreground">{error.message}</p>
+
         <button
           onClick={() => window.location.reload()}
-          className="text-xs text-primary hover:underline"
+          className="text-xs text-primary hover:underline hover:cursor-pointer"
         >
           Reload page
         </button>
@@ -229,11 +237,11 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
       )}
 
       {/* ── New Releases (All genre only) ── */}
-      {activeGenre === 'All' && (loading || newReleases.length > 0) && (
+      {activeGenre === 'All' && (loading || NewReleaseContent.length > 0) && (
         <section>
           <SectionHeader icon={Sparkles} iconClass="text-primary" title="New Releases" showSeeAll />
           <ScrollRow>
-            {loading ? <SkeletonRow /> : newReleases.map(c => renderSnapCard(c, 'new'))}
+            {loading ? <SkeletonRow /> : NewReleaseContent.map(c => renderSnapCard(c, 'new'))}
           </ScrollRow>
         </section>
       )}

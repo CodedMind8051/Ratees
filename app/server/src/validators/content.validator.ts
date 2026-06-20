@@ -35,8 +35,6 @@ export const SearchContentsSchema = z.object({
     page: pageSchema
 });
 
-
-
 export const SearchContentDetailsSchema = z.object({
     ContentId: objectIdSchema("ContentId")
 })

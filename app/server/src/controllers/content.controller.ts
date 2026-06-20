@@ -3,8 +3,7 @@ import { FetchContentDataFromTmDb } from "../services/tmdb.service";
 import { validate } from "../utils/validate.utils";
 import { SearchContentsSchema, SearchContentDetailsSchema, pageSchema } from "../validators/content.validator";
 import mongoose from "mongoose";
-import { inngest } from "../inngest/client.inngest";
-import type { SearchContentDetailsInput, SearchContentInput, ContentDetailsType, FetchContentsForHomepageInput, PageNumberType } from "../types/content.types";
+import type { SearchContentDetailsInput, SearchContentInput, ContentDetailsType, PageNumberType } from "../types/content.types";
 import { throwGraphqlError } from "../utils/throwGraphqlError.utils";
 import { handelGraphqlError } from "../utils/handelError.utils";
 import { TmdbContentToContentDocument } from "../utils/content.utils"
@@ -93,26 +92,21 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
                 }
 
                 return TmdbContentToContentDocument(content)
-            }).filter((content: any) => content !== null)
+            }).filter((content: any): content is ContentDetailsType => content !== null)
 
 
             if (!ContentsToInsert || ContentsToInsert.length === 0) {
                 return throwGraphqlError('No content found', 'NOT_FOUND', 404, true)
             }
 
-            await inngest.send({
-                name: "Contents/data.save",
-                data: {
-                    ContentsToInsert
-                }
-            })
+            await SaveContentsDataToDB(ContentsToInsert)
 
             return ContentsToInsert?.map(content => ({
                 _id: content?._id,
                 title: content?.title,
                 description: content?.description,
                 release_date: content?.release_date,
-                genre: content?.genre === "Science Fiction" ? "Sci-FI" : content?.genre,
+                genre: content?.genre,
                 poster: content?.poster,
                 Content_Type: content?.Content_Type,
                 runtime: content?.runtime,
@@ -245,6 +239,8 @@ const fetchNewReleaseContents = async () => {
         if (!NewReleaseContentsData || NewReleaseContentsData.length === 0) {
             throwGraphqlError('Contents not found', 'PAGE_NOT_FOUND', 404, true)
         }
+
+        console.log(NewReleaseContentsData)
 
         return NewReleaseContentsData
 
