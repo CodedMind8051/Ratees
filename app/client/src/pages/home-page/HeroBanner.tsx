@@ -1,5 +1,4 @@
 import { Play, Plus, CheckCircle2, Film, Tv, EyeOff } from 'lucide-react';
-import { RATING_LABELS, RATING_COLORS } from '@/data/mockData';
 import { toast } from 'sonner';
 import { ContentItemTypeHomePage } from '@/types/Content.types';
 
@@ -32,7 +31,6 @@ function HeroBannerSkeleton() {
             {/* "Featured Today" eyebrow */}
             <div className="flex items-center gap-2 mb-3">
               <div className="h-2.5 w-16 sm:w-20 rounded bg-white/20" />
-              <div className="h-px w-6 sm:w-10 bg-white/20" />
             </div>
 
             {/* Type badge + year */}
@@ -67,13 +65,6 @@ function HeroBannerSkeleton() {
             </div>
           </div>
 
-          {/* Right: rating card — sm+ only (mirrors real banner) */}
-          <div className="hidden sm:flex flex-col items-center justify-center gap-2 px-4 py-3.5 bg-black/30 border border-white/10 rounded-2xl shrink-0 min-w-[80px]">
-            <div className="h-8 lg:h-9 w-12 rounded bg-white/20" />
-            <div className="h-2.5 w-14 rounded bg-white/15" />
-            <div className="h-2.5 w-10 rounded bg-white/12" />
-          </div>
-
         </div>
       </div>
     </div>
@@ -92,7 +83,6 @@ export default function HeroBanner({ content, onViewDetails, watchStatus, onStat
     toast.success(next ? 'Added to Watch Later' : 'Removed from Watch Later');
   };
 
-  const ratingColor = RATING_COLORS["masterpiece"];
 
   return (
     <div className="relative w-full h-[300px] sm:h-[380px] lg:h-[480px] rounded-2xl overflow-hidden">
@@ -191,21 +181,6 @@ export default function HeroBanner({ content, onViewDetails, watchStatus, onStat
             </div>
           </div>
 
-          {/* Right: rating card — sm+ only */}
-          <div className="hidden sm:flex flex-col items-center justify-center gap-1 px-4 py-3.5 bg-black/50 border border-white/10 rounded-2xl backdrop-blur-md shrink-0 min-w-[80px]">
-            <span
-              className="text-2xl lg:text-3xl font-black tabular-nums leading-none"
-              style={{ color: ratingColor }}
-            >
-              55%
-            </span>
-            <span
-              className="text-[10px] font-semibold uppercase tracking-wide text-center leading-tight max-w-[72px]"
-              style={{ color: ratingColor }}
-            >
-              {RATING_LABELS["masterpiece"]}
-            </span>
-          </div>
         </div>
       </div>
     </div>

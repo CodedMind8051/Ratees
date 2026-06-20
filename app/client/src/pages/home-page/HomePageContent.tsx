@@ -1,13 +1,12 @@
 import { useState, useMemo, useRef, useCallback, } from 'react';
 import { Flame, Sparkles, LayoutGrid, ChevronRight, ChevronLeft } from 'lucide-react';
-import { WatchlistEntry, ALL_GENRES } from '@/data/mockData';
+import { WatchlistEntry } from '@/data/mockData';
 import ContentCard, { ContentCardSkeleton } from '@/components/ContentCard';
 import HeroBanner from './HeroBanner';
 import { ContentItemTypeHomePage } from '@/types/Content.types';
-import { FETCH_TRENDING_CONTENTS, FETCH_COMPLETE_HOME_PAGE_DATA } from '@/lib/graphql/query/content.query';
+import { FETCH_COMPLETE_HOME_PAGE_DATA } from '@/lib/graphql/query/content.query';
 import { useQuery } from '@apollo/client/react';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface HomePageContentProps {
   onSelectMovie: (content: ContentItemTypeHomePage) => void;
@@ -15,7 +14,8 @@ interface HomePageContentProps {
   onStatusChange: (contentId: string, status: 'watched' | 'watching' | 'watchlater' | null) => void;
 }
 
-// ─── ScrollRow ────────────────────────────────────────────────────────────────
+const ALL_GENRES = ['All', 'Drama', 'Crime', 'Thriller', 'Sci-Fi', 'Comedy', 'Action', 'Romance', 'Horror', 'Biography', 'History', 'Mystery', 'Fantasy', 'Sport'];
+
 
 function ScrollRow({ children }: { children: React.ReactNode }) {
   const rowRef = useRef<HTMLDivElement>(null);
@@ -54,7 +54,6 @@ function ScrollRow({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ─── SectionHeader ────────────────────────────────────────────────────────────
 
 function SectionHeader({
   icon: Icon,
@@ -82,7 +81,6 @@ function SectionHeader({
   );
 }
 
-// ─── Skeleton rows ────────────────────────────────────────────────────────────
 
 const SKELETON_COUNT = 10;
 
@@ -108,12 +106,10 @@ function SkeletonGrid() {
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function HomePageContent({ onSelectMovie, watchlist, onStatusChange }: HomePageContentProps) {
   const [activeGenre, setActiveGenre] = useState('All');
 
-  // ── Data fetching ──────────────────────────────────────────────────────────
   const { loading, error, data } = useQuery<{
     FetchTrendingContents: ContentItemTypeHomePage[];
     FetchNewReleaseContents: ContentItemTypeHomePage[];
@@ -124,36 +120,23 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
     }
   });
 
-  if (!loading) {
-    console.log(data)
-  }
-  // Normalize to an array so the rest of the component can treat `contents` as an array
-  const contents: ContentItemTypeHomePage[] = data?.FetchTrendingContents ?? [];
+
+
+  const TrendingContents: ContentItemTypeHomePage[] = data?.FetchTrendingContents ?? [];
   const NewReleaseContent: ContentItemTypeHomePage[] = data?.FetchNewReleaseContents ?? []
+  const GeneralContent: ContentItemTypeHomePage[] = data?.FetchGeneralContentsForHomepage
 
 
-  if(!loading){
-    console.log(NewReleaseContent)
-  }
+
 
   const filteredContent = useMemo(() => {
-    if (activeGenre === 'All') return contents;
-    return contents.filter(c =>
+    if (activeGenre === 'All') return GeneralContent;
+    return GeneralContent.filter(c =>
       Array.isArray(c?.genre)
         ? c?.genre.includes(activeGenre)
         : (c as any).genre === activeGenre
     );
-  }, [activeGenre, contents]);
-
-  const newReleases = useMemo(() =>
-    contents.filter(c => {
-      const year = Number(c.release_date?.split('-')[0]);
-      return !isNaN(year) && year == 2026;
-    }),
-    [contents]);
-
-
-  // ── Helpers ────────────────────────────────────────────────────────────────
+  }, [activeGenre, GeneralContent]);
 
   const getWatchStatus = useCallback(
     (contentId: string) => watchlist.find(w => w.contentId === contentId)?.status ?? null,
@@ -162,7 +145,7 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
 
   const renderSnapCard = useCallback(
     (content: ContentItemTypeHomePage, keyPrefix: string) => (
-      <div key={`${keyPrefix}-${content._id}`} className="shrink-0 w-[140px] sm:w-[160px] snap-start">
+      <div key={`${keyPrefix}-${content._id}`} className="shrink-0  w-[140px]  sm:w-[160px] snap-start">
         <ContentCard
           content={content}
           onClick={onSelectMovie}
@@ -173,7 +156,6 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
     [onSelectMovie, getWatchStatus]
   );
 
-  // ── Error state ────────────────────────────────────────────────────────────
 
   if (error) {
     return (
@@ -191,22 +173,17 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
     );
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
-
   return (
     <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-6 sm:py-8 space-y-10">
 
-      {/* ── Hero ── */}
-
       <HeroBanner
-        content={contents[0]}
-        onViewDetails={() => contents[0] && onSelectMovie(contents[0])}
-        watchStatus={contents[0] ? getWatchStatus(contents[0]._id) : null}
+        content={TrendingContents[0]}
+        onViewDetails={() => TrendingContents[0] && onSelectMovie(TrendingContents[0])}
+        watchStatus={TrendingContents[0] ? getWatchStatus(TrendingContents[0]._id) : null}
         onStatusChange={onStatusChange}
       />
 
 
-      {/* ── Genre filter ── */}
       <div className="-mx-4 sm:mx-0">
         <div className="flex gap-2 overflow-x-auto px-4 sm:px-0 pb-1 scrollbar-hide">
           {ALL_GENRES.map(genre => (
@@ -226,17 +203,15 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
         </div>
       </div>
 
-      {/* ── Trending Now (All genre only) ── */}
       {activeGenre === 'All' && (
         <section>
           <SectionHeader icon={Flame} iconClass="text-accent" title="Trending Now" showSeeAll />
           <ScrollRow>
-            {loading ? <SkeletonRow /> : contents.map(c => renderSnapCard(c, 'trending'))}
+            {loading ? <SkeletonRow /> : TrendingContents.map(c => renderSnapCard(c, 'trending'))}
           </ScrollRow>
         </section>
       )}
 
-      {/* ── New Releases (All genre only) ── */}
       {activeGenre === 'All' && (loading || NewReleaseContent.length > 0) && (
         <section>
           <SectionHeader icon={Sparkles} iconClass="text-primary" title="New Releases" showSeeAll />
@@ -246,7 +221,6 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
         </section>
       )}
 
-      {/* ── All / Filtered titles ── */}
       <section>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -262,7 +236,7 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
           </div>
         </div>
 
-        {/* Empty state — only shown after loading with no results */}
+
         {!loading && filteredContent.length === 0 ? (
           <div className="text-center py-16 sm:py-24 border border-dashed border-border rounded-2xl">
             <LayoutGrid size={36} className="text-muted-foreground/30 mx-auto mb-3" />
