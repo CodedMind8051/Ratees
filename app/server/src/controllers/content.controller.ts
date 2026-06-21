@@ -240,8 +240,6 @@ const fetchNewReleaseContents = async () => {
             throwGraphqlError('Contents not found', 'PAGE_NOT_FOUND', 404, true)
         }
 
-        console.log(NewReleaseContentsData)
-
         return NewReleaseContentsData
 
 
@@ -265,7 +263,7 @@ const FetchGeneralContentsForHomepage = async (page: PageNumberType) => {
 
         const options = {
             page: validatedPage || 1,
-            limit: 60,
+            limit: 50,
         }
 
         const ContentsData = await Content.aggregatePaginate(aggregateResult, options)

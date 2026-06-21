@@ -5,12 +5,13 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
-  ContentItem, RatingKey, RATING_LABELS, RATING_COLORS, Review
+  RatingKey, RATING_LABELS, RATING_COLORS, Review
 } from '@/data/mockData';
+import { ContentFullDetail } from "@/types/Content.types"
 import RatingDistributionChart from './RatingDistributionChart';
 
 interface MovieDetailModalProps {
-  content: ContentItem;
+  content: ContentFullDetail;
   onClose: () => void;
   initialStatus?: 'watched' | 'watching' | 'watchlater' | null;
   onStatusChange?: (contentId: string, status: 'watched' | 'watching' | 'watchlater' | null) => void;
@@ -19,32 +20,32 @@ interface MovieDetailModalProps {
 const RATING_ORDER: RatingKey[] = ['waste', 'timepass', 'good', 'masterpiece'];
 
 const statusConfig = {
-  watched:   { label: 'Watched',     icon: CheckCircle2, color: 'text-green-400', bg: 'bg-green-400/10 border-green-400/30' },
-  watching:  { label: 'Watching',    icon: Eye,          color: 'text-blue-400',  bg: 'bg-blue-400/10 border-blue-400/30'  },
-  watchlater:{ label: 'Watch Later', icon: Clock,        color: 'text-primary',   bg: 'bg-primary/10 border-primary/30'    },
+  watched: { label: 'Watched', icon: CheckCircle2, color: 'text-green-400', bg: 'bg-green-400/10 border-green-400/30' },
+  watching: { label: 'Watching', icon: Eye, color: 'text-blue-400', bg: 'bg-blue-400/10 border-blue-400/30' },
+  watchlater: { label: 'Watch Later', icon: Clock, color: 'text-primary', bg: 'bg-primary/10 border-primary/30' },
 };
 
 const ratingBadgeClass: Record<RatingKey, string> = {
-  waste:       'bg-rating-waste rating-waste border border-red-500/20',
-  timepass:    'bg-rating-timepass rating-timepass border border-orange-500/20',
-  good:        'bg-rating-good rating-good border border-yellow-500/20',
+  waste: 'bg-rating-waste rating-waste border border-red-500/20',
+  timepass: 'bg-rating-timepass rating-timepass border border-orange-500/20',
+  good: 'bg-rating-good rating-good border border-yellow-500/20',
   masterpiece: 'bg-rating-masterpiece rating-masterpiece border border-green-500/20',
 };
 
 export default function MovieDetailModal({
   content, onClose, initialStatus, onStatusChange,
 }: MovieDetailModalProps) {
-  const [activeStatus, setActiveStatus]     = useState<'watched' | 'watching' | 'watchlater' | null>(initialStatus ?? null);
-  const [reviews, setReviews]               = useState<Review[]>(content.reviews);
-  const [newComment, setNewComment]         = useState('');
-  const [newRating, setNewRating]           = useState<RatingKey>('good');
-  const [editingId, setEditingId]           = useState<string | null>(null);
-  const [editComment, setEditComment]       = useState('');
-  const [editRating, setEditRating]         = useState<RatingKey>('good');
-  const [submitting, setSubmitting]         = useState(false);
+  const [activeStatus, setActiveStatus] = useState<'watched' | 'watching' | 'watchlater' | null>(initialStatus ?? null);
+  const [reviews, setReviews] = useState<Review[]>(content?.reviews);
+  const [newComment, setNewComment] = useState('');
+  const [newRating, setNewRating] = useState<RatingKey>('good');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editComment, setEditComment] = useState('');
+  const [editRating, setEditRating] = useState<RatingKey>('good');
+  const [submitting, setSubmitting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [playlistDropdownOpen, setPlaylistDropdownOpen] = useState(false);
-  const [myRating, setMyRating]             = useState<RatingKey | null>(null);
+  const [myRating, setMyRating] = useState<RatingKey | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Lock scroll + Escape key
@@ -73,7 +74,7 @@ export default function MovieDetailModal({
   const handleStatusToggle = (status: 'watched' | 'watching' | 'watchlater') => {
     const next = activeStatus === status ? null : status;
     setActiveStatus(next);
-    onStatusChange?.(content.id, next);
+    onStatusChange?.(content?._id, next);
     toast.success(next ? `Added to ${statusConfig[status].label}` : 'Removed from watchlist');
   };
 
@@ -152,11 +153,11 @@ export default function MovieDetailModal({
           {/* Top badges */}
           <div className="absolute top-3 left-3 flex items-center gap-2">
             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${ratingBadgeClass[content.aggregateRating]}`}>
-              {RATING_LABELS[content.aggregateRating]}
+              {RATING_LABELS[content?.aggregateRating]}
             </span>
             <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white/90 border border-white/10 flex items-center gap-1">
-              {content.type === 'Movie' ? <Film size={10} /> : <Tv size={10} />}
-              {content.type}
+              {content?.Content_Type === 'movie' ? <Film size={10} /> : <Tv size={10} />}
+              {content?.Content_Type}
             </span>
           </div>
         </div>
@@ -184,11 +185,11 @@ export default function MovieDetailModal({
                   {content.title}
                 </h2>
                 <div className="flex flex-wrap items-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
-                  <span>{content.year}</span>
+                  <span>{content?.release_date}</span>
                   <span className="opacity-40">·</span>
-                  <span>{content.runtime}</span>
+                  <span>{content?.runtime}</span>
                   <span className="opacity-40">·</span>
-                  <span className="truncate">Dir. {content.director}</span>
+                  <span className="truncate">Dir. {content?.director}</span>
                 </div>
                 {/* Genres */}
                 <div className="flex flex-wrap gap-1.5 mt-2">
@@ -264,7 +265,7 @@ export default function MovieDetailModal({
                 Where to Watch
               </p>
               <div className="flex flex-wrap gap-2">
-                {content.platforms.map(platform => (
+                {content?.WatchPlatform.map(platform => (
                   <span
                     key={`platform-${platform}`}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-secondary/60 border border-border rounded-lg text-xs font-medium text-foreground"
@@ -285,7 +286,7 @@ export default function MovieDetailModal({
               <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-3">
                   {RATING_ORDER.map(key => {
-                    const pct = content.ratingDistribution[key];
+                    const pct = content?.ratingDistribution[key];
                     return (
                       <div key={`dist-${key}`} className="flex items-center gap-3">
                         <span className="text-xs font-medium w-24 shrink-0" style={{ color: RATING_COLORS[key] }}>
@@ -357,13 +358,13 @@ export default function MovieDetailModal({
                 Cast & Crew
               </p>
               <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory">
-                {content.cast.map(member => (
-                  <div key={member.id} className="shrink-0 text-center w-[72px] snap-start">
+                {content?.Cast.map((member,index) => (
+                  <div key={index} className="shrink-0 text-center w-[72px] snap-start">
                     <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden mx-auto border-2 border-border ring-1 ring-white/5">
-                      <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
+                      <img src={member?.profile_path} alt={member?.name} className="w-full h-full object-cover" />
                     </div>
                     <p className="text-[11px] font-medium text-foreground mt-2 leading-tight">{member.name}</p>
-                    <p className="text-[10px] text-muted-foreground leading-tight">{member.role}</p>
+                    <p className="text-[10px] text-muted-foreground leading-tight">{member?.character}</p>
                   </div>
                 ))}
               </div>

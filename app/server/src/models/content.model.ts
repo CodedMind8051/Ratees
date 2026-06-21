@@ -67,17 +67,7 @@ const ContentSchema = new Schema(
             }
         },
         director: {
-            type: [
-                {
-                    name: String,
-                    profile_path: String
-                }
-            ],
-            validate: {
-                validator: function (value: []) {
-                    return value.length <= 2
-                }
-            }
+            type: String
         },
         total_seasons: {
             type: Number,

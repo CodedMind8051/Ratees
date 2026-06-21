@@ -3,10 +3,10 @@ import Navbar from '@/components/Navbar';
 import HomePageContent from '@/pages/home-page/HomePageContent';
 import MovieDetailModal from '@/components/MovieDetailModal';
 import { mockWatchlist, WatchlistEntry } from '@/data/mockData';
-import { ContentItemTypeHomePage } from '@/types/Content.types';
+import { ContentItemTypeHomePage, ContentFullDetail } from '@/types/Content.types';
 
 export default function HomePage() {
-  const [selectedContent, setSelectedContent] = useState<ContentItemTypeHomePage | null>(null);
+  const [selectedContent, setSelectedContent] = useState<ContentFullDetail | null>(null);
   const [watchlist, setWatchlist] = useState<WatchlistEntry[]>(mockWatchlist);
 
   const getWatchStatus = (contentId: string) => {

@@ -18,10 +18,6 @@ type Cast = {
     profile_path: string;
 };
 
-type Director = {
-    name: string;
-    profile_path: string;
-};
 
 export type ContentDetailsType = {
     _id: mongoose.Types.ObjectId,
@@ -36,7 +32,7 @@ export type ContentDetailsType = {
 
     whereTOwatch?: WatchPlatform[];
     casts?: Cast[];
-    director?: Director[];
+    director?: string
 
     total_seasons?: number;
     total_episodes?: number;

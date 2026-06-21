@@ -21,12 +21,7 @@ export const TmdbContentToContentDocument = (content: any): ContentDetailsType =
             profile_path: cast.profile_path || "N/A"
         })) : [],
 
-        director: content?.credits?.crew ? content.credits.crew.filter((crew: any) => crew.job === "Director").slice(0, 2).map(
-            (director: any) => ({
-                name: director.name,
-                profile_path: director.profile_path
-            })
-        ) : [],
+        director: content?.credits?.crew ? content.credits.crew.filter((crew: any) => crew.job === "Director")?.at(0)?.name : "N/A", 
         ...(content?.media_type === "tv" && {
             total_episodes: content?.number_of_episodes
         }),
