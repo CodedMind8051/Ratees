@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { objectIdSchema } from "./content.validator"
+import { objectIdSchema } from "./globle.validator"
 
 export const SubmitReviewSchema = z.object({
     userId: objectIdSchema("userId"),

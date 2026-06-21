@@ -9,6 +9,7 @@ import { handelGraphqlError } from "../utils/handelError.utils";
 import { TmdbContentToContentDocument } from "../utils/content.utils"
 
 
+
 const SaveContentsDataToDB = async (ContentsToInsert: ContentDetailsType[]) => {
     try {
 
@@ -132,10 +133,72 @@ const FetchContentDetailsController = async ({ ContentId }: SearchContentDetails
                 $match: {
                     _id: new mongoose.Types.ObjectId(verifiedId)
                 }
+            }, {
+                $lookup: {
+                    from: "ratingstates",
+                    localField: "_id",
+                    foreignField: "ContentId",
+                    as: "Ratings"
+                }
             },
             {
+                $unwind: {
+                    path: "$Ratings",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+
+            {
                 $project: {
-                    total_number_of_ratings: 0
+                    title:1,
+                    director:1,
+                    casts:1, 
+                    whereTOwatch:1,  
+                    runtime:1,         
+                    masterpiecePercentage: {
+                        $multiply: [
+                            {
+                                $divide: [
+                                    "$Ratings.MasterPieceRating.totalCount",
+                                    "$Ratings.totalNumberOfRatings"
+                                ]
+                            },
+                            100
+                        ]
+                    },
+                    TimePassPercentage: {
+                        $multiply: [
+                            {
+                                $divide: [
+                                    "$Ratings.TimePassRating.totalCount",
+                                    "$Ratings.totalNumberOfRatings"
+                                ]
+                            },
+                            100
+                        ]
+                    },
+                    GoodWatchPercentage: {
+                        $multiply: [
+                            {
+                                $divide: [
+                                    "$Ratings.GoodWatchRating.totalCount",
+                                    "$Ratings.totalNumberOfRatings"
+                                ]
+                            },
+                            100
+                        ]
+                    },
+                    wasteOfTimePercentage: {
+                        $multiply: [
+                            {
+                                $divide: [
+                                    "$Ratings.wasteOfTime.totalCount",
+                                    "$Ratings.totalNumberOfRatings"
+                                ]
+                            },
+                            100
+                        ]
+                    }
                 }
             }
         ])
@@ -143,6 +206,8 @@ const FetchContentDetailsController = async ({ ContentId }: SearchContentDetails
         if (!contentDetails || contentDetails.length === 0) {
             throwGraphqlError("Content Details not found", "NOT_FOUND", 404, true)
         }
+
+        console.log(contentDetails)
 
         return contentDetails[0]
 
@@ -283,6 +348,8 @@ const FetchGeneralContentsForHomepage = async (page: PageNumberType) => {
     }
 
 }
+
+
 
 export {
     SearchContentsController,

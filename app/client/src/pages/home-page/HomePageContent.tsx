@@ -3,12 +3,12 @@ import { Flame, Sparkles, LayoutGrid, ChevronRight, ChevronLeft } from 'lucide-r
 import { WatchlistEntry } from '@/data/mockData';
 import ContentCard, { ContentCardSkeleton } from '@/components/ContentCard';
 import HeroBanner from './HeroBanner';
-import { ContentItemTypeHomePage } from '@/types/Content.types';
+import { ContentItemTypeHomePage ,ContentFullDetail} from '@/types/Content.types';
 import { FETCH_COMPLETE_HOME_PAGE_DATA, FETCH_GENERAL_CONTENTS_FOR_HOME_PAGE } from '@/lib/graphql/query/content.query';
 import { useQuery, useLazyQuery } from '@apollo/client/react';
 
 interface HomePageContentProps {
-  onSelectMovie: (content: ContentItemTypeHomePage) => void;
+  onSelectMovie: (content: ContentFullDetail) => void;
   watchlist: WatchlistEntry[];
   onStatusChange: (contentId: string, status: 'watched' | 'watching' | 'watchlater' | null) => void;
 }

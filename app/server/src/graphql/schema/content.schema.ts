@@ -54,7 +54,7 @@ const contentTypeDefs = `#graphql
            ):[ContentDetails]!,
 
            getContentDetails(
-           _id:ID!
+           ContentId:ID!
            ):ContentDetails!,
 
            FetchGeneralContentsForHomepage(

@@ -24,13 +24,13 @@ type Cast = {
 
 
 export interface ContentFullDetail extends ContentItemTypeHomePage {
-  runtime: string,
-  director:string,
-  reviews:[],
-  WatchPlatform:[],
-  Cast:Cast[],
-  aggregateRating:any,
-  ratingDistribution:any
+  runtime?: string,
+  director?:string,
+  reviews?:[],
+  WatchPlatform?:[],
+  Cast?:Cast[],
+  aggregateRating?:any,
+  ratingDistribution?:any
 }
 
 

@@ -24,7 +24,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar onSelectMovie={setSelectedContent} />
+      <Navbar />
       <main className="pt-16">
         <HomePageContent onSelectMovie={setSelectedContent} watchlist={watchlist} onStatusChange={handleStatusChange} />
       </main>

@@ -48,6 +48,7 @@ export default function MovieDetailModal({
   const [myRating, setMyRating] = useState<RatingKey | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  console.log(content)
   // Lock scroll + Escape key
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -134,7 +135,11 @@ export default function MovieDetailModal({
         {/* ─── Backdrop hero ───────────────────────────────────────────── */}
         <div className="relative h-40 sm:h-52 shrink-0 overflow-hidden rounded-t-2xl">
           <img
-            src={content.backdrop}
+            src={
+              content?.backdrop?.startsWith("/")
+                ? `${import.meta.env.VITE_TMDB_BACKDROP_BASE_URL}${content?.backdrop}`
+                : content?.backdrop === "N/A" ? "/assets/images/no_image.png" : "/assets/images/no_image.png"
+            }
             alt={`${content.title} backdrop`}
             className="w-full h-full object-cover"
           />
@@ -170,9 +175,13 @@ export default function MovieDetailModal({
             <div className="flex gap-4 -mt-14 sm:-mt-16 relative z-10 mb-6">
               {/* Poster */}
               <div className="shrink-0">
-                <div className="w-24 h-36 sm:w-32 sm:h-48 rounded-xl overflow-hidden border-2 border-border shadow-2xl ring-1 ring-white/5">
+                <div className="w-24 h-36 mt-18 sm:w-32 sm:h-48 rounded-xl overflow-hidden border-2 border-border shadow-2xl ring-1 ring-white/5">
                   <img
-                    src={content.poster}
+                    src={
+                      content.poster?.startsWith("/")
+                        ? `${import.meta.env.VITE_TMDB_POSTER_BASE_URL}${content.poster}`
+                        : content?.poster === "N/A" ? "/assets/images/no_image.png" : "/assets/images/no_image.png"
+                    }
                     alt={`${content.title} poster`}
                     className="w-full h-full object-cover"
                   />
@@ -264,7 +273,7 @@ export default function MovieDetailModal({
               <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">
                 Where to Watch
               </p>
-              <div className="flex flex-wrap gap-2">
+              {/* <div className="flex flex-wrap gap-2">
                 {content?.WatchPlatform.map(platform => (
                   <span
                     key={`platform-${platform}`}
@@ -274,7 +283,7 @@ export default function MovieDetailModal({
                     {platform}
                   </span>
                 ))}
-              </div>
+              </div> */}
             </div>
 
             {/* ── Community Rating ── */}
@@ -284,7 +293,7 @@ export default function MovieDetailModal({
               </p>
               {/* Stacked on mobile, side-by-side on sm+ */}
               <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 sm:gap-6">
-                <div className="space-y-3">
+                {/* <div className="space-y-3">
                   {RATING_ORDER.map(key => {
                     const pct = content?.ratingDistribution[key];
                     return (
@@ -304,9 +313,9 @@ export default function MovieDetailModal({
                       </div>
                     );
                   })}
-                </div>
+                </div> */}
                 <div className="flex items-center justify-center sm:justify-end">
-                  <RatingDistributionChart distribution={content.ratingDistribution} />
+                  {/* <RatingDistributionChart distribution={content.ratingDistribution} /> */}
                 </div>
               </div>
             </div>
@@ -357,7 +366,7 @@ export default function MovieDetailModal({
               <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">
                 Cast & Crew
               </p>
-              <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory">
+              {/* <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory">
                 {content?.Cast.map((member,index) => (
                   <div key={index} className="shrink-0 text-center w-[72px] snap-start">
                     <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden mx-auto border-2 border-border ring-1 ring-white/5">
@@ -367,17 +376,17 @@ export default function MovieDetailModal({
                     <p className="text-[10px] text-muted-foreground leading-tight">{member?.character}</p>
                   </div>
                 ))}
-              </div>
+              </div> */}
             </div>
 
             {/* ── Reviews ── */}
             <div>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">
+              {/* <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">
                 Reviews{' '}
                 <span className="text-muted-foreground/60 font-normal normal-case tracking-normal">
                   ({reviews.length})
                 </span>
-              </p>
+              </p> */}
 
               {/* Write review */}
               <div className="bg-secondary/50 border border-border rounded-xl p-4 mb-5">
@@ -408,147 +417,14 @@ export default function MovieDetailModal({
               </div>
 
               {/* Reviews list */}
-              {reviews.length === 0 ? (
-                <div className="text-center py-10">
-                  <Star size={28} className="text-muted-foreground mx-auto mb-2 opacity-40" />
-                  <p className="text-sm text-muted-foreground">No reviews yet — be the first.</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {reviews.map(review => (
-                    <div
-                      key={review.id}
-                      className="bg-secondary/30 border border-border rounded-xl p-4 transition-colors"
-                    >
-                      {editingId === review.id ? (
-                        <div>
-                          <div className="flex flex-wrap gap-2 mb-3">
-                            {RATING_ORDER.map(key => (
-                              <button
-                                key={`edit-rating-${key}`}
-                                onClick={() => setEditRating(key)}
-                                className={[
-                                  'px-3 py-1 rounded-full text-xs font-medium border transition-all active:scale-95',
-                                  editRating === key
-                                    ? `${ratingBadgeClass[key]} scale-105`
-                                    : 'border-border text-muted-foreground hover:border-muted',
-                                ].join(' ')}
-                              >
-                                {RATING_LABELS[key]}
-                              </button>
-                            ))}
-                          </div>
-                          <textarea
-                            value={editComment}
-                            onChange={e => setEditComment(e.target.value)}
-                            rows={3}
-                            className="w-full bg-card border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60 resize-none mb-3 transition-colors"
-                          />
-                          <div className="flex gap-2 justify-end">
-                            <button
-                              onClick={() => setEditingId(null)}
-                              className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-secondary transition-colors"
-                            >
-                              Cancel
-                            </button>
-                            <button
-                              onClick={() => handleUpdateReview(review.id)}
-                              className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-amber-400 transition-colors"
-                            >
-                              Save Changes
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="flex items-start justify-between gap-3">
-                            {/* Avatar + name */}
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-8 h-8 shrink-0 rounded-full bg-gradient-to-br from-primary/60 to-primary flex items-center justify-center text-xs font-bold text-primary-foreground">
-                                {review.avatar}
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-sm font-semibold text-foreground leading-none">{review.username}</p>
-                                <p className="text-[11px] text-muted-foreground mt-0.5">{review.date}</p>
-                              </div>
-                            </div>
 
-                            {/* Rating badge + actions */}
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${ratingBadgeClass[review.rating]}`}>
-                                {RATING_LABELS[review.rating]}
-                              </span>
-                              {review.isOwn && (
-                                <div className="flex gap-0.5 ml-1">
-                                  <button
-                                    onClick={() => {
-                                      setEditingId(review.id);
-                                      setEditComment(review.comment);
-                                      setEditRating(review.rating);
-                                    }}
-                                    className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                                    aria-label="Edit review"
-                                  >
-                                    <Pencil size={13} />
-                                  </button>
-                                  <button
-                                    onClick={() => setDeleteConfirmId(review.id)}
-                                    className="p-1.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-colors"
-                                    aria-label="Delete review"
-                                  >
-                                    <Trash2 size={13} />
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <p className="text-sm text-muted-foreground mt-2.5 leading-relaxed">{review.comment}</p>
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* ─── Delete confirm modal ───────────────────────────────────────── */}
-      {deleteConfirmId && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center p-6"
-          onClick={() => setDeleteConfirmId(null)}
-        >
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-          <div
-            className="relative bg-card border border-border rounded-2xl p-6 w-full max-w-xs shadow-2xl fade-in"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
-              <Trash2 size={18} className="text-red-400" />
-            </div>
-            <h3 className="text-base font-bold text-center mb-1">Delete Review?</h3>
-            <p className="text-sm text-muted-foreground text-center mb-5 leading-relaxed">
-              This will permanently remove your review and cannot be undone.
-            </p>
-            <div className="flex gap-2.5">
-              <button
-                onClick={() => setDeleteConfirmId(null)}
-                className="flex-1 py-2.5 rounded-xl border border-border text-sm font-medium hover:bg-secondary transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDeleteReview(deleteConfirmId)}
-                className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 active:scale-95 transition-all"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }

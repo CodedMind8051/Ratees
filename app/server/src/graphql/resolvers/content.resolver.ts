@@ -15,7 +15,8 @@ const contentResolver = {
             _: any,
             { ContentId }: SearchContentDetailsInput) => {
 
-            const contentDetails = await FetchContentDetailsController({ ContentId: ContentId ?? "" })
+
+            const contentDetails = await FetchContentDetailsController({ ContentId: ContentId  })
 
             return contentDetails
 
