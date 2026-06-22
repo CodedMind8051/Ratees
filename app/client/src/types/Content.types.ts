@@ -10,27 +10,35 @@ export interface ContentItemTypeHomePage {
 }
 
 
-// type WatchPlatform = {
-//     platform: string;
-//     logo: string;
-// };
-
-type Cast = {
-    name: string;
-    character: string;
-    profile_path: string;
+type WatchPlatform = {
+  platform: string;
+  logo: string;
 };
 
+type Cast = {
+  name: string;
+  character: string;
+  profile_path: string;
+};
+
+type Ratings = {
+  masterpiecePercentage?: number 
+  TimePassPercentage?: number 
+  GoodWatchPercentage?: number 
+  wasteOfTimePercentage?: number 
+  totalNumberOfRating?: number 
+}
 
 
-export interface ContentFullDetail extends ContentItemTypeHomePage {
-  runtime?: string,
-  director?:string,
-  reviews?:[],
-  WatchPlatform?:[],
-  Cast?:Cast[],
-  aggregateRating?:any,
-  ratingDistribution?:any
+export interface ContentFullDetailType extends ContentItemTypeHomePage {
+  runtime?: string;
+  whereTOwatch?: WatchPlatform[];
+  casts?: Cast[];
+  director?: string
+  userRating?: number
+  total_seasons?: number;
+  total_episodes?: number;
+  Ratings: Ratings
 }
 
 

@@ -4,7 +4,7 @@ import {
   ArrowUpDown, Film, Tv, X, Filter
 } from 'lucide-react';
 import { allContent, mockWatchlist, WatchlistEntry, RATING_LABELS, RatingKey } from '@/data/mockData';
-import MovieDetailModal from '@/components/MovieDetailModal';
+import MovieDetailModal from '@/components/ContentDetailModal';
 import { ContentItem } from '@/data/mockData';
 import { toast } from 'sonner';
 import Icon from '@/components/ui/AppIcon';

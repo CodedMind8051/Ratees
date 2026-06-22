@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { mockPlaylists, allContent, Playlist, ContentItem } from '@/data/mockData';
-import MovieDetailModal from '@/components/MovieDetailModal';
+import MovieDetailModal from '@/components/ContentDetailModal';
 
 export default function PlaylistsContent() {
   const [playlists, setPlaylists]           = useState<Playlist[]>(mockPlaylists);

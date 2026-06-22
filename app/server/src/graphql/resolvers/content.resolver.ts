@@ -1,5 +1,5 @@
 import { SearchContentsController, FetchContentDetailsController, FetchGeneralContentsForHomepage, FetchTrendingContents, fetchNewReleaseContents } from "../../controllers/content.controller"
-import type { SearchContentDetailsInput, SearchContentInput, PageNumberType } from "../../types/content.types";
+import type { ContentDetailsInput, SearchContentInput } from "../../types/content.types";
 
 const contentResolver = {
     Query: {
@@ -13,10 +13,9 @@ const contentResolver = {
 
         getContentDetails: async (
             _: any,
-            { ContentId }: SearchContentDetailsInput) => {
+            { ContentId }: ContentDetailsInput) => {
 
-
-            const contentDetails = await FetchContentDetailsController({ ContentId: ContentId  })
+            const contentDetails = await FetchContentDetailsController({ ContentId: ContentId })
 
             return contentDetails
 

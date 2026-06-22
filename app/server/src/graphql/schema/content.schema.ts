@@ -10,27 +10,31 @@ const contentTypeDefs = `#graphql
           character: String!
           profile_path: String!
       }
-    
-    type Director {
-          name: String!
-          profile_path: String!
-      }
-    
+
+      type Ratings {  
+          masterpiecePercentage: Int
+          TimePassPercentage: Int
+          GoodWatchPercentage: Int
+          wasteOfTimePercentage: Int
+}
 
         type ContentDetails{
-            _id: ID!,
-            title: String!,
-            description: String,
-            release_date: String,
-            genre: [String!]!,
-            poster: String!,
-            Content_Type: String!,
-            runtime: String,
-            whereTOwatch:[WatchPlatform]
-            casts:[Cast],
-            director:[Director]
-            total_seasons:Int,
-            total_episodes:Int
+          _id: ID!,
+          title: String!
+          release_date: String!
+          genre: [String!]!
+          poster: String!
+          description: String!
+          backdrop: String!
+          Content_Type: String!
+          runtime: String
+          whereTOwatch: [WatchPlatform!]
+          casts: [Cast!]
+          director: String
+          userRating: Int
+          total_seasons: Int
+          total_episodes: Int
+          Ratings:Ratings
     }
 
 

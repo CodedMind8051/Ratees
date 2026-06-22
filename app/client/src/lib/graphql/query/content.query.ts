@@ -11,6 +11,37 @@ const ContentListFields = `
         Content_Type
 `
 
+const ContentFullDetail = `
+   _id
+    title
+    release_date
+    genre
+    poster
+    description
+    backdrop
+    Content_Type
+    runtime
+    whereTOwatch {
+      platform
+      logo
+    }
+    casts {
+      name
+      character
+      profile_path
+    }
+    director
+    userRating
+    total_seasons
+    total_episodes
+    Ratings { 
+    masterpiecePercentage
+    TimePassPercentage
+    GoodWatchPercentage
+    wasteOfTimePercentage
+    }
+`
+
 export const FETCH_NEW_RELEASE_CONTENTS = gql`
 query Query {
   FetchNewReleaseContents {
@@ -50,3 +81,11 @@ export const FETCH_COMPLETE_HOME_PAGE_DATA = gql`
     }
   }
 `;
+
+export const FETCH_FULL_CONTENT_DETAIL = gql`
+query GetContentDetails($ContentId: ID!) {
+  getContentDetails(ContentId: $ContentId) {
+     ${ContentFullDetail}
+  }
+}
+`

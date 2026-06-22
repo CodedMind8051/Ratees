@@ -9,11 +9,14 @@ interface Props {
 const RATING_ORDER: RatingKey[] = ['masterpiece', 'good', 'timepass', 'waste'];
 
 export default function RatingDistributionChart({ distribution }: Props) {
-  const data = RATING_ORDER.map(key => ({
-    name: RATING_LABELS[key],
-    value: distribution[key],
-    fill: RATING_COLORS[key],
-  }));
+  const data = RATING_ORDER.map(key => {
+    console.log(key)
+    return {
+      name: RATING_LABELS[key],
+      value: distribution[key],
+      fill: RATING_COLORS[key],
+    }
+  });
 
   const topRating = data.reduce((prev, cur) =>
     cur.value > prev.value ? cur : prev, data[0]

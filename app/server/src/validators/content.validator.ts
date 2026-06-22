@@ -28,7 +28,7 @@ export const SearchContentsSchema = z.object({
     page: pageSchema
 });
 
-export const SearchContentDetailsSchema = z.object({
+export const ContentDetailsInputSchema = z.object({
     ContentId: objectIdSchema("ContentId")
 })
 

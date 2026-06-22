@@ -1,9 +1,9 @@
 import { z } from "zod"
-import { SearchContentsSchema, SearchContentDetailsSchema, FetchContentsForHomepageSchema, pageSchema } from "../validators/content.validator"
+import { SearchContentsSchema, ContentDetailsInputSchema, FetchContentsForHomepageSchema, pageSchema } from "../validators/content.validator"
 import mongoose from "mongoose"
 
 export type SearchContentInput = z.infer<typeof SearchContentsSchema>
-export type SearchContentDetailsInput = z.infer<typeof SearchContentDetailsSchema>
+export type ContentDetailsInput = z.infer<typeof ContentDetailsInputSchema>
 export type FetchContentsForHomepageInput = z.infer<typeof FetchContentsForHomepageSchema>
 export type PageNumberType = z.infer<typeof pageSchema>
 
@@ -27,15 +27,19 @@ export type ContentDetailsType = {
     genre: string[];
     poster: string;
     backdrop: string;
-    Content_Type: string;
+    Content_Type: "movie" | "tv" | "N/A";
     runtime?: string;
-
     whereTOwatch?: WatchPlatform[];
     casts?: Cast[];
     director?: string
-
+    userRating?: number
     total_seasons?: number;
     total_episodes?: number;
+    masterpiecePercentage?: number
+    TimePassPercentage?: number
+    GoodWatchPercentage?: number
+    wasteOfTimePercentage?: number
+    totalNumberOfRating?: number
 };
 
 

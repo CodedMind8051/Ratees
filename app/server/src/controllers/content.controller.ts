@@ -1,9 +1,9 @@
 import { Content, TrendingContent } from "../models/content.model";
 import { FetchContentDataFromTmDb } from "../services/tmdb.service";
 import { validate } from "../utils/validate.utils";
-import { SearchContentsSchema, SearchContentDetailsSchema, pageSchema } from "../validators/content.validator";
+import { SearchContentsSchema, ContentDetailsInputSchema, pageSchema } from "../validators/content.validator";
 import mongoose from "mongoose";
-import type { SearchContentDetailsInput, SearchContentInput, ContentDetailsType, PageNumberType } from "../types/content.types";
+import type { ContentDetailsInput, SearchContentInput, ContentDetailsType, PageNumberType } from "../types/content.types";
 import { throwGraphqlError } from "../utils/throwGraphqlError.utils";
 import { handelGraphqlError } from "../utils/handelError.utils";
 import { TmdbContentToContentDocument } from "../utils/content.utils"
@@ -122,10 +122,10 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
     }
 }
 
-const FetchContentDetailsController = async ({ ContentId }: SearchContentDetailsInput): Promise<ContentDetailsType> => {
+const FetchContentDetailsController = async ({ ContentId }: ContentDetailsInput): Promise<ContentDetailsType> => {
 
     try {
-        const { ContentId: verifiedId } = validate(SearchContentDetailsSchema, { ContentId })
+        const { ContentId: verifiedId } = validate(ContentDetailsInputSchema, { ContentId })
 
         const contentDetails = await Content.aggregate([
 
@@ -142,12 +142,12 @@ const FetchContentDetailsController = async ({ ContentId }: SearchContentDetails
                 }
             },
             {
-$lookup:{
-  from:"rates",
-  localField:"_id",
-  foreignField:"ContentId",
-  as:"userRating"
-}
+                $lookup: {
+                    from: "rates",
+                    localField: "_id",
+                    foreignField: "ContentId",
+                    as: "userRating"
+                }
             },
             {
                 $unwind: {
@@ -155,64 +155,77 @@ $lookup:{
                     preserveNullAndEmptyArrays: true
                 }
             },
-             {
-                 $unwind: {
+            {
+                $unwind: {
                     path: "$userRating",
-                     preserveNullAndEmptyArrays: true                }
-               },
+                    preserveNullAndEmptyArrays: true
+                }
+            },
 
             {
                 $project: {
-                    title:1,
-                    director:1,
-                    casts:1, 
-                    whereTOwatch:1,  
-                    runtime:1,  
-                    userRating:"$userRating.rating",
-                    masterpiecePercentage: {
-                        $multiply: [
-                            {
-                                $divide: [
-                                    "$Ratings.MasterPieceRating.totalCount",
-                                    "$Ratings.totalNumberOfRatings"
-                                ]
-                            },
-                            100
-                        ]
-                    },
-                    TimePassPercentage: {
-                        $multiply: [
-                            {
-                                $divide: [
-                                    "$Ratings.TimePassRating.totalCount",
-                                    "$Ratings.totalNumberOfRatings"
-                                ]
-                            },
-                            100
-                        ]
-                    },
-                    GoodWatchPercentage: {
-                        $multiply: [
-                            {
-                                $divide: [
-                                    "$Ratings.GoodWatchRating.totalCount",
-                                    "$Ratings.totalNumberOfRatings"
-                                ]
-                            },
-                            100
-                        ]
-                    },
-                    wasteOfTimePercentage: {
-                        $multiply: [
-                            {
-                                $divide: [
-                                    "$Ratings.wasteOfTime.totalCount",
-                                    "$Ratings.totalNumberOfRatings"
-                                ]
-                            },
-                            100
-                        ]
+                    title: 1,
+                    director: 1,
+                    genre: 1,
+                    description: 1,
+                    poster: 1,
+                    backdrop: 1,
+                    release_date: 1,
+                    Content_Type: 1,
+                    total_episodes: 1,
+                    total_seasons: 1,
+                    casts: 1,
+                    whereTOwatch: 1,
+                    runtime: 1,
+                    userRating: "$userRating.rating",
+                    totalNumberOfRating: "$Ratings.totalNumberOfRatings",
+                    Ratings: {
+                        masterpiecePercentage: {
+                            $multiply: [
+                                {
+                                    $divide: [
+                                        "$Ratings.MasterPieceRating.totalCount",
+                                        "$Ratings.totalNumberOfRatings"
+                                    ]
+                                },
+                                100
+                            ]
+                        },
+                        TimePassPercentage: {
+                            $multiply: [
+                                {
+                                    $divide: [
+                                        "$Ratings.TimePassRating.totalCount",
+                                        "$Ratings.totalNumberOfRatings"
+                                    ]
+                                },
+                                100
+                            ]
+                        },
+                        GoodWatchPercentage: {
+                            $multiply: [
+                                {
+                                    $divide: [
+                                        "$Ratings.GoodWatchRating.totalCount",
+                                        "$Ratings.totalNumberOfRatings"
+                                    ]
+                                },
+                                100
+                            ]
+                        },
+                        wasteOfTimePercentage: {
+                            $multiply: [
+                                {
+                                    $divide: [
+                                        "$Ratings.wasteOfTime.totalCount",
+                                        "$Ratings.totalNumberOfRatings"
+                                    ]
+                                },
+                                100
+                            ]
+                        }
                     }
+
                 }
             }
         ])
