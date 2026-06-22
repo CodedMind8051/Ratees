@@ -142,11 +142,24 @@ const FetchContentDetailsController = async ({ ContentId }: SearchContentDetails
                 }
             },
             {
+$lookup:{
+  from:"rates",
+  localField:"_id",
+  foreignField:"ContentId",
+  as:"userRating"
+}
+            },
+            {
                 $unwind: {
                     path: "$Ratings",
                     preserveNullAndEmptyArrays: true
                 }
             },
+             {
+                 $unwind: {
+                    path: "$userRating",
+                     preserveNullAndEmptyArrays: true                }
+               },
 
             {
                 $project: {
@@ -154,7 +167,8 @@ const FetchContentDetailsController = async ({ ContentId }: SearchContentDetails
                     director:1,
                     casts:1, 
                     whereTOwatch:1,  
-                    runtime:1,         
+                    runtime:1,  
+                    userRating:"$userRating.rating",
                     masterpiecePercentage: {
                         $multiply: [
                             {
@@ -207,7 +221,7 @@ const FetchContentDetailsController = async ({ ContentId }: SearchContentDetails
             throwGraphqlError("Content Details not found", "NOT_FOUND", 404, true)
         }
 
-        console.log(contentDetails)
+        console.log(contentDetails[0])
 
         return contentDetails[0]
 

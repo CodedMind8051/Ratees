@@ -12,7 +12,7 @@ import { sessionMiddleware } from "./middlewares/auth.middleware"
 const app = express();
 
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin:"*",
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
