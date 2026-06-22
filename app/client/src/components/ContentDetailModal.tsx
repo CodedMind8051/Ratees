@@ -39,6 +39,8 @@ const ratingBadgeClass: Record<RatingKey, string> = {
   masterpiece: 'bg-rating-masterpiece rating-masterpiece border border-green-500/20',
 };
 
+const ratingOptions = ["wasteOfTimePercentage", "TimePassPercentage", "GoodWatchPercentage", "masterpiecePercentage"] as const
+
 export default function MovieDetailModal({
   contentId, onClose, initialStatus, onStatusChange,
 }: MovieDetailModalProps) {
@@ -219,7 +221,11 @@ export default function MovieDetailModal({
                   <div className="flex flex-wrap items-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
                     <span>{content?.release_date}</span>
                     <span className="opacity-40">·</span>
-                    <span>{content?.runtime}</span>
+            <span>
+  {content?.runtime === "N/A" || !content?.runtime
+    ? "Runtime: N/A"
+    : `${Math.floor(content.runtime / 60)} hr ${content.runtime % 60} min`}
+</span>
                     <span className="opacity-40">·</span>
                     <span className="truncate">Dir. {content?.director}</span>
                   </div>
@@ -332,11 +338,13 @@ export default function MovieDetailModal({
                 {/* Stacked on mobile, side-by-side on sm+ */}
                 <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-3">
-                    {RATING_ORDER.map(key => {
-                      const pct = content?.Ratings[key];
+                    {RATING_ORDER.map((key,index) => {
+                      const pct = content?.Ratings[ratingOptions[index] !] || 0;
+                      
                       return (
                         <div key={`dist-${key}`} className="flex items-center gap-3">
-                          <span className="text-xs font-medium w-24 shrink-0" style={{ color: RATING_COLORS[key] }}>
+                         
+                        <span className="text-xs font-medium w-24 shrink-0" style={{ color: RATING_COLORS[key] }}>
                             {RATING_LABELS[key]}
                           </span>
                           <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden">
@@ -347,7 +355,7 @@ export default function MovieDetailModal({
                           </div>
                           <span className="text-xs text-muted-foreground w-8 text-right font-mono tabular-nums">
                             {pct}%
-                          </span>
+                             </span>
                         </div>
                       );
                     })}
