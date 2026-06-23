@@ -100,17 +100,15 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
                 return throwGraphqlError('No content found', 'NOT_FOUND', 404, true)
             }
 
-            await SaveContentsDataToDB(ContentsToInsert)
+            SaveContentsDataToDB(ContentsToInsert)
 
             return ContentsToInsert?.map(content => ({
                 _id: content?._id,
                 title: content?.title,
-                description: content?.description,
                 release_date: content?.release_date,
                 genre: content?.genre,
                 poster: content?.poster,
                 Content_Type: content?.Content_Type,
-                runtime: content?.runtime,
             }))
         }
 

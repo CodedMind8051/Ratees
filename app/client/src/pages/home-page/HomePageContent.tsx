@@ -1,9 +1,10 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { Flame, Sparkles, LayoutGrid, ChevronRight, ChevronLeft } from 'lucide-react';
 import { WatchlistEntry } from '@/data/mockData';
-import ContentCard, { ContentCardSkeleton } from '@/components/ContentCard';
+import ContentCard from '@/components/ui/content/ContentCard';
+import { ContentCardSkeleton } from '@/components/ui/content/ContentCard.skeleton';
 import HeroBanner from './HeroBanner';
-import type { ContentItemTypeHomePage   , ContentFullDetailType} from '@/types/Content.types';
+import type { ContentItemsType } from '@/types/content.types';
 import { FETCH_COMPLETE_HOME_PAGE_DATA, FETCH_GENERAL_CONTENTS_FOR_HOME_PAGE } from '@/lib/graphql/query/content.query';
 import { useQuery, useLazyQuery } from '@apollo/client/react';
 
@@ -14,22 +15,22 @@ interface HomePageContentProps {
 }
 
 interface HomePageQueryData {
-  FetchTrendingContents: ContentItemTypeHomePage[];
-  FetchNewReleaseContents: ContentItemTypeHomePage[];
-  FetchGeneralContentsForHomepage: ContentItemTypeHomePage[];
+  FetchTrendingContents: ContentItemsType[];
+  FetchNewReleaseContents: ContentItemsType[];
+  FetchGeneralContentsForHomepage: ContentItemsType[];
 }
 
 interface GeneralContentQueryData {
-  FetchGeneralContentsForHomepage: ContentItemTypeHomePage[];
+  FetchGeneralContentsForHomepage: ContentItemsType[];
 }
 
-const ALL_GENRES = ['All', 'Drama', 'Crime', 'Thriller', 'Sci-Fi', 'Comedy', 'Action', 'Romance', 'Horror', 'Biography', 'History', 'Mystery', 'Fantasy', 'Sport'];
+const ALL_GENRES = ['All', 'Drama', 'Crime', 'Thriller', 'Science Fiction', 'Comedy', 'Action', 'Romance', 'Horror', 'Biography', 'History', 'Mystery', 'Fantasy', 'Sport'];
 
 
 const LOAD_MORE_SKELETON_COUNT = 6;
 const SKELETON_COUNT = 10;
 
-function getContentGenres(content: ContentItemTypeHomePage): string[] {
+function getContentGenres(content: ContentItemsType): string[] {
   const genre = (content as { genre?: string | string[] }).genre;
   if (Array.isArray(genre)) return genre;
   if (typeof genre === 'string') return [genre];
@@ -131,7 +132,7 @@ function SkeletonGrid({ count = 21 }: { count?: number }) {
 
 export default function HomePageContent({ onSelectMovie, watchlist, onStatusChange }: HomePageContentProps) {
   const [activeGenre, setActiveGenre] = useState('All');
-  const [generalContent, setGeneralContent] = useState<ContentItemTypeHomePage[]>([]);
+  const [generalContent, setGeneralContent] = useState<ContentItemsType[]>([]);
   const [hasMore, setHasMore] = useState(true);
 
   const [sectionView, setSectionView] = useState<'home' | 'trending' | 'newReleases'>('home');
@@ -150,8 +151,8 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
     { loading: loadingGeneralContent, error: generalContentError, data: generalContentData },
   ] = useLazyQuery<GeneralContentQueryData>(FETCH_GENERAL_CONTENTS_FOR_HOME_PAGE);
 
-  const trendingContents: ContentItemTypeHomePage[] = data?.FetchTrendingContents ?? [];
-  const newReleaseContent: ContentItemTypeHomePage[] = data?.FetchNewReleaseContents ?? [];
+  const trendingContents: ContentItemsType[] = data?.FetchTrendingContents ?? [];
+  const newReleaseContent: ContentItemsType[] = data?.FetchNewReleaseContents ?? [];
 
 
   useEffect(() => {
@@ -224,7 +225,7 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
   );
 
   const renderSnapCard = useCallback(
-    (content: ContentItemTypeHomePage, keyPrefix: string) => (
+    (content: ContentItemsType, keyPrefix: string) => (
       <div key={`${keyPrefix}-${content._id}`} className="shrink-0 w-[140px] sm:w-[160px] snap-start">
         <ContentCard content={content} onClick={onSelectMovie} watchStatus={getWatchStatus(content._id)} />
       </div>

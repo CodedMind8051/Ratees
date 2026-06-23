@@ -2,7 +2,7 @@ import { authClient } from '@/lib/auth-client'
 import { toast } from "sonner"
 import { CircleX } from "lucide-react"
 import React from 'react'
-import { FlowStep } from '@/pages/Signup'
+import { FlowStep } from '@/pages/auth/Signup'
 
 
 type formSignUp = {

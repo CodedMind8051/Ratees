@@ -89,3 +89,16 @@ query GetContentDetails($ContentId: ID!) {
   }
 }
 `
+
+export const SEARCH_CONTENT = gql`
+query GetContentsList($query: String!, $page: Int!) {
+  getContentsList(query: $query, page: $page) {
+    _id
+    title
+    release_date
+    genre
+    poster
+    Content_Type
+  }
+}
+` 

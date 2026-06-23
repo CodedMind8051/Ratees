@@ -28,7 +28,7 @@ export type ContentDetailsType = {
     poster: string;
     backdrop: string;
     Content_Type: "movie" | "tv" | "N/A";
-    runtime?: string;
+    runtime?: number;
     whereTOwatch?: WatchPlatform[];
     casts?: Cast[];
     director?: string

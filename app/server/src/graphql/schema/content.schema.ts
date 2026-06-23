@@ -1,5 +1,14 @@
 const contentTypeDefs = `#graphql
 
+type ContentsListDetails {
+          _id: ID!,
+          title: String!
+          release_date: String!
+          genre: [String!]!
+          poster: String!
+          Content_Type: String!
+}
+
     type WatchPlatform {
           platform: String!
           logo: String!
@@ -55,7 +64,7 @@ const contentTypeDefs = `#graphql
            getContentsList(
            query:String!, 
            page:Int!
-           ):[ContentDetails]!,
+           ):[ContentsListDetails]!,
 
            getContentDetails(
            ContentId:ID!

@@ -1,0 +1,1 @@
+export type RatingKey = 'masterpiece' | 'good' | 'timepass' | 'waste';

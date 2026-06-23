@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import InputField from "../input/InputField";
-import GoogleButton from "../Button/GoogleButton";
+import GoogleButton from "../ui/buttons/GoogleButton";
 import { Button } from "@/components/ui/button";
 
 export default function AuthCard() {

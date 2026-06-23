@@ -1,13 +1,13 @@
 import { Play, Plus, CheckCircle2, Film, Tv, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
-import { ContentItemTypeHomePage } from '@/types/Content.types';
+import type { ContentItemsType } from '@/types/content.types';
 
 
 
 
 
 interface HeroBannerProps {
-  content: ContentItemTypeHomePage;
+  content: ContentItemsType;
   onViewDetails: () => void;
   watchStatus?: 'watched' | 'watching' | 'watchlater' | null;
   onStatusChange: (contentId: string, status: 'watched' | 'watching' | 'watchlater' | null) => void;
