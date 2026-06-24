@@ -5,6 +5,7 @@ const reviewTypeDefs = `
     _id:ID!,
     review:String!,
     createdAt:Date!,
+    isOwn:Boolean!
     userId:ID!,
     username:String!,
     userEmail:String!,
@@ -12,11 +13,12 @@ const reviewTypeDefs = `
     }
 
     type Query{
-    getReviews(ContentId:ID! , page:Int!):[ReviewsDetailsData]!
+    getReviews(ContentId:String! , page:Int!):[ReviewsDetailsData]!
     }
 
     type Mutation {
         submitReview(ContentId: ID!, review: String!): Boolean!
+        updateReview(reviewId:ID! , review:String!):Boolean!
         deleteReview(reviewId:ID!):Boolean!
     }
 

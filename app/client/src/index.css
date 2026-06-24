@@ -1,3 +1,27 @@
 
 @import "./styles//tailwind.css";
 
+/* src/index.css or globals.css */
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes zoom-in-95 {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slide-in-from-bottom-3 {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-dialog-overlay {
+  animation: fade-in 0.15s ease both;
+}
+
+.animate-dialog-panel {
+  animation: slide-in-from-bottom-3 0.2s ease both;
+}

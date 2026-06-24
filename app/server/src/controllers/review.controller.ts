@@ -7,6 +7,7 @@ import { Review } from "../models/review.model"
 import mongoose from "mongoose"
 import { Content } from "../models/content.model"
 import { User } from "../models/user.model"
+import { err } from "inngest/types"
 
 
 const submitReviewController = async ({ userId, ContentId, review }: SubmitReviewType): Promise<boolean> => {
@@ -104,6 +105,13 @@ const getReviewsController = async ({
                 }
             },
             {
+                $addFields: {
+                    isOwn: {
+                        $eq: ["6a3baa03034506e31bc39fab", "6a3baa03034506e31bc39fab"]
+                    }
+                }
+            },
+            {
                 $unwind: {
                     path: "$userDetail",
                     preserveNullAndEmptyArrays: true
@@ -118,6 +126,7 @@ const getReviewsController = async ({
                     username: "$userDetail.username",
                     userEmail: "$userDetail.email",
                     profileImage: "$userDetail.profileImage",
+                    isOwn: "$isOwn"
                 }
             }
         ])
@@ -125,7 +134,7 @@ const getReviewsController = async ({
 
         const options = {
             page: validatedPage || 1,
-            limit: 10,
+            limit: 20,
         }
 
         const ReviewsDetailsData = await Review.aggregatePaginate(aggregateResult, options)
@@ -139,8 +148,10 @@ const getReviewsController = async ({
             throwGraphqlError("No review found", "REVIEW_NOT_FOUND", 404, true)
         }
 
+        console.log(ReviewsDetailsData.docs[0])
         return ReviewsDetailsData.docs
     } catch (error) {
+        console.log(error)
         return handelGraphqlError(error)
     }
 

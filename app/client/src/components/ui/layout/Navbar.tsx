@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import AppLogo from '@/components/ui/AppLogo';
+import AppLogo from '@/components/ui/shadcn/AppLogo';
 import { Search, BookMarked, ListVideo, Home, ChevronDown, X, Menu, Bell, Users } from 'lucide-react';
 import ProfileDropdown from '../../ProfileDropdown';
 import SearchOverlay from '../common/SearchOverlay';

@@ -7,7 +7,7 @@ import { allContent, mockWatchlist, WatchlistEntry, RATING_LABELS, RatingKey } f
 import MovieDetailModal from '@/components/ui/content/ContentDetailModal';
 import { ContentItem } from '@/data/mockData';
 import { toast } from 'sonner';
-import Icon from '@/components/ui/AppIcon';
+import Icon from '@/components/ui/shadcn/AppIcon';
 
 
 type StatusTab = 'watching' | 'watchlater' | 'watched';

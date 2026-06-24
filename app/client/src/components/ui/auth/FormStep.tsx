@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, AlertCircle, Eye, EyeOff } from "lucide-react";
-import GoogleButton from "@/components/ui/buttons/GoogleButton";
+import GoogleButton from "@/components/buttons/GoogleButton";
 import { handelSignUpWithGoogle } from "@/functions/auth.function";
 
 export type FormState = {

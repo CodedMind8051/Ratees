@@ -20,7 +20,7 @@ const SaveContentsDataToDB = async (ContentsToInsert: ContentDetailsType[]) => {
         await Content.bulkWrite(
             ContentsToInsert.map((content: ContentDetailsType) => ({
                 updateOne: {
-                    filter: { title: content.title },
+                    filter: { title: content?.title, release_date: content?.release_date },
                     update: { $setOnInsert: content },
                     upsert: true
                 }
@@ -48,6 +48,31 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
                 {
                     $match: {
                         title: { $regex: validatedQuery, $options: 'i' }
+                    }
+                },
+                {
+                    $addFields: {
+                        isReleaseDateNA: {
+                            $eq: ["$release_date", "N/A"]
+                        },
+                        isPosterNA: {
+                            $eq: ["$poster", "N/A"]
+                        },
+                        isFutureReleaseDate: {
+                            $gt: [
+                                { $dateFromString: { dateString: "$release_date", onError: new Date() } },
+                                new Date()
+                            ]
+                        }
+                    }
+                },
+                {
+                    $sort: {
+                        isReleaseDateNA: 1,
+                        isPosterNA: 1,
+                        isFutureReleaseDate: 1,
+                        release_date: -1,
+                        createdAt: -1,
                     }
                 },
                 {
@@ -345,8 +370,28 @@ const FetchGeneralContentsForHomepage = async (page: PageNumberType) => {
 
         const aggregateResult = Content.aggregate([
             {
+                $addFields: {
+                    isReleaseDateNA: {
+                        $eq: ["$release_date", "N/A"]
+                    },
+                    isPosterNA: {
+                        $eq: ["$poster", "N/A"]
+                    },
+                    isFutureReleaseDate: {
+                        $gt: [
+                            { $dateFromString: { dateString: "$release_date", onError: new Date() } },
+                            new Date()
+                        ]
+                    }
+                }
+            },
+            {
                 $sort: {
-                    release_date: -1
+                    isReleaseDateNA: 1,
+                    isPosterNA: 1,
+                    isFutureReleaseDate: 1,
+                    release_date: -1,
+                    createdAt: -1
                 }
             }
         ])
@@ -373,8 +418,6 @@ const FetchGeneralContentsForHomepage = async (page: PageNumberType) => {
     }
 
 }
-
-
 
 export {
     SearchContentsController,

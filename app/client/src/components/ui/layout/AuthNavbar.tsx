@@ -1,5 +1,5 @@
 import RateesLogo from "../../logo/RateesLogo";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/shadcn/button";
 
 export default function AuthNavbar() {
   return (

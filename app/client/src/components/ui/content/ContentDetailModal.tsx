@@ -1,16 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   X, Eye, Clock, CheckCircle2, Plus, Film, Tv, UserCircle,
-  ChevronDown, Pencil, Trash2, Send, Monitor, Star
+  ChevronDown, Monitor
 } from 'lucide-react';
 import { toast } from 'sonner';
-import {
-  RatingKey, RATING_LABELS, RATING_COLORS, Review
-} from '@/data/mockData';
+import { RatingKey } from '@/types/rating.types';
+import { RATING_LABELS, RATING_COLORS } from '@/constants/rating.constant';
 import type { ContentFullDetailType } from "@/types/content.types"
 import RatingDistributionChart from './RatingDistributionChart';
 import { useQuery } from '@apollo/client/react';
 import { FETCH_FULL_CONTENT_DETAIL } from '@/lib/graphql/query/content.query';
+import { ReviewList } from '../review/reviewList';
+import { useNavigate } from 'react-router-dom';
 
 
 interface MovieDetailModalProps {
@@ -35,8 +36,8 @@ const statusConfig = {
 const ratingBadgeClass: Record<RatingKey, string> = {
   waste: 'bg-rating-waste rating-waste border border-red-500/20',
   timepass: 'bg-rating-timepass rating-timepass border border-orange-500/20',
-  good: 'bg-rating-good rating-good border border-yellow-500/20',
-  masterpiece: 'bg-rating-masterpiece rating-masterpiece border border-green-500/20',
+  good: 'bg-rating-good rating-good border border-green-500/20',
+  masterpiece: 'bg-rating-masterpiece rating-masterpiece border-purple-500/20 ',
 };
 
 const ratingOptions = ["wasteOfTimePercentage", "TimePassPercentage", "GoodWatchPercentage", "masterpiecePercentage"] as const
@@ -45,7 +46,7 @@ export default function MovieDetailModal({
   contentId, onClose, initialStatus, onStatusChange,
 }: MovieDetailModalProps) {
 
-  console.log(contentId)
+
 
   const { loading, error, data } = useQuery<GetContentDetailsResponse>(FETCH_FULL_CONTENT_DETAIL, {
     variables: {
@@ -56,19 +57,12 @@ export default function MovieDetailModal({
 
   const content: ContentFullDetailType = data?.getContentDetails
 
-
   const [activeStatus, setActiveStatus] = useState<'watched' | 'watching' | 'watchlater' | null>(initialStatus ?? null);
-  // const [reviews, setReviews] = useState<Review[]>(content?.reviews);
-  const [newComment, setNewComment] = useState('');
-  const [newRating, setNewRating] = useState<RatingKey>('good');
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editComment, setEditComment] = useState('');
-  const [editRating, setEditRating] = useState<RatingKey>('good');
-  const [submitting, setSubmitting] = useState(false);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [playlistDropdownOpen, setPlaylistDropdownOpen] = useState(false);
   const [myRating, setMyRating] = useState<RatingKey | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const navigate = useNavigate()
 
 
   // Lock scroll + Escape key
@@ -101,38 +95,7 @@ export default function MovieDetailModal({
     toast.success(next ? `Added to ${statusConfig[status].label}` : 'Removed from watchlist');
   };
 
-  const handleSubmitReview = async () => {
-    if (!newComment.trim()) return;
-    setSubmitting(true);
-    await new Promise(r => setTimeout(r, 600));
-    const newRev: Review = {
-      id: `rev-new-${Date.now()}`,
-      userId: 'user-self',
-      username: 'Arjun Rao',
-      avatar: 'AR',
-      rating: newRating,
-      comment: newComment,
-      date: 'Jun 12, 2026',
-      isOwn: true,
-    };
-    // setReviews(prev => [newRev, ...prev]);
-    setNewComment('');
-    setNewRating('good');
-    setSubmitting(false);
-    toast.success('Review posted');
-  };
 
-  const handleUpdateReview = async (id: string) => {
-    // setReviews(prev => prev.map(r => r.id === id ? { ...r, rating: editRating, comment: editComment } : r));
-    setEditingId(null);
-    toast.success('Review updated');
-  };
-
-  const handleDeleteReview = async (id: string) => {
-    // setReviews(prev => prev.filter(r => r.id !== id));
-    setDeleteConfirmId(null);
-    toast.success('Review deleted');
-  };
 
   const playlists = ['Nolan Universe', 'Watch on a Rainy Night', 'Weekend Binge'];
 
@@ -441,53 +404,16 @@ export default function MovieDetailModal({
                   ))}
                 </div>
               </div>
-
-              {/* ── Reviews ── */}
-              <div>
-                {/* <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">
-                Reviews{' '}
-                <span className="text-muted-foreground/60 font-normal normal-case tracking-normal">
-                  ({reviews.length})
-                </span>
-              </p> */}
-
-                {/* Write review */}
-                <div className="bg-secondary/50 border border-border rounded-xl p-4 mb-5">
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">
-                    Write a Review
-                  </p>
-                  {/* Comment + send */}
-                  <div className="flex gap-2 items-end">
-                    <textarea
-                      value={newComment}
-                      onChange={e => setNewComment(e.target.value)}
-                      placeholder="Share your thoughts on this title..."
-                      rows={3}
-                      className="flex-1 bg-card border border-border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60 resize-none transition-colors"
-                    />
-                    <button
-                      onClick={handleSubmitReview}
-                      disabled={submitting || !newComment.trim()}
-                      className="shrink-0 p-3 bg-primary text-primary-foreground rounded-xl hover:bg-amber-400 disabled:opacity-40 transition-all active:scale-95 flex items-center justify-center"
-                      aria-label="Post review"
-                    >
-                      {submitting
-                        ? <span className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                        : <Send size={15} />
-                      }
-                    </button>
-                  </div>
-                </div>
-
-                {/* Reviews list */}
-
-              </div>
+              <ReviewList
+                contentId={content?._id}
+                onOpenUserProfile={(userId) => {
+                  onClose();                       // close modal first
+                  navigate(`/profile/${userId}`);  // then go to their profile
+                }}
+              />
             </div>
           </div>
         </div>
-
-        {/* ─── Delete confirm modal ───────────────────────────────────────── */}
-
       </div>
     )
   };

@@ -4,7 +4,7 @@ import './index.css'
 import { apolloClient } from './lib/graphql';
 import { ApolloProvider } from "@apollo/client/react";
 import { BrowserRouter } from "react-router-dom"
-import { Toaster } from './components/ui/sonner'
+import { Toaster } from './components/ui/shadcn/sonner'
 
 
 

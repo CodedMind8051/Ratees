@@ -4,7 +4,7 @@ import { Check, AlertCircle, Loader2, Eye, EyeOff, Users, Compass, MessageSquare
 
 import AuthNavbar from "@/components/ui/layout/AuthNavbar";
 import GlowBackground from "@/components/ui/common/GlowBackground";
-import GoogleButton from "@/components/ui/buttons/GoogleButton";
+import GoogleButton from "@/components/buttons/GoogleButton";
 
 import { handelSignInWithFiled, handelSignUpWithGoogle } from "@/functions/auth.function";
 

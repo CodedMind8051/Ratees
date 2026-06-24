@@ -65,7 +65,7 @@ const FetchContentDataFromTmDb = async (contentName: string) => {
 
 
 
-        const actualLength = response1st?.data?.results.length >= 5 ? 5 : response1st?.data?.results.length
+        const actualLength = response1st?.data?.results.length >= 60 ? 60 : response1st?.data?.results.length
 
         const ContentsDetails = await FetchCompleteContentDetail(response1st, actualLength)
 
