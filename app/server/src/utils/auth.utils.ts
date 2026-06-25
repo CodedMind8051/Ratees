@@ -41,8 +41,13 @@ export const auth = betterAuth({
         expiresIn: UserSessionExpiresIn,
         updateAge: UserSessionUpdateIn
     },
-    advanced:{
-        useSecureCookies:true
+    advanced: {
+        defaultCookieAttributes: {
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            secure: process.env.NODE_ENV === "production",
+            httpOnly: true
+        },
+        useSecureCookies: process.env.NODE_ENV === "production"
     }
 }
 )

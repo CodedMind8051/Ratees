@@ -7,10 +7,13 @@ import { throwGraphqlError } from "../utils/throwGraphqlError.utils";
 
 
 const sessionMiddleware = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+
     const session = await auth.api.getSession({
         headers: fromNodeHeaders(req.headers)
     })
+
     req.session = session
+
     next()
 
 });

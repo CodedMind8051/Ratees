@@ -9,6 +9,7 @@ export const SubmitReviewSchema = z.object({
 
 export const getReviewsSchema = z.object({
     ContentId: objectIdSchema("ContentId"),
+    userId:objectIdSchema("userId").optional(),
     page: z
         .number({
             error: "Page number is required"

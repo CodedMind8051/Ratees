@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 import { ReviewFormValues } from '@/types/review.types';
+import { useMutation } from '@apollo/client/react';
+import { SUBMIT_REVIEWS } from '@/lib/graphql/mutation/review.mutation';
 
 
 interface ReviewFormProps {
@@ -11,10 +13,12 @@ interface ReviewFormProps {
 export function ReviewForm({ onSubmit, submitting }: ReviewFormProps) {
     const [comment, setComment] = useState('');
 
+ 
+
     const handleSubmit = async () => {
         const trimmed = comment.trim();
         if (!trimmed) return;
-        await onSubmit({ comment: trimmed });
+        await onSubmit({ review: trimmed });
         setComment('');
     };
 

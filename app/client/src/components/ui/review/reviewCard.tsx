@@ -96,7 +96,7 @@ export function ReviewCard({
         const trimmed = editComment.trim();
         if (!trimmed) return;
         setSaving(true);
-        await onSaveEdit(review?._id, { comment: trimmed });
+        await onSaveEdit(review?._id, { review: trimmed });
         setSaving(false);
     };
 
@@ -199,23 +199,24 @@ export function ReviewCard({
                                     {review?.username}
                                 </p>
                                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                                    {review?.createdAt.slice(0,10)}
+                                    {review?.createdAt.slice(0, 10)}
                                 </p>
                             </div>
                         </button>
 
                         {review.isOwn && (
-                            <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 shrink-0">
+                            <div className="flex gap-0.5 transition-opacity duration-150 shrink-0">
                                 <button
                                     type="button"
                                     onClick={handleStartEdit}
                                     title="Edit review"
                                     aria-label="Edit review"
                                     className="
-                                        w-7 h-7 rounded-lg border border-transparent
+                                        w-7 h-7  rounded-lg border border-transparent
+                                        max-[800px]:text-yellow-500
                                         flex items-center justify-center text-muted-foreground
                                         hover:text-yellow-500 hover:bg-secondary hover:border-border
-                                        active:scale-90 transition-all duration-150
+                                        active:scale-90 transition-all duration-150 hover:cursor-pointer 
                                     "
                                 >
                                     <Pencil size={12} />
@@ -226,9 +227,10 @@ export function ReviewCard({
                                     title="Delete review"
                                     aria-label="Delete review"
                                     className="
-                                        w-7 h-7 rounded-lg border border-transparent
-                                        flex items-center justify-center text-muted-foreground
-                                        hover:text-red-600 hover:bg-destructive/10 hover:border-destructive/20
+                                        w-7  h-7 rounded-lg border border-transparent
+                                        max-[800px]:text-red-600
+                                        flex items-center justify-center text-muted-foreground 
+                                        hover:text-red-600 hover:bg-destructive/10 hover:border-destructive/20 hover:cursor-pointer
                                         active:scale-90 transition-all duration-150
                                     "
                                 >

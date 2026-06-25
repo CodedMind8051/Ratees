@@ -14,7 +14,10 @@ const reviewResolver = {
             }: getReviewsInputType,
             context: MyContextType
         ) => {
-            const result = await getReviewsController({ ContentId, page })
+
+
+            const userId = (context?.req?.session as any)?.session?.userId
+            const result = await getReviewsController({ ContentId, page, userId })
             return result
         }
     },
@@ -29,7 +32,7 @@ const reviewResolver = {
             context: MyContextType
         ) => {
             isAuthenticated(context)
-            const userId = (context.req.session as any).session.userId
+            const userId = (context?.req?.session as any)?.session?.userId
             const result = await submitReviewController({ userId, ContentId, review })
             return result
         },
@@ -42,7 +45,7 @@ const reviewResolver = {
             context: MyContextType
         ) => {
             isAuthenticated(context)
-            const userId = (context.req.session as any).session.userId
+            const userId = (context?.req?.session as any)?.session?.userId
             const result = await deleteReviewController({ reviewId, userId })
             return result
         },
@@ -55,9 +58,9 @@ const reviewResolver = {
             }: updateReviewType,
             context: MyContextType
         ) => {
-            
+
             isAuthenticated(context)
-            const userId = (context.req.session as any).session.userId
+            const userId = (context?.req?.session as any)?.session?.userId
             const result = await updateReviewController({ reviewId, userId, review })
 
             return result

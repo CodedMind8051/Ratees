@@ -257,7 +257,6 @@ const FetchContentDetailsController = async ({ ContentId }: ContentDetailsInput)
             throwGraphqlError("Content Details not found", "NOT_FOUND", 404, true)
         }
 
-        console.log(contentDetails[0])
 
         return contentDetails[0]
 

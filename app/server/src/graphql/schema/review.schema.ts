@@ -13,7 +13,7 @@ const reviewTypeDefs = `
     }
 
     type Query{
-    getReviews(ContentId:String! , page:Int!):[ReviewsDetailsData]!
+    getReviews(ContentId:ID! , page:Int!):[ReviewsDetailsData]!
     }
 
     type Mutation {

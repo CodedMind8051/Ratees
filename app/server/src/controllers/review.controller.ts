@@ -7,7 +7,6 @@ import { Review } from "../models/review.model"
 import mongoose from "mongoose"
 import { Content } from "../models/content.model"
 import { User } from "../models/user.model"
-import { err } from "inngest/types"
 
 
 const submitReviewController = async ({ userId, ContentId, review }: SubmitReviewType): Promise<boolean> => {
@@ -76,11 +75,13 @@ const submitReviewController = async ({ userId, ContentId, review }: SubmitRevie
 
 const getReviewsController = async ({
     ContentId,
+    userId,
     page
 }: getReviewsInputType): Promise<ReviewsDetailsDataType> => {
 
     try {
-        const { ContentId: verifiedContentId, page: validatedPage } = validate(getReviewsSchema, { ContentId, page })
+
+        const { ContentId: verifiedContentId, page: validatedPage, userId: validatedUserId } = validate(getReviewsSchema, { ContentId, page, userId })
 
         const isContentExists = await Content.exists({
             _id: new mongoose.Types.ObjectId(verifiedContentId)
@@ -105,16 +106,16 @@ const getReviewsController = async ({
                 }
             },
             {
-                $addFields: {
-                    isOwn: {
-                        $eq: ["6a3baa03034506e31bc39fab", "6a3baa03034506e31bc39fab"]
-                    }
-                }
-            },
-            {
                 $unwind: {
                     path: "$userDetail",
                     preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $addFields: {
+                    isOwn: {
+                        $eq: ["$userDetail._id", new mongoose.Types.ObjectId(validatedUserId)]
+                    }
                 }
             },
             {
@@ -147,11 +148,8 @@ const getReviewsController = async ({
         if (!ReviewsDetailsData || ReviewsDetailsData.totalDocs === 0) {
             throwGraphqlError("No review found", "REVIEW_NOT_FOUND", 404, true)
         }
-
-        console.log(ReviewsDetailsData.docs[0])
         return ReviewsDetailsData.docs
     } catch (error) {
-        console.log(error)
         return handelGraphqlError(error)
     }
 

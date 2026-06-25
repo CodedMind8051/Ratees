@@ -10,5 +10,5 @@ export interface Review {
 }
 
 export interface ReviewFormValues {
-    comment: string;
+    review: string;
 }
