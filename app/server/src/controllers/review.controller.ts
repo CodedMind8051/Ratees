@@ -119,6 +119,11 @@ const getReviewsController = async ({
                 }
             },
             {
+                $sort: {
+                    isOwn: -1
+                }
+            },
+            {
                 $project: {
                     _id: 1,
                     review: 1,

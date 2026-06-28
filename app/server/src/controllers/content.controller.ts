@@ -8,8 +8,6 @@ import { throwGraphqlError } from "../utils/throwGraphqlError.utils";
 import { handelGraphqlError } from "../utils/handelError.utils";
 import { TmdbContentToContentDocument } from "../utils/content.utils"
 
-
-
 const SaveContentsDataToDB = async (ContentsToInsert: ContentDetailsType[]) => {
     try {
 
@@ -47,7 +45,7 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
             [
                 {
                     $match: {
-                        title: { $regex: validatedQuery, $options: 'i' }
+                        title: { $regex: validatedQuery, $options: "i" }
                     }
                 },
                 {
@@ -84,7 +82,8 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
                         poster: 1,
                         Content_Type: 1,
                         runtime: 1,
-                        backdrop: 1
+                        backdrop: 1,
+                        score: { $meta: "searchScore" }
                     }
                 }
             ]
@@ -92,7 +91,7 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
 
         const options = {
             page: validatedPage || 1,
-            limit: 10,
+            limit: 20,
         }
 
         const ContentsData = await Content.aggregatePaginate(aggregateResult, options)

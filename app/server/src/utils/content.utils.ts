@@ -3,7 +3,7 @@ import type { ContentDetailsType } from "../types/content.types"
 export const TmdbContentToContentDocument = (content: any): ContentDetailsType => {
     return {
         _id: content?.ContentId,
-        title: content?.title || content?.name,
+        title: content?.title?.replace(/[-\/?!@]/g, " ") || content?.name?.replace(/[-\/?!@]/g, " "),
         description: content?.overview || "N/A",
         poster: content?.poster_path || "N/A",
         backdrop: content?.backdrop_path || "N?A",
@@ -21,7 +21,7 @@ export const TmdbContentToContentDocument = (content: any): ContentDetailsType =
             profile_path: cast.profile_path || "N/A"
         })) : [],
 
-        director: content?.credits?.crew ? content.credits.crew.filter((crew: any) => crew.job === "Director")?.at(0)?.name : "N/A", 
+        director: content?.credits?.crew ? content.credits.crew.filter((crew: any) => crew.job === "Director")?.at(0)?.name : "N/A",
         ...(content?.media_type === "tv" && {
             total_episodes: content?.number_of_episodes
         }),
