@@ -7,6 +7,7 @@ import type { ContentDetailsInput, SearchContentInput, ContentDetailsType, PageN
 import { throwGraphqlError } from "../utils/throwGraphqlError.utils";
 import { handelGraphqlError } from "../utils/handelError.utils";
 import { TmdbContentToContentDocument } from "../utils/content.utils"
+import { boolean } from "zod";
 
 const SaveContentsDataToDB = async (ContentsToInsert: ContentDetailsType[]) => {
     try {
@@ -45,7 +46,9 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
             [
                 {
                     $match: {
-                        title: { $regex: validatedQuery, $options: "i" }
+                        $and: validatedQuery.split(/\s+/).filter(boolean).map((word: string) => ({
+                            title: { $regex: word, $options: "i" }
+                        }))
                     }
                 },
                 {
