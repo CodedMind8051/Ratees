@@ -1,4 +1,4 @@
-import { objectIdSchema } from "../validators/globle.validator"
+import { objectIdSchema } from "./common.validator"
 import z from "zod"
 
 export const RateSchema = z.object({

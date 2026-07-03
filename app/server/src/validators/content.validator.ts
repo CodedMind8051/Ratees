@@ -1,13 +1,7 @@
 import { z } from "zod";
-import { objectIdSchema } from "./globle.validator";
+import { objectIdSchema, pageSchema } from "./common.validator";
 
 
-export const pageSchema = z
-    .number({
-        error: "Page number is required"
-    })
-    .int("Page number must be an integer")
-    .positive("Page number must be greater than 0")
 
 
 export const SearchContentsSchema = z.object({

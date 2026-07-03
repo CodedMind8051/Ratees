@@ -1,7 +1,8 @@
 import { Content, TrendingContent } from "../models/content.model";
 import { FetchContentDataFromTmDb } from "../services/tmdb.service";
 import { validate } from "../utils/validate.utils";
-import { SearchContentsSchema, ContentDetailsInputSchema, pageSchema } from "../validators/content.validator";
+import { SearchContentsSchema, ContentDetailsInputSchema } from "../validators/content.validator";
+import { pageSchema } from "../validators/common.validator";
 import mongoose from "mongoose";
 import type { ContentDetailsInput, SearchContentInput, ContentDetailsType, PageNumberType } from "../types/content.types";
 import { throwGraphqlError } from "../utils/throwGraphqlError.utils";

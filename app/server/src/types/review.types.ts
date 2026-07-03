@@ -16,4 +16,4 @@ export type ReviewsDetailsDataType = {
     username: String,
     userEmail: String,
     profileImage: String
-}[]
+}

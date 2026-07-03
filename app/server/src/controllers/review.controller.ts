@@ -12,7 +12,7 @@ import { User } from "../models/user.model"
 const submitReviewController = async ({ userId, ContentId, review }: SubmitReviewType): Promise<boolean> => {
     const session = await mongoose.startSession()
     try {
-
+        await session.startTransaction();
         const {
             userId: verifiedUserId,
             ContentId: verifiedContentId,
@@ -64,9 +64,12 @@ const submitReviewController = async ({ userId, ContentId, review }: SubmitRevie
             throwGraphqlError("Failed to submit review", "REVIEW_SUBMISSION_FAILED", 500, true)
         }
 
+        await session.commitTransaction();
+
         return true
 
     } catch (error) {
+        await session.abortTransaction();
         return handelGraphqlError(error)
     } finally {
         await session.endSession()
@@ -77,7 +80,7 @@ const getReviewsController = async ({
     ContentId,
     userId,
     page
-}: getReviewsInputType): Promise<ReviewsDetailsDataType> => {
+}: getReviewsInputType): Promise<ReviewsDetailsDataType[]> => {
 
     try {
 
@@ -90,6 +93,7 @@ const getReviewsController = async ({
         if (!isContentExists) {
             throwGraphqlError("Content not found", "NOT_FOUND", 404, true)
         }
+
 
         const aggregateResult = Review.aggregate([
             {
@@ -120,7 +124,8 @@ const getReviewsController = async ({
             },
             {
                 $sort: {
-                    isOwn: -1
+                    isOwn: -1,
+                    createdAt: -1
                 }
             },
             {

@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { objectIdSchema } from "./globle.validator"
+import { objectIdSchema, pageSchema } from "./common.validator"
 
 export const SubmitReviewSchema = z.object({
     userId: objectIdSchema("userId"),
@@ -9,13 +9,8 @@ export const SubmitReviewSchema = z.object({
 
 export const getReviewsSchema = z.object({
     ContentId: objectIdSchema("ContentId"),
-    userId:objectIdSchema("userId").optional(),
-    page: z
-        .number({
-            error: "Page number is required"
-        })
-        .int("Page number must be an integer")
-        .positive("Page number must be greater than 0")
+    userId: objectIdSchema("userId").optional(),
+    page: pageSchema
 })
 
 export const updateReviewSchema = z.object({

@@ -9,3 +9,11 @@ export const objectIdSchema = (fieldName: string) => {
     )
 }
 
+export const pageSchema = z
+    .number({
+        error: "Page number is required"
+    })
+    .int("Page number must be an integer")
+    .positive("Page number must be greater than 0")
+
+
