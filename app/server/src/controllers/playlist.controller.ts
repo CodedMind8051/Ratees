@@ -1,20 +1,21 @@
 import { Playlist, PlaylistItem } from "../models/playlist.model";
+import { Content } from "../models/content.model";
 import { validate } from "../utils/validate.utils";
-import { GetPlaylistsSchema, CreatePlaylistSchema, deletePlaylistSchema, updatePlaylistSchema } from "../validators/playlist.validator";
+import { GetPlaylistsSchema, CreatePlaylistSchema, deletePlaylistSchema, updatePlaylistSchema, PlaylistsItemsSchema, getPlaylistItemsSchema } from "../validators/playlist.validator";
 import { throwGraphqlError } from "../utils/throwGraphqlError.utils";
 import { handelGraphqlError } from "../utils/handelError.utils";
-import type { GetPlaylistsInputType, PlaylistResponseType, CreatePlaylistInputType, DeletePlaylistInputType, UpdatePlaylistInputType } from "../types/playlist.types";
+import type { GetPlaylistsInputType, PlaylistResponseType, CreatePlaylistInputType, DeletePlaylistInputType, UpdatePlaylistInputType, PlaylistsItemsInputType, GetPlaylistItemsInputType, PlaylistItemResponseType } from "../types/playlist.types";
 import mongoose from "mongoose";
 
 
-export const getPlaylists = async ({ page, userID, OwnerUserId }: GetPlaylistsInputType): Promise<PlaylistResponseType[]> => {
+export const getPlaylists = async ({ page, userID, RequestUserId }: GetPlaylistsInputType): Promise<PlaylistResponseType[]> => {
 
     try {
 
-        const { page: validatedPage, userID: validatedUserID, OwnerUserId: validatedOwnerUserId } = validate(GetPlaylistsSchema, {
+        const { page: validatedPage, userID: validatedUserID, RequestUserId: validatedRequestUserId } = validate(GetPlaylistsSchema, {
             page: page,
             userID: userID,
-            OwnerUserId: OwnerUserId
+            RequestUserId: RequestUserId
         });
 
         const aggregate = Playlist.aggregate([
@@ -26,7 +27,7 @@ export const getPlaylists = async ({ page, userID, OwnerUserId }: GetPlaylistsIn
             {
                 $addFields: {
                     isOwner: {
-                        $eq: ["$userId", new mongoose.Types.ObjectId(validatedOwnerUserId)]
+                        $eq: ["$userId", new mongoose.Types.ObjectId(validatedRequestUserId)]
                     }
                 }
             },
@@ -216,6 +217,218 @@ export const deletePlaylist = async ({ playlistId, userId }: DeletePlaylistInput
         return handelGraphqlError(error)
     } finally {
         await session.endSession();
+    }
+
+}
+
+export const getPlaylistItems = async ({ playlistId, RequestUserId, page }: GetPlaylistItemsInputType): Promise<PlaylistItemResponseType[]> => {
+    try {
+
+        const { playlistId: validatedPlaylistId, RequestUserId: validatedRequestUserId, page: validatedPage } = validate(getPlaylistItemsSchema, {
+            playlistId,
+            RequestUserId,
+            page
+        })
+
+        const isShowPlaylistItemsTrue = await Playlist.aggregate([
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(validatedPlaylistId),
+                }
+            },
+            {
+                $addFields: {
+                    isOwner: {
+                        $eq: ["$userId", new mongoose.Types.ObjectId(validatedRequestUserId)]
+                    }
+                }
+            }, {
+                $match: {
+                    $or: [
+                        { isPublic: true },
+                        { isOwner: true }
+                    ]
+                }
+            }
+
+        ]
+        )
+
+        if (!isShowPlaylistItemsTrue || isShowPlaylistItemsTrue.length === 0) {
+            throwGraphqlError("Playlist not found or you don't have permission to view the items", "PLAYLIST_NOT_FOUND_OR_NO_PERMISSION", 404, true)
+        }
+
+        const aggregatedResult = PlaylistItem.aggregate([
+            {
+                $match: {
+                    playlistId: new mongoose.Types.ObjectId(validatedPlaylistId)
+                }
+            },
+            {
+                $lookup: {
+                    from: "contents",
+                    localField: "contentId",
+                    foreignField: "_id",
+                    as: "content"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$content",
+                    preserveNullAndEmptyArrays: true
+
+                }
+            },
+
+            {
+                $sort: {
+                    createdAt: -1
+                }
+            },
+            {
+                $project: {
+                    title: "$content.title",
+                    genre: "$content.genre",
+                    Content_Type: "$content.Content_Type",
+                    runtime: "$content.runtime",
+                    release_date: "$content.release_date",
+                    poster: "$content.poster"
+                }
+            }
+        ])
+
+        const options={
+            page: validatedPage || 1,
+            limit: 40
+        }
+
+        const playlistItems = await PlaylistItem.aggregatePaginate(aggregatedResult, options);
+
+        if (validatedPage > playlistItems.totalPages && playlistItems.totalDocs > 0) {
+            throwGraphqlError(
+                "Page not found",
+                "PAGE_NOT_FOUND",
+                404,
+                true
+            );
+        }
+
+        if (!playlistItems || playlistItems.totalDocs === 0) {
+            throwGraphqlError(
+                "No items found in the playlist",
+                "PLAYLIST_ITEMS_NOT_FOUND",
+                404,
+                true
+            );
+        }
+
+        return playlistItems.docs;
+
+    } catch (error) {
+        return handelGraphqlError(error)
+    }
+
+}
+
+export const createPlaylistItem = async ({
+    contentId,
+    userId,
+    playlistId
+}: PlaylistsItemsInputType): Promise<boolean> => {
+
+    try {
+
+        const { contentId: validatedContentId, playlistId: validatedPlaylistId, userId: validatedUserId } = validate(
+            PlaylistsItemsSchema, {
+            contentId,
+            userId,
+            playlistId
+        })
+
+
+        const isPlaylistExists = await Playlist.exists({
+            _id: new mongoose.Types.ObjectId(validatedPlaylistId),
+            userId: new mongoose.Types.ObjectId(validatedUserId)
+        })
+
+        if (!isPlaylistExists) {
+            throwGraphqlError("Playlist not found", "PLAYLIST_NOT_FOUND", 404, true)
+        }
+
+        const isContentExists = await Content.exists({
+            _id: new mongoose.Types.ObjectId(validatedContentId)
+        })
+
+        if (!isContentExists) {
+            throwGraphqlError("Movie/WebSeries not found", "CONTENT_NOT_FOUND", 404, true)
+        }
+
+        const existedDuplicatePlaylistItems = await PlaylistItem.exists({
+            contentId: new mongoose.Types.ObjectId(validatedContentId),
+            playlistId: new mongoose.Types.ObjectId(validatedPlaylistId)
+        })
+
+        if (existedDuplicatePlaylistItems) {
+            throwGraphqlError("This movie/WebSeries already exists", "PLAYLIST_ITEM_ALREADY_EXISTS", 409, true)
+        }
+
+        const createdPlaylistItem = await PlaylistItem.create({
+            contentId: new mongoose.Types.ObjectId(validatedContentId),
+            playlistId: new mongoose.Types.ObjectId(validatedPlaylistId)
+        })
+
+        if (!createdPlaylistItem) {
+            throwGraphqlError("Failed to add movie/WebSeries to playlist", "PLAYLIST_ITEM_CREATION_FAILED", 500, true)
+        }
+
+        return true;
+
+    } catch (error) {
+        return handelGraphqlError(error)
+
+    }
+}
+
+export const deletePlaylistItem = async (
+    {
+        playlistId,
+        userId,
+        contentId
+    }: PlaylistsItemsInputType
+
+): Promise<boolean> => {
+
+    try {
+
+        const { contentId: validatedContentId, playlistId: validatedPlaylistId, userId: validatedUserId } = validate(
+            PlaylistsItemsSchema, {
+            contentId,
+            userId,
+            playlistId
+        })
+
+        const isPlaylistExists = await Playlist.exists({
+            _id: new mongoose.Types.ObjectId(validatedPlaylistId),
+            userId: new mongoose.Types.ObjectId(validatedUserId)
+        })
+
+        if (!isPlaylistExists) {
+            throwGraphqlError("Playlist not found", "PLAYLIST_NOT_FOUND", 404, true)
+        }
+
+        const deletePlaylistItem = await PlaylistItem.deleteOne({
+            contentId: new mongoose.Types.ObjectId(validatedContentId),
+            playlistId: new mongoose.Types.ObjectId(validatedPlaylistId)
+        })
+
+        if (deletePlaylistItem.deletedCount === 0) {
+            throwGraphqlError("Movie/WebSeries not found in playlist", "PLAYLIST_ITEM_NOT_FOUND", 404, true)
+        }
+
+        return true
+
+    } catch (error) {
+        return handelGraphqlError(error)
     }
 
 }

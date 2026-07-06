@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { objectIdSchema, pageSchema } from "./common.validator";
-import { User } from "../models/user.model";
+
 
 export const GetPlaylistsSchema = z.object({
     page: pageSchema,
     userID: objectIdSchema("userID"),
-    OwnerUserId: objectIdSchema("OwnerUserId").optional()
+    RequestUserId: objectIdSchema("RequestUserId").optional()
 });
 
 export const CreatePlaylistSchema = z.object({
@@ -32,3 +32,15 @@ export const deletePlaylistSchema = z.object({
     userId: objectIdSchema("userId")
 })
 
+
+export const PlaylistsItemsSchema = z.object({
+    contentId: objectIdSchema("contentId"),
+    userId: objectIdSchema("userId"),
+    playlistId: objectIdSchema("playlistId")
+})
+
+export const getPlaylistItemsSchema = z.object({
+    playlistId: objectIdSchema("playlistId"),
+    RequestUserId: objectIdSchema("RequestUserId").optional(),
+    page: pageSchema
+})
