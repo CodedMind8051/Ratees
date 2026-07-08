@@ -25,7 +25,6 @@ const contentResolver = {
             _: any, { page }: { page: number }) => {
 
             const HomeContents = await FetchGeneralContentsForHomepage(page)
-
             return HomeContents
 
         },

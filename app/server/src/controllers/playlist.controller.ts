@@ -275,7 +275,7 @@ export const getPlaylistItems = async ({ playlistId, RequestUserId, page }: GetP
             {
                 $unwind: {
                     path: "$content",
-                    preserveNullAndEmptyArrays: true
+                    preserveNullAndEmptyArrays: false
 
                 }
             },
@@ -292,12 +292,13 @@ export const getPlaylistItems = async ({ playlistId, RequestUserId, page }: GetP
                     Content_Type: "$content.Content_Type",
                     runtime: "$content.runtime",
                     release_date: "$content.release_date",
-                    poster: "$content.poster"
+                    poster: "$content.poster",
+                    updatedAt: 1
                 }
             }
         ])
 
-        const options={
+        const options = {
             page: validatedPage || 1,
             limit: 40
         }

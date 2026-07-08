@@ -74,6 +74,7 @@ const FetchContentDataFromTmDb = async (contentName: string) => {
 
     } catch (error) {
 
+
         if (error instanceof GraphQLError) {
             throwGraphqlError(error.message, "INTERNAL_SERVER_ERROR", 500, false)
         }

@@ -95,7 +95,6 @@ const SubmitRatingController = async ({ userId, ContentId, rating }: SubmitRatin
 
     } catch (error) {
 
-        console.log(error)
         if (session.inTransaction()) await session.abortTransaction()
 
         return handelGraphqlError(error)

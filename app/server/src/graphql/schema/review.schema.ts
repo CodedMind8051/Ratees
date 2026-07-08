@@ -1,4 +1,4 @@
-const reviewTypeDefs = `
+const reviewTypeDefs = `#graphql
     scalar Date
 
     type ReviewsDetailsData{

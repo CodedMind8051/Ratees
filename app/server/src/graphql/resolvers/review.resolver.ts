@@ -10,7 +10,7 @@ const reviewResolver = {
             _: any,
             {
                 ContentId,
-                page
+                page,
             }: getReviewsInputType,
             context: MyContextType
         ) => {

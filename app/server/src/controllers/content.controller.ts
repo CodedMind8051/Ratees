@@ -284,7 +284,7 @@ const FetchTrendingContents = async () => {
             }, {
                 $unwind: {
                     path: "$TrendingContents",
-                    preserveNullAndEmptyArrays: true
+                    preserveNullAndEmptyArrays: false
                 }
             },
             {
