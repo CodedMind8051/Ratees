@@ -5,11 +5,6 @@ export type WatchStatusIdentifierInputType = z.infer<typeof WatchStatusIdentifie
 export type submitWatchStatusOfContentInputType = z.infer<typeof submitWatchStatusOfContentInputSchema>
 export type getContentListInWatchStatusInputType = z.infer<typeof getContentListInWatchStatusInputSchema>
 
-export enum WatchStatusEnum {
-    Watching = "Watching",
-    WATCHED = "Watched",
-    WATCH_LATER = "Watch Later",
-}
 
 export type getContentListInWatchStatusResponseType = {
     title: "string",
@@ -19,3 +14,4 @@ export type getContentListInWatchStatusResponseType = {
     poster: "string",
     createdAt: Date
 }
+

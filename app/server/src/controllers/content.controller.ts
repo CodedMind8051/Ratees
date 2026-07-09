@@ -8,7 +8,7 @@ import type { ContentDetailsInput, SearchContentInput, ContentDetailsType, PageN
 import { throwGraphqlError } from "../utils/throwGraphqlError.utils";
 import { handelGraphqlError } from "../utils/handelError.utils";
 import { TmdbContentToContentDocument } from "../utils/content.utils"
-import { boolean } from "zod";
+
 
 const SaveContentsDataToDB = async (ContentsToInsert: ContentDetailsType[]) => {
     try {
@@ -47,9 +47,8 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
             [
                 {
                     $match: {
-                        $and: validatedQuery.split(/\s+/).filter(boolean).map((word: string) => ({
-                            title: { $regex: word, $options: "i" }
-                        }))
+                     title: { $regex: validatedQuery.replace(/[-\/?!@]/g, " "), $options: "i" }
+  
                     }
                 },
                 {
@@ -144,7 +143,7 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
 
     }
     catch (error) {
-        handelGraphqlError(error)
+       return handelGraphqlError(error)
     }
 }
 
@@ -312,7 +311,7 @@ const FetchTrendingContents = async () => {
 
 
     } catch (error) {
-        handelGraphqlError(error)
+       return handelGraphqlError(error)
     }
 
 
@@ -361,7 +360,7 @@ const fetchNewReleaseContents = async () => {
 
 
     } catch (error) {
-        handelGraphqlError(error)
+       return handelGraphqlError(error)
     }
 }
 
@@ -416,7 +415,7 @@ const FetchGeneralContentsForHomepage = async (page: PageNumberType) => {
         return ContentsData.docs
 
     } catch (error) {
-        handelGraphqlError(error)
+      return  handelGraphqlError(error)
     }
 
 }

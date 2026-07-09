@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { WatchStatusEnum } from "../types/watchStatus.types";
+import { WatchStatusEnum } from "../validators/watchStatus.validator"
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 

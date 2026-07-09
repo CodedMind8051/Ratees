@@ -135,7 +135,6 @@ const getReviewsController = async ({
                     createdAt: 1,
                     userId: "$userDetail._id",
                     username: "$userDetail.username",
-                    userEmail: "$userDetail.email",
                     profileImage: "$userDetail.profileImage",
                     isOwn: "$isOwn"
                 }
@@ -182,7 +181,8 @@ const updateReviewController = async ({ reviewId, userId, review }: updateReview
 
 
         const isReviewExisted = await Review.exists({
-            _id: new mongoose.Types.ObjectId(verifiedReviewId)
+            _id: new mongoose.Types.ObjectId(verifiedReviewId),
+            userId: new mongoose.Types.ObjectId(verifiedUserId)
         })
 
         if (!isReviewExisted) {

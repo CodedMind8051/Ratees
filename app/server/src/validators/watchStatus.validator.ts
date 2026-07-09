@@ -1,7 +1,13 @@
 import { z } from "zod";
 import { objectIdSchema, pageSchema } from "./common.validator";
-import { WatchStatusEnum } from "../types/watchStatus.types";
 
+
+
+export enum WatchStatusEnum {
+    Watching = "Watching",
+    WATCHED = "Watched",
+    WATCH_LATER = "Watch Later",
+}
 
 export const WatchStatusIdentifierInputSchema = z.object({
     userId: objectIdSchema("UserId"),

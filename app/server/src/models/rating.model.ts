@@ -17,7 +17,7 @@ const RatingSchema = new Schema({
         type: Number,
         required: true,
         min: 1,
-        max: 5,
+        max: 4,
         default:0
     }
 }, { timestamps: true })
