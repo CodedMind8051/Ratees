@@ -1,6 +1,7 @@
 import { Film, Tv, HelpCircle, Eye, Check, Play, Clock } from 'lucide-react';
 import type { ContentItemsType } from '@/types/content.types';
 import { ContentCardSkeleton } from './ContentCard.skeleton';
+import { getPosterUrl } from '@/utils/content.utils';
 
 interface ContentCardProps {
   content: ContentItemsType;
@@ -9,11 +10,6 @@ interface ContentCardProps {
 }
 
 
-function getPosterUrl(poster: string | undefined | null): string {
-  if (!poster || poster === 'N/A') return '/assets/images/no_image.png';
-  if (poster.startsWith('/')) return `${import.meta.env.VITE_TMDB_POSTER_BASE_URL}${poster}`;
-  return poster;
-}
 
 
 const CONTENT_TYPE_META = {

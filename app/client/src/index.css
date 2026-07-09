@@ -25,3 +25,28 @@
 .animate-dialog-panel {
   animation: slide-in-from-bottom-3 0.2s ease both;
 }
+
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+.skeleton-shimmer {
+  background-color: hsl(var(--secondary) / 0.5);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--foreground) / 0.06) 20%,
+    hsl(var(--foreground) / 0.12) 40%,
+    hsl(var(--foreground) / 0.06) 60%,
+    transparent 100%
+  );
+  background-size: 400px 100%;
+  background-repeat: no-repeat;
+  animation: skeleton-shimmer 1.8s ease-in-out infinite;
+}

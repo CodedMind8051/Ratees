@@ -1,8 +1,6 @@
-import { allContent } from '@/data/mockData';
-import { ContentItemsType } from '@/types/content.types';
-import { ArrowLeft, ChevronRight, Film, GripVertical, ListVideo, Pencil, Plus, Trash2, Tv, X } from 'lucide-react';
+import { ChevronRight, ListVideo, Pencil, Trash2, Lock, Globe } from 'lucide-react';
 import type { Playlist } from '@/types/playlist.type';
-
+import { format } from 'date-fns';
 
 interface PlaylistCardProps {
   playlist: Playlist;
@@ -13,10 +11,20 @@ interface PlaylistCardProps {
 }
 
 export function PlaylistCard({ playlist, onOpen, onEdit, onDelete }: PlaylistCardProps) {
-  const itemPreviews = playlist.items
-    .slice(0, 4)
-    .map(id => allContent.find(c => c.id === id))
-    .filter(Boolean) as ContentItemsType[];
+  // Handle both old mock data format (name, items) and new backend format (playlistName, totalTracks)
+  const name = playlist.playlistName || (playlist as any).name || 'Untitled';
+  const description = playlist.description || (playlist as any).description || '';
+  const trackCount = playlist.totalTracks || (playlist as any).items?.length || 0;
+  const updatedAt = playlist.updatedAt || (playlist as any).updatedAt || new Date().toISOString();
+
+  // Format date
+  const formattedDate = (() => {
+    try {
+      return format(new Date(updatedAt), 'MMM d, yyyy');
+    } catch {
+      return 'Recently';
+    }
+  })();
 
   return (
     <div className="group bg-card border border-border rounded-2xl overflow-hidden hover:border-muted transition-all duration-200">
@@ -26,37 +34,18 @@ export function PlaylistCard({ playlist, onOpen, onEdit, onDelete }: PlaylistCar
         onClick={onOpen}
         role="button"
         tabIndex={0}
-        onKeyDown={e => { if (e.key === 'Enter') onOpen(); }}
-        aria-label={`Open ${playlist.name}`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') onOpen();
+        }}
+        aria-label={`Open ${name}`}
       >
-        {playlist.items.length === 0 ? (
+        {trackCount === 0 ? (
           <div className="w-full h-full flex items-center justify-center">
             <ListVideo size={36} className="text-muted-foreground/30" />
           </div>
-        ) : itemPreviews.length === 1 ? (
-          <img
-            src={itemPreviews[0].poster}
-            alt={playlist.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
         ) : (
-          <div className="grid grid-cols-2 h-full gap-0.5">
-            {Array.from({ length: 4 }).map((_, idx) => {
-              const item = itemPreviews[idx];
-              return item ? (
-                <div key={`cover-${playlist.id}-${item._id}`} className="overflow-hidden">
-                  <img
-                    src={item.poster}
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                </div>
-              ) : (
-                <div key={`cover-${playlist.id}-empty-${idx}`} className="bg-secondary/60 flex items-center justify-center">
-                  <ListVideo size={16} className="text-muted-foreground/20" />
-                </div>
-              );
-            })}
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary">
+            <ListVideo size={36} className="text-primary/50" />
           </div>
         )}
 
@@ -66,7 +55,7 @@ export function PlaylistCard({ playlist, onOpen, onEdit, onDelete }: PlaylistCar
         {/* Count badge */}
         <div className="absolute top-2.5 right-2.5">
           <span className="text-[10px] font-bold px-2 py-1 bg-black/60 backdrop-blur-sm text-white rounded-full border border-white/10 tabular-nums">
-            {playlist.items.length} {playlist.items.length === 1 ? 'title' : 'titles'}
+            {trackCount} {trackCount === 1 ? 'title' : 'titles'}
           </span>
         </div>
 
@@ -82,36 +71,48 @@ export function PlaylistCard({ playlist, onOpen, onEdit, onDelete }: PlaylistCar
       <div className="p-3.5">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0 cursor-pointer" onClick={onOpen}>
-            <h3 className="text-sm font-semibold text-foreground leading-tight truncate hover:text-primary transition-colors">
-              {playlist.name}
-            </h3>
-            {playlist.description && (
+            <div className="flex items-center gap-1.5">
+              <h3 className="text-sm font-semibold text-foreground leading-tight truncate hover:text-primary transition-colors">
+                {name}
+              </h3>
+              {playlist.isPublic ? (
+                <Globe size={12} className="text-muted-foreground shrink-0" />
+              ) : (
+                <Lock size={12} className="text-muted-foreground shrink-0" />
+              )}
+            </div>
+            {description && (
               <p className="text-xs text-muted-foreground mt-1 line-clamp-1 leading-relaxed">
-                {playlist.description}
+                {description}
               </p>
             )}
           </div>
           {/* Edit / delete — always visible on mobile, hover on desktop */}
           <div className="flex gap-1 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
             <button
-              onClick={e => { e.stopPropagation(); onEdit(); }}
-              className="cursor-pointer p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+              className="cursor-pointer p-1.5 rounded-lg text-yellow-400 sm:text-muted-foreground sm:hover:text-yellow-400 sm:hover:bg-yellow-400/10 transition-colors bg-yellow-400/10 sm:bg-transparent"
               aria-label="Edit playlist"
             >
               <Pencil size={13} />
             </button>
             <button
-              onClick={e => { e.stopPropagation(); onDelete(); }}
-              className="cursor-pointer p-1.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="cursor-pointer p-1.5 rounded-lg text-red-400 sm:text-muted-foreground sm:hover:text-red-400 sm:hover:bg-red-400/10 transition-colors bg-red-400/10 sm:bg-transparent"
               aria-label="Delete playlist"
             >
               <Trash2 size={13} />
             </button>
           </div>
         </div>
-        <p className="text-[10px] text-muted-foreground/50 mt-2 tabular-nums">Updated {playlist.updatedAt}</p>
+        <p className="text-[10px] text-muted-foreground/50 mt-2 tabular-nums">Updated {formattedDate}</p>
       </div>
     </div>
   );
 }
-

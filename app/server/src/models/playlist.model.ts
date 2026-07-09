@@ -9,6 +9,7 @@ const playlistSchema = new mongoose.Schema(
             trim: true,
             minlength: 1,
             maxlength: 100,
+            unique: true,
         },
 
         description: {

@@ -1,7 +1,7 @@
 export const playlistTypeDefs = `#graphql
-         
+
          scalar Date
-         
+
          type Playlist {
              _id: ID!
              playlistName: String!
@@ -9,24 +9,42 @@ export const playlistTypeDefs = `#graphql
              userId: ID!
              isPublic: Boolean!
              totalTracks: Int!
+             isOwner: Boolean!
+             coverImage: String
              createdAt: Date!
              updatedAt: Date!
          }
 
          type PlaylistItem {
              _id: ID!
+             contentId: ID!
              title: String!
              genre: [String!]!
              Content_Type: String!
              runtime: String!
              release_date: String!
              poster: String!
+             updatedAt:Date!
          }
 
-         
+         type PlaylistPagination {
+             playlists: [Playlist!]!
+             totalPages: Int!
+             totalDocs: Int!
+             currentPage: Int!
+         }
+
+         type PlaylistItemsPagination {
+             items: [PlaylistItem!]!
+             totalPages: Int!
+             totalDocs: Int!
+             currentPage: Int!
+         }
+
+
          type Query {
-             getPlaylists(page: Int!, userID: String!): [Playlist!]!,
-             getPlaylistItems(playlistId: ID!, page: Int!): [PlaylistItem!]!,
+             getPlaylists(page: Int!, userID: String!): PlaylistPagination,
+             getPlaylistItems(playlistId: ID!, page: Int!): PlaylistItemsPagination,
          }
 
          type Mutation {
@@ -36,6 +54,6 @@ export const playlistTypeDefs = `#graphql
              createPlaylistItem(contentId: ID!, playlistId: ID!): Boolean!,
              deletePlaylistItem(contentId: ID!, playlistId: ID!): Boolean!
          }
-     
+
 
 `

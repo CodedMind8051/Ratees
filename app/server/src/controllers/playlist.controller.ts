@@ -8,7 +8,7 @@ import type { GetPlaylistsInputType, PlaylistResponseType, CreatePlaylistInputTy
 import mongoose from "mongoose";
 
 
-export const getPlaylists = async ({ page, userID, RequestUserId }: GetPlaylistsInputType): Promise<PlaylistResponseType[]> => {
+export const getPlaylists = async ({ page, userID, RequestUserId }: GetPlaylistsInputType) => {
 
     try {
 
@@ -39,6 +39,40 @@ export const getPlaylists = async ({ page, userID, RequestUserId }: GetPlaylists
                     ]
                 }
             },
+            // Lookup first playlist item to get cover image
+            {
+                $lookup: {
+                    from: "playlistitems",
+                    let: { playlistId: "$_id" },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ["$playlistId", "$$playlistId"] } } },
+                        { $sort: { createdAt: -1 } },
+                        { $limit: 1 },
+                        {
+                            $lookup: {
+                                from: "contents",
+                                localField: "contentId",
+                                foreignField: "_id",
+                                as: "content"
+                            }
+                        },
+                        { $unwind: { path: "$content", preserveNullAndEmptyArrays: true } },
+                        { $project: { poster: "$content.poster" } }
+                    ],
+                    as: "firstItem"
+                }
+            },
+            {
+                $addFields: {
+                    coverImage: {
+                        $cond: {
+                            if: { $gt: [{ $size: "$firstItem" }, 0] },
+                            then: { $arrayElemAt: ["$firstItem.poster", 0] },
+                            else: null
+                        }
+                    }
+                }
+            },
             {
 
                 $sort: {
@@ -54,6 +88,7 @@ export const getPlaylists = async ({ page, userID, RequestUserId }: GetPlaylists
                     isPublic: 1,
                     isOwner: 1,
                     totalTracks: 1,
+                    coverImage: 1,
                     createdAt: 1,
                     updatedAt: 1
                 },
@@ -75,17 +110,23 @@ export const getPlaylists = async ({ page, userID, RequestUserId }: GetPlaylists
             );
         }
 
+        // Return empty array instead of error when no playlists exist
         if (!playlists || playlists.totalDocs === 0) {
-            throwGraphqlError(
-                "No playlists found",
-                "PLAYLIST_NOT_FOUND",
-                404,
-                true
-            );
+            return {
+                playlists: [],
+                totalPages: 0,
+                totalDocs: 0,
+                currentPage: validatedPage
+            };
         }
 
 
-        return playlists.docs;
+        return {
+            playlists: playlists.docs,
+            totalPages: playlists.totalPages,
+            totalDocs: playlists.totalDocs,
+            currentPage: playlists.page
+        };
 
     } catch (error) {
         return handelGraphqlError(error)
@@ -151,15 +192,19 @@ export const updatePlaylist = async ({
             isPublic
         });
 
-    if (validatedPlaylistName) {
-        const existedPlaylist = await Playlist.exists({
-            playlistName: validatedPlaylistName,
-            userId: new mongoose.Types.ObjectId(validatedUserId)
-        });
+    const existingPlaylist = await Playlist.exists({
+        playlistName: validatedPlaylistName,
+        userId: new mongoose.Types.ObjectId(validatedUserId),
+        _id: { $ne: new mongoose.Types.ObjectId(validatedPlaylistId) },
+    });
 
-        if (existedPlaylist) {
-            throwGraphqlError("Playlist name already exists", "PLAYLIST_ALREADY_EXISTS", 409, true)
-        }
+    if (existingPlaylist) {
+        throwGraphqlError(
+            "You already have a playlist with this name.",
+            "PLAYLIST_NAME_ALREADY_EXISTS",
+            409,
+            true
+        );
     }
 
     const playlistUpdated = await Playlist.updateOne({
@@ -175,7 +220,7 @@ export const updatePlaylist = async ({
         throwGraphqlError("Playlist not found", "PLAYLIST_NOT_FOUND", 404, true)
     }
 
-    if (playlistUpdated.modifiedCount === 0 || !playlistUpdated.acknowledged || !playlistUpdated) {
+    if (!playlistUpdated.acknowledged || !playlistUpdated) {
         throwGraphqlError("Failed to update playlist", "PLAYLIST_UPDATE_FAILED", 500, true)
     }
 
@@ -221,7 +266,7 @@ export const deletePlaylist = async ({ playlistId, userId }: DeletePlaylistInput
 
 }
 
-export const getPlaylistItems = async ({ playlistId, RequestUserId, page }: GetPlaylistItemsInputType): Promise<PlaylistItemResponseType[]> => {
+export const getPlaylistItems = async ({ playlistId, RequestUserId, page }: GetPlaylistItemsInputType) => {
     try {
 
         const { playlistId: validatedPlaylistId, RequestUserId: validatedRequestUserId, page: validatedPage } = validate(getPlaylistItemsSchema, {
@@ -287,6 +332,8 @@ export const getPlaylistItems = async ({ playlistId, RequestUserId, page }: GetP
             },
             {
                 $project: {
+                    _id: 1,
+                    contentId: "$contentId",
                     title: "$content.title",
                     genre: "$content.genre",
                     Content_Type: "$content.Content_Type",
@@ -314,14 +361,22 @@ export const getPlaylistItems = async ({ playlistId, RequestUserId, page }: GetP
             );
         }
 
+        // Return empty array instead of error when no items exist
         if (!playlistItems || playlistItems.totalDocs === 0) {
-            throwGraphqlError(
-                "No items found in the playlist",
-                "PLAYLIST_ITEMS_NOT_FOUND",
-                404,
-                true
-            );
+            return {
+                items: [],
+                totalPages: 0,
+                totalDocs: 0,
+                currentPage: validatedPage
+            };
         }
+
+        return {
+            items: playlistItems.docs,
+            totalPages: playlistItems.totalPages,
+            totalDocs: playlistItems.totalDocs,
+            currentPage: playlistItems.page
+        };
 
         return playlistItems.docs;
 
@@ -382,6 +437,12 @@ export const createPlaylistItem = async ({
             throwGraphqlError("Failed to add movie/WebSeries to playlist", "PLAYLIST_ITEM_CREATION_FAILED", 500, true)
         }
 
+        // Update totalTracks count
+        await Playlist.updateOne(
+            { _id: new mongoose.Types.ObjectId(validatedPlaylistId) },
+            { $inc: { totalTracks: 1 } }
+        );
+
         return true;
 
     } catch (error) {
@@ -425,6 +486,12 @@ export const deletePlaylistItem = async (
         if (deletePlaylistItem.deletedCount === 0) {
             throwGraphqlError("Movie/WebSeries not found in playlist", "PLAYLIST_ITEM_NOT_FOUND", 404, true)
         }
+
+        // Update totalTracks count
+        await Playlist.updateOne(
+            { _id: new mongoose.Types.ObjectId(validatedPlaylistId) },
+            { $inc: { totalTracks: -1 } }
+        );
 
         return true
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, X, Film, Tv } from 'lucide-react';
+import { Search, X, Film, Tv, Check } from 'lucide-react';
 import { useQuery } from '@apollo/client/react';
 import { SEARCH_CONTENT } from '@/lib/graphql/query/content.query';
 import type { ContentItemsType } from '@/types/content.types';
@@ -10,6 +10,7 @@ const TRENDING_TAGS = ['Thriller', 'Science Fiction', 'Drama', 'Korean', 'Crime'
 interface SearchOverlayProps {
   onClose: () => void;
   onSelectMovie?: (content: ContentItemsType) => void;
+  onSelectMovieOnly?: boolean; // When true, only calls onSelectMovie without opening detail modal
 }
 
 function getPosterUrl(poster: string | undefined | null): string {
@@ -35,13 +36,14 @@ function SearchSkeleton() {
   );
 }
 
-export default function SearchOverlay({ onClose, onSelectMovie }: SearchOverlayProps) {
+export default function SearchOverlay({ onClose, onSelectMovie, onSelectMovieOnly }: SearchOverlayProps) {
   const [query, setQuery] = useState('');
   const [submittedQuery, setSubmittedQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [selected, setselected] = useState(false)
   const [selectedContent, setselectedContent] = useState("")
+  const [addingItemId, setAddingItemId] = useState<string | null>(null);
 
   const { data, loading, refetch } = useQuery<{ getContentsList: ContentItemsType[] }>(
     SEARCH_CONTENT,
@@ -82,9 +84,19 @@ export default function SearchOverlay({ onClose, onSelectMovie }: SearchOverlayP
   }
 
   function handleSelectItem(item: ContentItemsType) {
-    onSelectMovie?.(item);
-    setselected(true)
-    setselectedContent(item?._id)
+    // Show animation feedback when clicking to add
+    setAddingItemId(item._id);
+
+    // Small delay to show animation before calling the callback
+    setTimeout(() => {
+      onSelectMovie?.(item);
+      // Only open detail modal if onSelectMovieOnly is not true
+      if (!onSelectMovieOnly) {
+        setselected(true)
+        setselectedContent(item?._id)
+      }
+      setAddingItemId(null);
+    }, 300);
   }
 
 
@@ -146,8 +158,11 @@ export default function SearchOverlay({ onClose, onSelectMovie }: SearchOverlayP
                     <button
                       key={item._id}
                       type="button"
-                      className="w-full flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2.5 sm:py-3 hover:bg-secondary transition-colors text-left cursor-pointer"
+                      className={`w-full flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2.5 sm:py-3 hover:bg-secondary transition-all text-left cursor-pointer relative ${
+                        addingItemId === item._id ? 'bg-primary/10 scale-[0.98]' : ''
+                      }`}
                       onClick={() => handleSelectItem(item)}
+                      disabled={addingItemId !== null}
                     >
                       <div className="w-9 sm:w-10 h-12 sm:h-14 rounded-md overflow-hidden shrink-0 bg-secondary">
                         <img
@@ -171,13 +186,19 @@ export default function SearchOverlay({ onClose, onSelectMovie }: SearchOverlayP
                         </p>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
-                        {item.Content_Type === 'movie'
-                          ? <Film size={12} className="text-primary" aria-hidden="true" />
-                          : <Tv size={12} className="text-blue-400" aria-hidden="true" />
-                        }
-                        <span className="text-xs text-muted-foreground hidden sm:block">
-                          {item.Content_Type === 'movie' ? 'Movie' : 'TV'}
-                        </span>
+                        {addingItemId === item._id ? (
+                          <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                        ) : item.Content_Type === 'movie' ? (
+                          <>
+                            <Film size={12} className="text-primary" aria-hidden="true" />
+                            <span className="text-xs text-muted-foreground hidden sm:block">Movie</span>
+                          </>
+                        ) : (
+                          <>
+                            <Tv size={12} className="text-blue-400" aria-hidden="true" />
+                            <span className="text-xs text-muted-foreground hidden sm:block">TV</span>
+                          </>
+                        )}
                       </div>
                     </button>
                   ))}

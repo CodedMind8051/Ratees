@@ -11,6 +11,11 @@ export const theme = {
         padding: '1rem',
     },
     extend: {
+        keyframes: {
+            shimmer: {
+                '100%': { transform: 'translateX(100%)' },
+            },
+        },
         colors: {
             background: 'var(--background)',
             foreground: 'var(--foreground)',

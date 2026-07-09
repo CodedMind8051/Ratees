@@ -21,11 +21,14 @@ export type PlaylistResponseType = {
 };
 
 export type PlaylistItemResponseType = {
+    _id: string;
+    contentId: string;
     title: string;
     genre: [string];
     Content_Type: string;
     runtime: string;
     release_date: string;
-    poster:string
+    poster: string;
+    updatedAt?: string;
 };
 

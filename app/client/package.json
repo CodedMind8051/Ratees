@@ -67,6 +67,7 @@
     "react": "^19.2.6",
     "react-day-picker": "^10.0.1",
     "react-dom": "^19.2.6",
+    "react-intersection-observer": "^10.0.3",
     "react-resizable-panels": "^4.11.1",
     "react-router-dom": "^7.15.1",
     "recharts": "^3.8.1",
