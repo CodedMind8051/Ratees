@@ -12,6 +12,9 @@ import { useQuery } from '@apollo/client/react';
 import { FETCH_FULL_CONTENT_DETAIL } from '@/lib/graphql/query/content.query';
 import { ReviewList } from '../review/reviewList';
 import { useNavigate } from 'react-router-dom';
+import {
+  useWatchStatus,
+} from '@/hooks/useWatchStatus';
 
 
 interface MovieDetailModalProps {
@@ -46,24 +49,32 @@ export default function MovieDetailModal({
   contentId, onClose, initialStatus, onStatusChange,
 }: MovieDetailModalProps) {
 
-
-
-  const { loading, error, data } = useQuery<GetContentDetailsResponse>(FETCH_FULL_CONTENT_DETAIL, {
+  // Fetch content details
+  const { loading: contentLoading, error: contentError, data: contentData } = useQuery<GetContentDetailsResponse>(FETCH_FULL_CONTENT_DETAIL, {
     variables: {
       ContentId: contentId
     }
-  })
+  });
 
+  // Fetch watch status from API
+  const { watchStatus: apiWatchStatus, loading: statusLoading } = useWatchStatus(contentId);
 
-  const content: ContentFullDetailType = data?.getContentDetails
+  const content: ContentFullDetailType | undefined = contentData?.getContentDetails;
 
+  // Use API status, fallback to initialStatus, or null
   const [activeStatus, setActiveStatus] = useState<'watched' | 'watching' | 'watchlater' | null>(initialStatus ?? null);
   const [playlistDropdownOpen, setPlaylistDropdownOpen] = useState(false);
   const [myRating, setMyRating] = useState<RatingKey | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
+  // Sync status from API when available
+  useEffect(() => {
+    if (apiWatchStatus) {
+      setActiveStatus(apiWatchStatus as 'watched' | 'watching' | 'watchlater');
+    }
+  }, [apiWatchStatus]);
 
   // Lock scroll + Escape key
   useEffect(() => {
@@ -88,10 +99,14 @@ export default function MovieDetailModal({
     return () => document.removeEventListener('mousedown', handler);
   }, [playlistDropdownOpen]);
 
-  const handleStatusToggle = (status: 'watched' | 'watching' | 'watchlater') => {
+  const handleStatusToggle = async (status: 'watched' | 'watching' | 'watchlater') => {
     const next = activeStatus === status ? null : status;
     setActiveStatus(next);
-    onStatusChange?.(content?._id, next);
+
+    // Just call the parent callback - parent handles the API call
+    // This prevents duplicate API calls
+    onStatusChange?.(contentId, next);
+
     toast.success(next ? `Added to ${statusConfig[status].label}` : 'Removed from watchlist');
   };
 
@@ -100,13 +115,34 @@ export default function MovieDetailModal({
   const playlists = ['Nolan Universe', 'Watch on a Rainy Night', 'Weekend Binge'];
 
 
-  if (loading) {
-    return <>loading</>
-  } else {
-    console.log(content)
+  if (contentLoading || statusLoading) {
     return (
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+        <div className="relative w-full bg-card border border-border flex flex-col sm:max-w-3xl sm:rounded-2xl sm:border sm:max-h-[90vh] rounded-t-2xl border-t border-x max-h-[95dvh]">
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </div>
+    );
+  } else if (contentError) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4" onClick={onClose}>
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+        <div className="relative w-full bg-card border border-border flex flex-col sm:max-w-3xl sm:rounded-2xl sm:border sm:max-h-[90vh] rounded-t-2xl border-t border-x max-h-[95dvh]" onClick={e => e.stopPropagation()}>
+          <div className="flex flex-col items-center justify-center h-64 gap-4">
+            <p className="text-red-400">Failed to load content details</p>
+            <button onClick={onClose} className="px-4 py-2 bg-primary text-white rounded-lg">Close</button>
+          </div>
+        </div>
+      </div>
+    );
+  } else {
+    // At this point, content is loaded and defined
+    const contentDetails: ContentFullDetailType = content!;
 
-
+    return (
       <div
         className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
         onClick={onClose}
@@ -131,7 +167,7 @@ export default function MovieDetailModal({
                   ? `${import.meta.env.VITE_TMDB_BACKDROP_BASE_URL}${content?.backdrop}`
                   : content?.backdrop === "N/A" ? "/assets/images/no_image.png" : "/assets/images/no_image.png"
               }
-              alt={`${content.title} backdrop`}
+              alt={`${contentDetails.title} backdrop`}
               className="w-full h-full object-cover"
             />
             {/* Gradient: dark bottom + subtle vignette */}
@@ -166,11 +202,11 @@ export default function MovieDetailModal({
                   <div className="w-24 h-36 mt-18 sm:w-32 sm:h-48 rounded-xl overflow-hidden border-2 border-border shadow-2xl ring-1 ring-white/5">
                     <img
                       src={
-                        content.poster?.startsWith("/")
-                          ? `${import.meta.env.VITE_TMDB_POSTER_BASE_URL}${content.poster}`
+                        contentDetails.poster?.startsWith("/")
+                          ? `${import.meta.env.VITE_TMDB_POSTER_BASE_URL}${contentDetails.poster}`
                           : content?.poster === "N/A" ? "/assets/images/no_image.png" : "/assets/images/no_image.png"
                       }
-                      alt={`${content.title} poster`}
+                      alt={`${contentDetails.title} poster`}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -179,7 +215,7 @@ export default function MovieDetailModal({
                 {/* Title + meta */}
                 <div className="flex-1 min-w-0 pt-16 sm:pt-20">
                   <h2 className="text-lg sm:text-2xl font-bold text-foreground leading-tight line-clamp-2">
-                    {content.title}
+                    {contentDetails.title}
                   </h2>
                   <div className="flex flex-wrap items-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
                     <span>{content?.release_date}</span>
@@ -194,7 +230,7 @@ export default function MovieDetailModal({
                   </div>
                   {/* Genres */}
                   <div className="flex flex-wrap gap-1.5 mt-2">
-                    {content.genre.map(g => (
+                    {contentDetails.genre.map(g => (
                       <span
                         key={`genre-${g}`}
                         className="px-2 py-0.5 bg-secondary/80 rounded-full text-[10px] font-medium text-muted-foreground uppercase tracking-wide"
@@ -208,7 +244,7 @@ export default function MovieDetailModal({
 
               {/* Description */}
               <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                {content.description}
+                {contentDetails.description}
               </p>
 
               {/* ── Action row: status buttons + playlist ── */}
@@ -266,8 +302,8 @@ export default function MovieDetailModal({
                   Where to Watch
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {content?.whereTOwatch && content.whereTOwatch.length > 0 ? (
-                    content.whereTOwatch.map(platform => (
+                  {contentDetails.whereTOwatch && contentDetails.whereTOwatch.length > 0 ? (
+                    contentDetails.whereTOwatch.map(platform => (
                       <div
                         key={`platform-${platform?.platform}`}
                         className="flex items-center gap-2 px-3 py-1.5 bg-secondary/60 border border-border rounded-xl text-xs font-medium text-foreground hover:bg-secondary transition-colors"
@@ -381,7 +417,7 @@ export default function MovieDetailModal({
                   Cast & Crew
                 </p>
                 <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory">
-                  {content?.casts.map((member, index) => (
+                  {contentDetails.casts?.map((member, index) => (
                     <div className="shrink-0 text-center w-[72px] snap-start">
                       <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden mx-auto border-2 border-border ring-1 ring-white/5 bg-secondary/60 flex items-center justify-center">
                         {member?.profile_path ? (
@@ -405,7 +441,7 @@ export default function MovieDetailModal({
                 </div>
               </div>
               <ReviewList
-                contentId={content?._id}
+                contentId={contentDetails._id}
                 onOpenUserProfile={(userId) => {
                   onClose();                       // close modal first
                   navigate(`/profile/${userId}`);  // then go to their profile

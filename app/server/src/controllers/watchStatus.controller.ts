@@ -180,7 +180,7 @@ export const getContentListInWatchStatus = async ({
             },
             {
                 $unwind: {
-                    path: "content",
+                    path: "$content",
                     preserveNullAndEmptyArrays: false
                 }
             },
@@ -233,6 +233,7 @@ export const getContentListInWatchStatus = async ({
 
 
     } catch (error) {
+        console.log(error)
         return handelGraphqlError(error)
     }
 

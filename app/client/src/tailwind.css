@@ -120,3 +120,16 @@
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(9,9,11,0) 60%);
   }
 }
+
+
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+ 
+.animate-shimmer {
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+ 

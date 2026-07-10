@@ -27,26 +27,14 @@
 }
 
 
-@keyframes skeleton-shimmer {
-  0% {
-    background-position: -400px 0;
-  }
+@keyframes shimmer {
   100% {
-    background-position: 400px 0;
+    transform: translateX(100%);
   }
 }
-
-.skeleton-shimmer {
-  background-color: hsl(var(--secondary) / 0.5);
-  background-image: linear-gradient(
-    90deg,
-    transparent 0%,
-    hsl(var(--foreground) / 0.06) 20%,
-    hsl(var(--foreground) / 0.12) 40%,
-    hsl(var(--foreground) / 0.06) 60%,
-    transparent 100%
-  );
-  background-size: 400px 100%;
-  background-repeat: no-repeat;
-  animation: skeleton-shimmer 1.8s ease-in-out infinite;
+ 
+.animate-shimmer {
+  animation: shimmer 1.8s ease-in-out infinite;
 }
+ 
+

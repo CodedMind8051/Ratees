@@ -204,7 +204,7 @@ export default function WatchlistContent() {
 
       {selectedContent && (
         <MovieDetailModal
-          content={selectedContent}
+          contentId={selectedContent.id}
           onClose={() => setSelectedContent(null)}
           initialStatus={watchlist.find(w => w.contentId === selectedContent.id)?.status ?? null}
           onStatusChange={handleStatusChange}

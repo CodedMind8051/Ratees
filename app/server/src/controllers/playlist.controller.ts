@@ -8,7 +8,7 @@ import type { GetPlaylistsInputType, PlaylistResponseType, CreatePlaylistInputTy
 import mongoose from "mongoose";
 
 
-export const getPlaylists = async ({ page, userID, RequestUserId }: GetPlaylistsInputType) => {
+export const getPlaylists = async ({ page, userID, RequestUserId }: GetPlaylistsInputType):Promise<PlaylistResponseType> => {
 
     try {
 
@@ -110,7 +110,6 @@ export const getPlaylists = async ({ page, userID, RequestUserId }: GetPlaylists
             );
         }
 
-        // Return empty array instead of error when no playlists exist
         if (!playlists || playlists.totalDocs === 0) {
             return {
                 playlists: [],
@@ -125,7 +124,7 @@ export const getPlaylists = async ({ page, userID, RequestUserId }: GetPlaylists
             playlists: playlists.docs,
             totalPages: playlists.totalPages,
             totalDocs: playlists.totalDocs,
-            currentPage: playlists.page
+            currentPage: playlists.page || 1
         };
 
     } catch (error) {

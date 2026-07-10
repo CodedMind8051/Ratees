@@ -14,6 +14,5 @@ export type ReviewsDetailsDataType = {
     createdAt: Date,
     userId: mongoose.Types.ObjectId,
     username: String,
-    userEmail: String,
     profileImage: String
 }

@@ -8,7 +8,6 @@ const reviewTypeDefs = `#graphql
     isOwn:Boolean!
     userId:ID!,
     username:String!,
-    userEmail:String!,
     profileImage:String!
     }
 

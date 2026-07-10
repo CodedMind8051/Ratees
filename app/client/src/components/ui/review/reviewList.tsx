@@ -1,5 +1,5 @@
 import { Star } from 'lucide-react';
-import { useReviews } from '@/components/ui/review/useReview';
+import { useReviews } from '@/hooks/useReview';
 import { ReviewForm } from '@/components/ui/review/reviewFrom';
 import { ReviewCard , ReviewCardSkeleton } from '@/components/ui/review/reviewCard'
 import { DeleteConfirmDialog } from '@/components/ui/review/reviewDeleteConformation';

@@ -9,15 +9,23 @@ export type UpdatePlaylistInputType = z.infer<typeof updatePlaylistSchema>
 export type PlaylistsItemsInputType = z.infer<typeof PlaylistsItemsSchema>
 export type GetPlaylistItemsInputType = z.infer<typeof getPlaylistItemsSchema>
 
-export type PlaylistResponseType = {
+
+type playlistDetailsType = {
     playlistName: string;
     description: string;
     userId: mongoose.Types.ObjectId;
     isPublic: boolean;
     isOwner: boolean;
     totalTracks: number;
+    coverImage?: string,
     createdAt: Date;
-    updatedAt: Date;
+    updatedAt: Date
+}
+export type PlaylistResponseType = {
+    playlists: playlistDetailsType[] | [],
+    totalPages: number,
+    totalDocs: number,
+    currentPage: number
 };
 
 export type PlaylistItemResponseType = {

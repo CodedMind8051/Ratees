@@ -1,66 +1,111 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   BookMarked, SlidersHorizontal
 } from 'lucide-react';
-import { allContent, mockWatchlist, WatchlistEntry, RatingKey } from '@/data/mockData';
 import MovieDetailModal from '@/components/ui/content/ContentDetailModal';
-import { ContentItem } from '@/data/mockData';
 import { toast } from 'sonner';
 import { StatusTab, SortOption, tabConfig, emptyMessages } from '@/constants/watchlist.constant';
 import { WatchlistCard } from '@/components/ui/watchlist/watchlistContaintCard';
+import { useWatchStatusContentList, useWatchStatusActions, backendToStatus } from '@/hooks/useWatchStatus';
+import { useAuth } from '@/hooks/useAuth';
+import type { ContentFullDetailType } from "@/types/content.types"
 
-
+interface WatchlistContentItem {
+  _id: string;
+  title: string;
+  genre: string[];
+  Content_Type: string;
+  release_date: string;
+  poster: string;
+  createdAt: string;
+  isOwner: boolean;
+}
 
 export default function WatchlistContent() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<StatusTab>('watching');
-  const [watchlist, setWatchlist] = useState<WatchlistEntry[]>(mockWatchlist);
-  const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
+  const [selectedContent, setSelectedContent] = useState<ContentFullDetailType | null>(null);
+  const [selectedContentId, setSelectedContentId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('dateAdded');
   const [filterType, setFilterType] = useState<'All' | 'Movie' | 'Series'>('All');
   const [showFilters, setShowFilters] = useState(false);
 
+  // Fetch watch status content list based on active tab
+  const { contentList, loading, refetch } = useWatchStatusContentList(activeTab);
+
+  // Actions for status changes
+  const { setStatus } = useWatchStatusActions();
+
+  // Get current status for selected content from the modal
+  const [currentStatus, setCurrentStatus] = useState<'watching' | 'watchlater' | 'watched' | null>(null);
+
+  // Memoize and filter the content list
   const tabEntries = useMemo(() => {
-    const withContent = watchlist
-      .filter(w => w.status === activeTab)
-      .map(e => {
-        const content = allContent.find(c => c.id === e.contentId);
-        return content ? { entry: e, content } : null;
-      })
-      .filter(Boolean) as { entry: WatchlistEntry; content: ContentItem }[];
-
     const filtered = filterType === 'All'
-      ? withContent
-      : withContent.filter(({ content }) => content.type === filterType);
+      ? contentList
+      : contentList.filter((item: WatchlistContentItem) =>
+          item.Content_Type === (filterType === 'Movie' ? 'movie' : 'tv')
+        );
 
-    return filtered.sort((a, b) => {
-      if (sortBy === 'title') return a.content.title.localeCompare(b.content.title);
-      if (sortBy === 'year') return b.content.year - a.content.year;
+    return filtered.sort((a: WatchlistContentItem, b: WatchlistContentItem) => {
+      if (sortBy === 'title') return a.title.localeCompare(b.title);
+      if (sortBy === 'year') {
+        const yearA = new Date(a.release_date).getFullYear();
+        const yearB = new Date(b.release_date).getFullYear();
+        return yearB - yearA;
+      }
       return 0;
     });
-  }, [activeTab, watchlist, sortBy, filterType]);
+  }, [contentList, sortBy, filterType]);
 
-  const tabCounts = useMemo(() => ({
-    watching: watchlist.filter(w => w.status === 'watching').length,
-    watchlater: watchlist.filter(w => w.status === 'watchlater').length,
-    watched: watchlist.filter(w => w.status === 'watched').length,
-  }), [watchlist]);
+  // Calculate tab counts by refetching each tab (optimized approach)
+  const [tabCounts, setTabCounts] = useState({
+    watching: 0,
+    watchlater: 0,
+    watched: 0,
+  });
 
-  const handleStatusChange = (contentId: string, status: 'watched' | 'watching' | 'watchlater' | null) => {
-    setWatchlist(prev =>
-      status === null
-        ? prev.filter(w => w.contentId !== contentId)
-        : prev.map(w => w.contentId === contentId ? { ...w, status } : w)
-    );
+  useEffect(() => {
+    // We'll count based on the content list when tab changes
+    // For now, we'll show the count from the current query
+    if (contentList && user) {
+      setTabCounts(prev => ({ ...prev, [activeTab]: contentList.length }));
+    }
+  }, [contentList, activeTab, user]);
+
+  // Handle status change from modal
+  const handleStatusChange = async (contentId: string, status: 'watched' | 'watching' | 'watchlater' | null) => {
+    await setStatus(contentId, status, currentStatus);
+    setCurrentStatus(status);
+    refetch();
+
+    // Refresh all tab counts
+    setTimeout(() => {
+      refetch();
+    }, 500);
   };
 
-  const handleRemove = (contentId: string) => {
-    setWatchlist(prev => prev.filter(w => w.contentId !== contentId));
+  // Handle remove from watchlist
+  const handleRemove = async (contentId: string) => {
+    await setStatus(contentId, null, currentStatus);
+    refetch();
     toast.success('Removed from watchlist');
   };
 
-  const handleMoveStatus = (contentId: string, newStatus: 'watched' | 'watching' | 'watchlater') => {
-    setWatchlist(prev => prev.map(w => w.contentId === contentId ? { ...w, status: newStatus } : w));
+  // Handle move status
+  const handleMoveStatus = async (contentId: string, newStatus: 'watched' | 'watching' | 'watchlater') => {
+    await setStatus(contentId, newStatus, currentStatus);
+    setCurrentStatus(newStatus);
+    refetch();
     toast.success(`Moved to ${tabConfig[newStatus].label}`);
+  };
+
+  // Handle viewing details
+  const handleViewDetails = (contentId: string) => {
+    setSelectedContentId(contentId);
+    // Find the content in the current list to get its status
+    const item = contentList.find((c: WatchlistContentItem) => c._id === contentId);
+    // We'll fetch the full details via the modal
   };
 
   const sortOptions: { value: SortOption; label: string }[] = [
@@ -68,6 +113,16 @@ export default function WatchlistContent() {
     { value: 'title', label: 'Title A–Z' },
     { value: 'year', label: 'Year' },
   ];
+
+  // When selectedContentId changes, find the status
+  useEffect(() => {
+    if (selectedContentId && contentList) {
+      const item = contentList.find((c: WatchlistContentItem) => c._id === selectedContentId);
+      if (item) {
+        setCurrentStatus(activeTab);
+      }
+    }
+  }, [selectedContentId, contentList, activeTab]);
 
   return (
     <div className="watchlist-content-component max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-6 sm:py-8">
@@ -89,7 +144,7 @@ export default function WatchlistContent() {
             <h1 className="text-xl sm:text-2xl font-bold text-foreground">My Watchlist</h1>
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            {watchlist.length} titles tracked
+            {tabCounts[activeTab]} titles tracked
           </p>
         </div>
 
@@ -189,7 +244,19 @@ export default function WatchlistContent() {
       </div>
 
       {/* ── Content ── */}
-      {tabEntries.length === 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3 sm:gap-4">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="bg-card border border-border rounded-xl overflow-hidden">
+              <div className="aspect-[16/9] bg-secondary animate-pulse" />
+              <div className="p-3 space-y-2">
+                <div className="h-4 bg-secondary animate-pulse rounded w-3/4" />
+                <div className="h-3 bg-secondary animate-pulse rounded w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : tabEntries.length === 0 ? (
         <div className="text-center py-16 sm:py-24 border border-dashed border-border rounded-2xl">
           {React.createElement(tabConfig[activeTab].icon, {
             size: 40,
@@ -204,29 +271,38 @@ export default function WatchlistContent() {
         </div>
       ) : (
         <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3 sm:gap-4">
-          {tabEntries.map(({ entry, content }) => (
+          {(tabEntries as WatchlistContentItem[]).map((item) => (
             <WatchlistCard
-              key={`wl-${entry.id}`}
-              entry={entry}
-              content={content}
-              onViewDetails={() => setSelectedContent(content)}
-              onRemove={() => handleRemove(content.id)}
-              onMoveStatus={status => handleMoveStatus(content.id, status)}
+              key={`wl-${item._id}`}
+              contentId={item._id}
+              title={item.title}
+              poster={item.poster}
+              genre={item.genre}
+              contentType={item.Content_Type}
+              releaseDate={item.release_date}
+              dateAdded={item.createdAt}
+              isOwner={item.isOwner}
+              status={activeTab}
+              onViewDetails={() => handleViewDetails(item._id)}
+              onRemove={() => handleRemove(item._id)}
+              onMoveStatus={(status) => handleMoveStatus(item._id, status)}
             />
           ))}
         </div>
       )}
 
       {/* ── Modal ── */}
-      {selectedContent && (
+      {selectedContentId && (
         <MovieDetailModal
-          content={selectedContent}
-          onClose={() => setSelectedContent(null)}
-          initialStatus={watchlist.find(w => w.contentId === selectedContent.id)?.status ?? null}
+          contentId={selectedContentId}
+          onClose={() => {
+            setSelectedContentId(null);
+            setSelectedContent(null);
+          }}
+          initialStatus={currentStatus}
           onStatusChange={handleStatusChange}
         />
       )}
     </div>
   );
 }
-

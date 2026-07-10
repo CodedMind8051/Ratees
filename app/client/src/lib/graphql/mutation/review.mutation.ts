@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client"
 
 export const SUBMIT_REVIEWS = gql`
-     mutation SubmitReview($contentId: ID!, $review: String!) {
-       submitReview(ContentId: $contentId, review: $review)
+     mutation SubmitReview($ContentId: ID!, $review: String!) {
+       submitReview(ContentId: $ContentId, review: $review)
      }
 
 `

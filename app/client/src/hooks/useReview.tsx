@@ -30,17 +30,18 @@ export function useReviews(contentId?: string): UseReviewsReturn {
 
     const { loading, data, error } = useQuery<GetReviewsResponse>(GET_REVIEWS, {
         variables: {
-            contentId: contentId,
+            ContentId: contentId,  // Use capital C and I to match backend
             page: 1
-        }
-    })
+        },
+        skip: !contentId,  // Skip if no contentId
+    });
 
     const [submitReviewMutation] = useMutation(SUBMIT_REVIEWS, {
         refetchQueries: [
             {
                 query: GET_REVIEWS,
                 variables: {
-                    contentId: contentId,
+                    ContentId: contentId,
                     page: 1
                 }
             }
@@ -52,7 +53,7 @@ export function useReviews(contentId?: string): UseReviewsReturn {
             {
                 query: GET_REVIEWS,
                 variables: {
-                    contentId: contentId,
+                    ContentId: contentId,
                     page: 1
                 }
             }
@@ -64,7 +65,7 @@ export function useReviews(contentId?: string): UseReviewsReturn {
             {
                 query: GET_REVIEWS,
                 variables: {
-                    contentId: contentId,
+                    ContentId: contentId,
                     page: 1
                 }
             }
@@ -74,7 +75,7 @@ export function useReviews(contentId?: string): UseReviewsReturn {
     const [submitting, setSubmitting] = useState(false);
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [reviews, setReviews] = useState([])
+    const [reviews, setReviews] = useState<Review[]>([])
 
 
     useEffect(() => {
@@ -85,15 +86,15 @@ export function useReviews(contentId?: string): UseReviewsReturn {
     const submitReview = useCallback(async (values: ReviewFormValues) => {
         setSubmitting(true);
         try {
-
-            await submitReviewMutation({ variables: { contentId, ...values } })
+            await submitReviewMutation({ variables: { ContentId: contentId, ...values } })
             toast.success('Review posted');
-        } catch (error) {
+        } catch (error: any) {
+            console.error('Failed to submit review:', error);
             toast.error(`${error.message || 'Failed to post review. Try again.'}`)
         } finally {
             setSubmitting(false);
         }
-    }, []);
+    }, [contentId]);
 
     const startEditing = useCallback((review: Review) => {
         setEditingId(review?._id);
@@ -109,7 +110,8 @@ export function useReviews(contentId?: string): UseReviewsReturn {
             await updateReviewMutation({ variables: { reviewId: id, ...values } })
             setEditingId(null);
             toast.success('Review updated');
-        } catch (error) {
+        } catch (error: any) {
+            console.error('Failed to update review:', error);
             toast.error(`${error.message || 'Failed to post review. Try again.'}`)
         }
     }, []);
@@ -119,8 +121,9 @@ export function useReviews(contentId?: string): UseReviewsReturn {
             await deleteReviewMutation({ variables: { reviewId: id } })
             setDeleteConfirmId(null);
             toast.success('Review deleted');
-        } catch (error) {
-            toast.error(`${error.message || 'Failed to post review. Try again.'}`)
+        } catch (error: any) {
+            console.error('Failed to delete review:', error);
+            toast.error(`${error.message || 'Failed to delete review. Try again.'}`)
         }
     }, []);
 

@@ -1,23 +1,43 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowUpDown, Film, Tv, X } from 'lucide-react';
-import { WatchlistEntry, ContentItem } from '@/data/mockData';
 import { RATING_LABELS } from '@/constants/rating.constant';
-import { tabConfig } from '@/constants/watchlist.constant';
-
+import { tabConfig, StatusTab } from '@/constants/watchlist.constant';
 
 interface WatchlistCardProps {
-  entry: WatchlistEntry;
-  content: ContentItem;
+  contentId: string;
+  title: string;
+  poster: string;
+  genre: string[];
+  contentType: string;
+  releaseDate: string;
+  dateAdded: string;
+  isOwner: boolean;
+  status: StatusTab;
+  personalRating?: string;
   onViewDetails: () => void;
   onRemove: () => void;
   onMoveStatus: (status: 'watched' | 'watching' | 'watchlater') => void;
 }
 
-export function WatchlistCard({ entry, content, onViewDetails, onRemove, onMoveStatus }: WatchlistCardProps) {
+export function WatchlistCard({
+  contentId,
+  title,
+  poster,
+  genre,
+  contentType,
+  releaseDate,
+  dateAdded,
+  isOwner,
+  status,
+  personalRating,
+  onViewDetails,
+  onRemove,
+  onMoveStatus,
+}: WatchlistCardProps) {
   const [moveMenuOpen, setMoveMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const moveOptions = (['watched', 'watching', 'watchlater'] as const).filter(s => s !== entry.status);
+  const moveOptions = (['watched', 'watching', 'watchlater'] as const).filter(s => s !== status);
 
   // Close move menu on outside click
   useEffect(() => {
@@ -30,6 +50,14 @@ export function WatchlistCard({ entry, content, onViewDetails, onRemove, onMoveS
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [moveMenuOpen]);
+
+  // Format release year from date string
+  const releaseYear = releaseDate ? new Date(releaseDate).getFullYear() : '';
+
+  // Get poster URL
+  const posterUrl = poster?.startsWith('/')
+    ? `${import.meta.env.VITE_TMDB_POSTER_BASE_URL}${poster}`
+    : poster || '/assets/images/no_image.png';
 
   return (
     <div className="group bg-card border border-border rounded-xl overflow-hidden hover:border-muted transition-all duration-200 flex flex-col">
@@ -44,8 +72,8 @@ export function WatchlistCard({ entry, content, onViewDetails, onRemove, onMoveS
       >
         <div className="aspect-[16/9] bg-secondary overflow-hidden">
           <img
-            src={content.poster}
-            alt={content.title}
+            src={posterUrl}
+            alt={title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </div>
@@ -57,12 +85,12 @@ export function WatchlistCard({ entry, content, onViewDetails, onRemove, onMoveS
         <div className="absolute top-2 left-2">
           <span className={[
             'flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border backdrop-blur-sm',
-            content.type === 'Movie'
+            contentType === 'movie'
               ? 'bg-card/80 border-border text-muted-foreground'
               : 'bg-blue-500/20 border-blue-500/40 text-blue-400',
           ].join(' ')}>
-            {content.type === 'Movie' ? <Film size={9} /> : <Tv size={9} />}
-            {content.type}
+            {contentType === 'movie' ? <Film size={9} /> : <Tv size={9} />}
+            {contentType === 'movie' ? 'Movie' : 'Series'}
           </span>
         </div>
 
@@ -84,23 +112,23 @@ export function WatchlistCard({ entry, content, onViewDetails, onRemove, onMoveS
               className="text-sm font-semibold text-foreground leading-tight truncate cursor-pointer hover:text-primary transition-colors"
               onClick={onViewDetails}
             >
-              {content.title}
+              {title}
             </h3>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              {content.year} · {content.genre[0]}
+              {releaseYear} · {genre?.[0] || 'Unknown'}
             </p>
           </div>
 
           {/* Personal rating badge */}
-          {entry.personalRating && (
+          {personalRating && (
             <span className={[
               'text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 border',
-              entry.personalRating === 'masterpiece' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                entry.personalRating === 'good' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
-                  entry.personalRating === 'timepass' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' :
+              personalRating === 'masterpiece' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                personalRating === 'good' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
+                  personalRating === 'timepass' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' :
                     'bg-red-500/10 text-red-400 border-red-500/20',
             ].join(' ')}>
-              {RATING_LABELS[entry.personalRating]}
+              {RATING_LABELS[personalRating as keyof typeof RATING_LABELS] || personalRating}
             </span>
           )}
         </div>
@@ -108,7 +136,7 @@ export function WatchlistCard({ entry, content, onViewDetails, onRemove, onMoveS
         {/* ── Footer ── */}
         <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-border/60">
           <p className="text-[10px] text-muted-foreground/60 tabular-nums">
-            {entry.dateAdded}
+            {dateAdded ? new Date(dateAdded).toLocaleDateString() : ''}
           </p>
 
           {/* Move to */}
@@ -121,13 +149,13 @@ export function WatchlistCard({ entry, content, onViewDetails, onRemove, onMoveS
             </button>
             {moveMenuOpen && (
               <div className="absolute bottom-full right-0 mb-1.5 bg-card border border-border rounded-xl shadow-2xl z-20 py-1 min-w-[130px] fade-in overflow-hidden">
-                {moveOptions.map(status => {
-                  const cfg = tabConfig[status];
+                {moveOptions.map(moveStatus => {
+                  const cfg = tabConfig[moveStatus];
                   const MoveIcon = cfg.icon;
                   return (
                     <button
-                      key={`move-${status}`}
-                      onClick={() => { setMoveMenuOpen(false); onMoveStatus(status); }}
+                      key={`move-${moveStatus}`}
+                      onClick={() => { setMoveMenuOpen(false); onMoveStatus(moveStatus); }}
                       className={`w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-secondary transition-colors ${cfg.color}`}
                     >
                       <MoveIcon size={12} />
