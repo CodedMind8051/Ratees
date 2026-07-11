@@ -30,7 +30,6 @@ export function useAuth() {
         setError(null);
       } else if (sessionData?.error) {
         // Error in session
-        console.log('[Auth] Session error:', sessionData.error);
         setError(sessionData.error.message || 'Session error');
         setUser(null);
       } else {

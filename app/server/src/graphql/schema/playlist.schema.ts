@@ -10,7 +10,7 @@ export const playlistTypeDefs = `#graphql
              isPublic: Boolean!
              totalTracks: Int!
              isOwner: Boolean!
-             coverImage: String
+             coverImage: [String]
              createdAt: Date!
              updatedAt: Date!
          }

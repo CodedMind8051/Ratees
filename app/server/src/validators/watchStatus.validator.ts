@@ -6,7 +6,7 @@ import { objectIdSchema, pageSchema } from "./common.validator";
 export enum WatchStatusEnum {
     Watching = "Watching",
     WATCHED = "Watched",
-    WATCH_LATER = "Watch Later",
+    WATCH_LATER = "WatchLater",
 }
 
 export const WatchStatusIdentifierInputSchema = z.object({

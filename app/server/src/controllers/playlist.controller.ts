@@ -8,7 +8,7 @@ import type { GetPlaylistsInputType, PlaylistResponseType, CreatePlaylistInputTy
 import mongoose from "mongoose";
 
 
-export const getPlaylists = async ({ page, userID, RequestUserId }: GetPlaylistsInputType):Promise<PlaylistResponseType> => {
+export const getPlaylists = async ({ page, userID, RequestUserId }: GetPlaylistsInputType): Promise<PlaylistResponseType> => {
 
     try {
 
@@ -39,38 +39,21 @@ export const getPlaylists = async ({ page, userID, RequestUserId }: GetPlaylists
                     ]
                 }
             },
-            // Lookup first playlist item to get cover image
             {
                 $lookup: {
                     from: "playlistitems",
-                    let: { playlistId: "$_id" },
-                    pipeline: [
-                        { $match: { $expr: { $eq: ["$playlistId", "$$playlistId"] } } },
-                        { $sort: { createdAt: -1 } },
-                        { $limit: 1 },
-                        {
-                            $lookup: {
-                                from: "contents",
-                                localField: "contentId",
-                                foreignField: "_id",
-                                as: "content"
-                            }
-                        },
-                        { $unwind: { path: "$content", preserveNullAndEmptyArrays: true } },
-                        { $project: { poster: "$content.poster" } }
-                    ],
-                    as: "firstItem"
+                    localField: "_id",
+                    foreignField: "playlistId",
+                    as: "playlistItems"
                 }
+
             },
             {
-                $addFields: {
-                    coverImage: {
-                        $cond: {
-                            if: { $gt: [{ $size: "$firstItem" }, 0] },
-                            then: { $arrayElemAt: ["$firstItem.poster", 0] },
-                            else: null
-                        }
-                    }
+                $lookup: {
+                    from: "contents",
+                    localField: "playlistItems.contentId",
+                    foreignField: "_id",
+                    as: "contents"
                 }
             },
             {
@@ -88,7 +71,9 @@ export const getPlaylists = async ({ page, userID, RequestUserId }: GetPlaylists
                     isPublic: 1,
                     isOwner: 1,
                     totalTracks: 1,
-                    coverImage: 1,
+                    coverImage: {
+                        $slice: ["$contents.poster", 4]
+                    },
                     createdAt: 1,
                     updatedAt: 1
                 },

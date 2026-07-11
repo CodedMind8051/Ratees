@@ -27,7 +27,7 @@ export default function WatchlistContent() {
   const [selectedContent, setSelectedContent] = useState<ContentFullDetailType | null>(null);
   const [selectedContentId, setSelectedContentId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('dateAdded');
-  const [filterType, setFilterType] = useState<'All' | 'Movie' | 'Series'>('All');
+  const [filterType, setFilterType] = useState<'All' | 'movie' | 'Series'>('All');
   const [showFilters, setShowFilters] = useState(false);
 
   // Fetch watch status content list based on active tab
@@ -42,16 +42,16 @@ export default function WatchlistContent() {
   // Memoize and filter the content list
   const tabEntries = useMemo(() => {
     const filtered = filterType === 'All'
-      ? contentList
+      ? [...contentList]
       : contentList.filter((item: WatchlistContentItem) =>
-          item.Content_Type === (filterType === 'Movie' ? 'movie' : 'tv')
+          item.Content_Type === (filterType === 'movie' ? 'movie' : 'tv')
         );
 
     return filtered.sort((a: WatchlistContentItem, b: WatchlistContentItem) => {
       if (sortBy === 'title') return a.title.localeCompare(b.title);
       if (sortBy === 'year') {
-        const yearA = new Date(a.release_date).getFullYear();
-        const yearB = new Date(b.release_date).getFullYear();
+        const yearA = new Date(a.release_date)?.getFullYear();
+        const yearB = new Date(b.release_date)?.getFullYear();
         return yearB - yearA;
       }
       return 0;
@@ -78,7 +78,7 @@ export default function WatchlistContent() {
     await setStatus(contentId, status, currentStatus);
     setCurrentStatus(status);
     refetch();
-
+    
     // Refresh all tab counts
     setTimeout(() => {
       refetch();
@@ -193,7 +193,7 @@ export default function WatchlistContent() {
                 Type
               </p>
               <div className="flex gap-2">
-                {(['All', 'Movie', 'Series'] as const).map(type => (
+                {(['All', 'movie', 'Series'] as const).map(type => (
                   <button
                     key={`type-${type}`}
                     onClick={() => setFilterType(type)}

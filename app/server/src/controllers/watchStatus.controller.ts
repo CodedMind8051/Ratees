@@ -72,13 +72,16 @@ export const updateWatchStatusOfContent = async ({
     contentId,
     watchStatus
 }: submitWatchStatusOfContentInputType): Promise<boolean> => {
-
     try {
+
         const { userId: verifiedUserId, contentId: verifiedContentId, watchStatus: verifiedWatchStatus } = validate(submitWatchStatusOfContentInputSchema, {
             userId,
             contentId,
             watchStatus
         })
+
+
+        console.log(verifiedContentId)
 
 
         const updateWatchStatus = await WatchStatus.updateOne(
@@ -93,6 +96,20 @@ export const updateWatchStatusOfContent = async ({
             }
         )
 
+        console.log({
+            verifiedUserId,
+            verifiedContentId,
+            verifiedWatchStatus,
+            updateWatchStatus
+        });
+
+
+        const doc = await WatchStatus.findOne({
+            userId: new mongoose.Types.ObjectId(verifiedUserId),
+            contentId: new mongoose.Types.ObjectId(verifiedContentId),
+        });
+
+        console.log(doc);
         if (updateWatchStatus.matchedCount === 0) {
             throwGraphqlError("Watch status not found.", "WATCH_STATUS_NOT_FOUND", 404, true)
         }
@@ -233,7 +250,6 @@ export const getContentListInWatchStatus = async ({
 
 
     } catch (error) {
-        console.log(error)
         return handelGraphqlError(error)
     }
 

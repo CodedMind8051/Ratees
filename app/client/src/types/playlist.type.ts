@@ -10,7 +10,7 @@ export interface Playlist {
   isPublic: boolean;
   totalTracks: number;
   isOwner?: boolean; // Added by backend aggregation
-  coverImage?: string | null;
+  coverImage?: string[] | null;
   createdAt: string;
   updatedAt: string;
 }

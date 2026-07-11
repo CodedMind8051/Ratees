@@ -4,30 +4,40 @@ import type { ReactNode } from 'react';
 // ============================================
 // PLAYLIST CARD SKELETON
 // ============================================
-// Matches the real PlaylistCard: no poster, a flat cover with a
-// centered watermark icon and a "N titles" pill top-right, then a
-// footer with title+visibility icon, a description line, and an
-// "Updated ..." line.
+// Matches the redesigned PlaylistCard: a tall cover with a
+// circular privacy badge top-left, a "N TITLES" pill top-right,
+// and a bottom scrim holding title + description placeholders,
+// then a slim footer with an "Updated ..." line and round
+// action buttons.
 
 export function PlaylistCardSkeleton() {
   return (
-    <div className="relative bg-card border border-border rounded-2xl overflow-hidden animate-pulse">
+    <div className="relative bg-card border border-border/60 rounded-3xl overflow-hidden animate-pulse">
       {/* Cover */}
-      <div className="relative aspect-[4/3] bg-secondary flex items-center justify-center">
-        {/* titles count pill, top-right */}
-        <div className="absolute top-3 right-3 h-6 w-16 rounded-full bg-white/15" />
+      <div className="relative h-64 sm:h-72 bg-gradient-to-br from-secondary to-secondary/50 flex items-center justify-center">
         {/* centered watermark icon */}
         <div className="h-9 w-9 rounded-lg bg-white/10" />
+
+        {/* Top row: privacy badge + count pill */}
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+          <div className="w-7 h-7 rounded-full bg-white/15" />
+          <div className="h-6 w-20 rounded-full bg-white/15" />
+        </div>
+
+        {/* Title + description overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 pr-14 space-y-2">
+          <div className="h-4 w-3/4 rounded bg-white/25" />
+          <div className="h-3 w-1/2 rounded bg-white/15" />
+        </div>
       </div>
 
       {/* Footer */}
-      <div className="p-4 space-y-2.5">
-        <div className="flex items-center gap-1.5">
-          <div className="h-4 w-24 rounded bg-muted" />
-          <div className="h-3.5 w-3.5 rounded-full bg-muted opacity-70" />
+      <div className="px-4 py-3 flex items-center justify-between">
+        <div className="h-2.5 w-24 rounded bg-muted opacity-50" />
+        <div className="flex gap-1 shrink-0">
+          <div className="h-8 w-8 rounded-full bg-secondary" />
+          <div className="h-8 w-8 rounded-full bg-secondary" />
         </div>
-        <div className="h-3 w-4/5 rounded bg-muted opacity-70" />
-        <div className="h-2.5 w-28 rounded bg-muted opacity-50" />
       </div>
     </div>
   );

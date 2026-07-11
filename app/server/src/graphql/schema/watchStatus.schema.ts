@@ -6,7 +6,7 @@ export const watchStatusTypeDefs = `#graphql
         enum WatchStatusEnum {
           Watching
           Watched
-          Watch_Later
+          WatchLater
         }
         
         type WatchStatus {
