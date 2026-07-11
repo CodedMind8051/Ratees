@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, AlertCircle, Loader2, Eye, EyeOff, Users, Compass, MessageSquare } from "lucide-react";
+import { Check, AlertCircle, Loader2, Eye, EyeOff, Compass, MessageSquare } from "lucide-react";
 
 import AuthNavbar from "@/components/ui/layout/AuthNavbar";
 import GlowBackground from "@/components/ui/common/GlowBackground";
 import GoogleButton from "@/components/buttons/GoogleButton";
 
-import { handelSignInWithFiled, handelSignUpWithGoogle } from "@/functions/auth.function";
+import { handleSignInWithEmail, handleSignUpWithGoogle } from "@/functions/auth.function";
 
 type FormState = {
   email: string;
@@ -17,7 +17,7 @@ type ValidationErrors = {
   [key in keyof FormState]?: string;
 };
 
-const CUBIC_EASE = [0.22, 1, 0.36, 1];
+const CUBIC_EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 interface FormFieldProps {
   name: keyof FormState;
@@ -114,7 +114,7 @@ export default function Login() {
   const [form, setForm] = useState<FormState>({ email: "", password: "" });
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [success] = useState(false);
   const [touched, setTouched] = useState<Set<string>>(new Set());
   const [showPass, setShowPass] = useState(false);
 
@@ -173,7 +173,7 @@ export default function Login() {
 
     setLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 1600));
-    await handelSignInWithFiled(form, setSuccess);
+    await handleSignInWithEmail(form);
     setLoading(false);
   };
 
@@ -315,7 +315,7 @@ export default function Login() {
                       </div>
 
                       {/* Google Authentication */}
-                      <GoogleButton onClick={handelSignUpWithGoogle} />
+                      <GoogleButton onClick={handleSignUpWithGoogle} />
 
                       {/* Divider */}
                       <div className="my-3.5 flex items-center gap-3">

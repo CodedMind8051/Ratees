@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, X, Film, Tv, Check } from 'lucide-react';
+import { Search, X, Film, Tv } from 'lucide-react';
 import { useQuery } from '@apollo/client/react';
 import { SEARCH_CONTENT } from '@/lib/graphql/query/content.query';
 import type { ContentItemsType } from '@/types/content.types';
 import MovieDetailModal from "@/components/ui/content/ContentDetailModal"
+import { getPosterUrl } from '@/utils/content.utils';
 
 const TRENDING_TAGS = ['Thriller', 'Science Fiction', 'Drama', 'Korean', 'Crime', 'Animation'] as const;
 
@@ -11,12 +12,6 @@ interface SearchOverlayProps {
   onClose: () => void;
   onSelectMovie?: (content: ContentItemsType) => void;
   onSelectMovieOnly?: boolean; // When true, only calls onSelectMovie without opening detail modal
-}
-
-function getPosterUrl(poster: string | undefined | null): string {
-  if (!poster || poster === 'N/A') return '/assets/images/no_image.png';
-  if (poster.startsWith('/')) return `${import.meta.env.VITE_TMDB_POSTER_BASE_URL}${poster}`;
-  return poster;
 }
 
 function SearchSkeleton() {
@@ -41,7 +36,6 @@ export default function SearchOverlay({ onClose, onSelectMovie, onSelectMovieOnl
   const [submittedQuery, setSubmittedQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [selected, setselected] = useState(false)
   const [selectedContent, setselectedContent] = useState("")
   const [addingItemId, setAddingItemId] = useState<string | null>(null);
 
@@ -92,7 +86,6 @@ export default function SearchOverlay({ onClose, onSelectMovie, onSelectMovieOnl
       onSelectMovie?.(item);
       // Only open detail modal if onSelectMovieOnly is not true
       if (!onSelectMovieOnly) {
-        setselected(true)
         setselectedContent(item?._id)
       }
       setAddingItemId(null);

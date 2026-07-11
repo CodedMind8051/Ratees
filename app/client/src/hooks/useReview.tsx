@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { Review, ReviewFormValues } from '@/types/review.types';
 import { useMutation, useQuery } from '@apollo/client/react';
@@ -8,7 +8,7 @@ import { SUBMIT_REVIEWS, UPDATE_REVIEW, DELETE_REVIEW } from '@/lib/graphql/muta
 
 interface UseReviewsReturn {
     reviews: Review[];
-    error?: any,
+    error?: Error | null,
     loading: boolean,
     submitting: boolean;
     deleteConfirmId: string | null;
@@ -30,10 +30,10 @@ export function useReviews(contentId?: string): UseReviewsReturn {
 
     const { loading, data, error } = useQuery<GetReviewsResponse>(GET_REVIEWS, {
         variables: {
-            ContentId: contentId,  // Use capital C and I to match backend
+            ContentId: contentId,
             page: 1
         },
-        skip: !contentId,  // Skip if no contentId
+        skip: !contentId,
     });
 
     const [submitReviewMutation] = useMutation(SUBMIT_REVIEWS, {
@@ -75,12 +75,8 @@ export function useReviews(contentId?: string): UseReviewsReturn {
     const [submitting, setSubmitting] = useState(false);
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [reviews, setReviews] = useState<Review[]>([])
 
-
-    useEffect(() => {
-        setReviews(data?.getReviews || [])
-    }, [data?.getReviews])
+    const reviews: Review[] = data?.getReviews || [];
 
 
     const submitReview = useCallback(async (values: ReviewFormValues) => {
@@ -88,9 +84,10 @@ export function useReviews(contentId?: string): UseReviewsReturn {
         try {
             await submitReviewMutation({ variables: { ContentId: contentId, ...values } })
             toast.success('Review posted');
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Failed to submit review:', error);
-            toast.error(`${error.message || 'Failed to post review. Try again.'}`)
+            const message = error instanceof Error ? error.message : 'Failed to post review. Try again.';
+            toast.error(message);
         } finally {
             setSubmitting(false);
         }
@@ -110,9 +107,10 @@ export function useReviews(contentId?: string): UseReviewsReturn {
             await updateReviewMutation({ variables: { reviewId: id, ...values } })
             setEditingId(null);
             toast.success('Review updated');
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Failed to update review:', error);
-            toast.error(`${error.message || 'Failed to post review. Try again.'}`)
+            const message = error instanceof Error ? error.message : 'Failed to post review. Try again.';
+            toast.error(message);
         }
     }, []);
 
@@ -121,9 +119,10 @@ export function useReviews(contentId?: string): UseReviewsReturn {
             await deleteReviewMutation({ variables: { reviewId: id } })
             setDeleteConfirmId(null);
             toast.success('Review deleted');
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Failed to delete review:', error);
-            toast.error(`${error.message || 'Failed to delete review. Try again.'}`)
+            const message = error instanceof Error ? error.message : 'Failed to delete review. Try again.';
+            toast.error(message);
         }
     }, []);
 

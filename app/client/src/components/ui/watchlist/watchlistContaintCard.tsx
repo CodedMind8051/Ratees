@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowUpDown, Film, Tv, X } from 'lucide-react';
 import { RATING_LABELS } from '@/constants/rating.constant';
 import { tabConfig, StatusTab } from '@/constants/watchlist.constant';
+import type { WatchStatus } from '@/types/watchlist';
+import { WATCH_STATUS_VALUES } from '@/types/watchlist';
 
 interface WatchlistCardProps {
   contentId: string;
@@ -16,18 +18,16 @@ interface WatchlistCardProps {
   personalRating?: string;
   onViewDetails: () => void;
   onRemove: () => void;
-  onMoveStatus: (status: 'watched' | 'watching' | 'watchlater') => void;
+  onMoveStatus: (status: WatchStatus) => void;
 }
 
 export function WatchlistCard({
-  contentId,
   title,
   poster,
   genre,
   contentType,
   releaseDate,
   dateAdded,
-  isOwner,
   status,
   personalRating,
   onViewDetails,
@@ -37,7 +37,7 @@ export function WatchlistCard({
   const [moveMenuOpen, setMoveMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const moveOptions = (['watched', 'watching', 'watchlater'] as const).filter(s => s !== status);
+  const moveOptions = WATCH_STATUS_VALUES.filter(s => s !== status);
 
   // Close move menu on outside click
   useEffect(() => {
@@ -98,7 +98,7 @@ export function WatchlistCard({
         <button
           onClick={e => { e.stopPropagation(); onRemove(); }}
           aria-label="Remove from watchlist"
-          className="absolute top-2 right-2 p-1.5 bg-black/60 backdrop-blur-sm rounded-full text-white/70 hover:text-white opacity-0 group-hover:opacity-100 transition-all active:scale-95"
+          className="absolute top-2 right-2 p-1.5 bg-black/60 backdrop-blur-sm rounded-full text-white/70 hover:text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all active:scale-95"
         >
           <X size={12} />
         </button>

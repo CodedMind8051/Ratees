@@ -1,8 +1,8 @@
 import { Star } from 'lucide-react';
 import { useReviews } from '@/hooks/useReview';
-import { ReviewForm } from '@/components/ui/review/reviewFrom';
-import { ReviewCard , ReviewCardSkeleton } from '@/components/ui/review/reviewCard'
-import { DeleteConfirmDialog } from '@/components/ui/review/reviewDeleteConformation';
+import { ReviewForm } from '@/components/ui/review/ReviewForm';
+import { ReviewCard, ReviewCardSkeleton } from '@/components/ui/review/ReviewCard'
+import { DeleteConfirmDialog } from '@/components/ui/review/ReviewDeleteDialog';
 
 
 interface ReviewListProps {
@@ -16,7 +16,6 @@ export function ReviewList({ contentId, onOpenUserProfile }: ReviewListProps) {
     submitting,
     deleteConfirmId,
     editingId,
-    error,
     loading,
     setDeleteConfirmId,
     startEditing,

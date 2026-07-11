@@ -17,6 +17,7 @@ export const watchStatusTypeDefs = `#graphql
 
         type WatchStatusContentLists {
            _id: ID!
+           contentId: ID!
            title: String!
            genre: [String!]!
            Content_Type: String!

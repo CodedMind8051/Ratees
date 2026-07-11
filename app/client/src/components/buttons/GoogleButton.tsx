@@ -1,8 +1,11 @@
 import { useState } from "react";
 
-export default function GoogleButton(onclick:any) {
+interface GoogleButtonProps {
+  onClick: () => void;
+}
+
+export default function GoogleButton({ onClick }: GoogleButtonProps) {
   const [coords, setCoords] = useState({ x: -1, y: -1 });
-  const [isRippling, setIsRippling] = useState(false);
 
   // Subtle interactive spotlight gradient tracking
   const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -17,7 +20,7 @@ export default function GoogleButton(onclick:any) {
     <button
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setCoords({ x: -1, y: -1 })}
-      onClick={onclick.onClick}
+      onClick={onClick}
       className="
         relative
         group

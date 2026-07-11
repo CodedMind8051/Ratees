@@ -1,12 +1,13 @@
 import { Film, Tv, HelpCircle, Eye, Check, Play, Clock } from 'lucide-react';
 import type { ContentItemsType } from '@/types/content.types';
-import { ContentCardSkeleton } from './ContentCard.skeleton';
+import type { WatchStatus } from '@/types/watchlist';
+import { ContentCardSkeleton } from './ContentCardSkeleton';
 import { getPosterUrl } from '@/utils/content.utils';
 
 interface ContentCardProps {
   content: ContentItemsType;
   onClick: (content: ContentItemsType) => void;
-  watchStatus?: 'watched' | 'watching' | 'watchlater' | null;
+  watchStatus?: WatchStatus | null;
 }
 
 
@@ -17,11 +18,11 @@ const CONTENT_TYPE_META = {
   tv: { label: 'TV', Icon: Tv, className: 'bg-blue-500/20 border-blue-500/40 text-blue-400' },
 } as const;
 
-const WATCH_STATUS_META = {
-  watched: { label: 'Watched', Icon: Check, className: 'bg-green-500/20 border-green-500/40 text-green-400' },
-  watching: { label: 'Watching', Icon: Play, className: 'bg-blue-500/20 border-blue-500/40 text-blue-400' },
-  watchlater: { label: 'Watch later', Icon: Clock, className: 'bg-primary/20 border-primary/40 text-primary' },
-} as const;
+const WATCH_STATUS_META: Record<WatchStatus, { label: string; Icon: typeof Check; className: string }> = {
+  Watched: { label: 'Watched', Icon: Check, className: 'bg-green-500/20 border-green-500/40 text-green-400' },
+  Watching: { label: 'Watching', Icon: Play, className: 'bg-blue-500/20 border-blue-500/40 text-blue-400' },
+  WatchLater: { label: 'Watch later', Icon: Clock, className: 'bg-primary/20 border-primary/40 text-primary' },
+};
 
 
 export default function ContentCard({ content, onClick, watchStatus }: ContentCardProps) {

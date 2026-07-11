@@ -96,14 +96,6 @@ export const updateWatchStatusOfContent = async ({
             }
         )
 
-        console.log({
-            verifiedUserId,
-            verifiedContentId,
-            verifiedWatchStatus,
-            updateWatchStatus
-        });
-
-
         const doc = await WatchStatus.findOne({
             userId: new mongoose.Types.ObjectId(verifiedUserId),
             contentId: new mongoose.Types.ObjectId(verifiedContentId),
@@ -208,11 +200,12 @@ export const getContentListInWatchStatus = async ({
             },
             {
                 $project: {
+                    contentId: "$content._id",
                     title: "$content.title",
                     genre: "$content.genre",
                     Content_Type: "$content.Content_Type",
                     release_date: "$content.release_date",
-                    poster: "$content.poster",
+                    poster: "$content.backdrop",
                     createdAt: 1,
                     isOwner: 1
                 }
@@ -238,12 +231,7 @@ export const getContentListInWatchStatus = async ({
         }
 
         if (!WatchStatusItems || WatchStatusItems.totalDocs === 0) {
-            throwGraphqlError(
-                "No items found in the WatchStatus",
-                "WatchStatus_ITEMS_NOT_FOUND",
-                404,
-                true
-            );
+          return [];
         }
 
         return WatchStatusItems.docs;

@@ -83,11 +83,11 @@ function CoverCollage({ images }: { images: string[] }) {
 }
 
 export function PlaylistCard({ playlist, onOpen, onEdit, onDelete }: PlaylistCardProps) {
-  // Handle both old mock data format (name, items) and new backend format (playlistName, totalTracks)
-  const name = playlist.playlistName || (playlist as any).name || 'Untitled';
-  const description = playlist.description || (playlist as any).description || '';
-  const trackCount = playlist.totalTracks || (playlist as any).items?.length || 0;
-  const updatedAt = playlist.updatedAt || (playlist as any).updatedAt || new Date().toISOString();
+  const fallback = playlist as typeof playlist & { name?: string; items?: unknown[] };
+  const name = playlist.playlistName || fallback.name || 'Untitled';
+  const description = playlist.description || fallback.description || '';
+  const trackCount = playlist.totalTracks || fallback.items?.length || 0;
+  const updatedAt = playlist.updatedAt || fallback.updatedAt || new Date().toISOString();
 
   const formattedDate = (() => {
     try {

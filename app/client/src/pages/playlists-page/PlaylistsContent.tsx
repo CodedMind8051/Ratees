@@ -21,16 +21,14 @@ import {
 
 // Components
 import { PlaylistCard } from '@/components/ui/playlist/playlistCard';
-import MovieDetailModal from '@/components/ui/content/ContentDetailModal';
 import ContentDetailModal from '@/components/ui/content/ContentDetailModal';
 import SearchOverlay from '@/components/ui/common/SearchOverlay';
 import {
   PlaylistGridSkeleton,
-  PlaylistItemsSkeleton,
   PlaylistDetailPageSkeleton,
   EmptyState,
   ErrorState,
-} from '@/components/ui/playlist/PlaylistSkeleton';
+} from '@/components/ui/playlist/PlaylistSkeletons';
 
 // ============================================
 // MAIN COMPONENT
@@ -38,7 +36,7 @@ import {
 
 export default function PlaylistsContent() {
   // Use the auth hook for session management
-  const { user, loading: loadingSession, refetch } = useAuth();
+  const { user, loading: loadingSession } = useAuth();
   const userId = user?.id || null;
 
   // State
@@ -63,12 +61,11 @@ export default function PlaylistsContent() {
     enabled: !!userId,
   });
 
-  // Refetch when userId becomes available
   useEffect(() => {
     if (userId && refetchPlaylists) {
       refetchPlaylists();
     }
-  }, [userId]);
+  }, [userId, refetchPlaylists]);
 
   // Fetch playlist items when active
   const {
@@ -85,7 +82,7 @@ export default function PlaylistsContent() {
   const { createPlaylist, loading: creating } = useCreatePlaylist();
   const { updatePlaylist, loading: updating } = useUpdatePlaylist();
   const { deletePlaylist, loading: deleting } = useDeletePlaylist();
-  const { addToPlaylist, loading: addingContent } = useAddToPlaylist();
+  const { addToPlaylist } = useAddToPlaylist();
   const { removeFromPlaylist, loading: removingItem } = useRemoveFromPlaylist();
 
   // Handlers
@@ -383,7 +380,6 @@ function PlaylistsGrid({
         <PlaylistCard
           key={playlist._id}
           playlist={playlist}
-          coverImage={null}
           onOpen={() => onOpen(playlist)}
           onEdit={() => onEdit(playlist)}
           onDelete={() => onDelete(playlist._id)}

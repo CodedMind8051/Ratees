@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Users, X } from 'lucide-react';
-import { mockFriends, allContent, FriendUser } from '@/data/mockData';
+import { mockFriends, allContent } from '@/data/mockData';
+import type { FriendUser } from '@/types/friend';
 import UserProfileModal from '@/pages/friends-page/UserProfileModal';
 
 export default function FriendsContent() {

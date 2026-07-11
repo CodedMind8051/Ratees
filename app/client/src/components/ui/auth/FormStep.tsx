@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, AlertCircle, Eye, EyeOff } from "lucide-react";
 import GoogleButton from "@/components/buttons/GoogleButton";
-import { handelSignUpWithGoogle } from "@/functions/auth.function";
+import { handleSignUpWithGoogle } from "@/functions/auth.function";
 
 export type FormState = {
   username: string;
@@ -94,7 +94,7 @@ export default function FormStep({ form, onChange, onNext }: FormStepProps) {
           Your next favorite movie starts here
         </h1>
       </div>
-      <GoogleButton onClick={handelSignUpWithGoogle} />
+      <GoogleButton onClick={handleSignUpWithGoogle} />
       <form onSubmit={handleSubmit} className="space-y-5">
 
         <div className="my-6 flex items-center gap-4">

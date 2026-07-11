@@ -1,6 +1,7 @@
 import { Play, Plus, CheckCircle2, Film, Tv, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import type { ContentItemsType } from '@/types/content.types';
+import type { WatchStatus } from '@/types/watchlist';
 
 
 
@@ -9,8 +10,8 @@ import type { ContentItemsType } from '@/types/content.types';
 interface HeroBannerProps {
   content: ContentItemsType;
   onViewDetails: () => void;
-  watchStatus?: 'watched' | 'watching' | 'watchlater' | null;
-  onStatusChange: (contentId: string, status: 'watched' | 'watching' | 'watchlater' | null) => void;
+  watchStatus?: WatchStatus | null;
+  onStatusChange: (contentId: string, status: WatchStatus | null) => void;
 }
 
 
@@ -77,9 +78,9 @@ export default function HeroBanner({ content, onViewDetails, watchStatus, onStat
     return <HeroBannerSkeleton />;
   }
 
-  const handleQuickAdd = () => {
-    const next = watchStatus === 'watchlater' ? null : 'watchlater';
-    onStatusChange(content._id, next);
+  const handleQuickAdd = async () => {
+    const next = watchStatus === 'WatchLater' ? null : 'WatchLater';
+    await onStatusChange(content._id, next);
     toast.success(next ? 'Added to Watch Later' : 'Removed from Watch Later');
   };
 
@@ -162,20 +163,20 @@ export default function HeroBanner({ content, onViewDetails, watchStatus, onStat
                 onClick={handleQuickAdd}
                 className={[
                   'flex items-center gap-2 px-4 hover:cursor-pointer sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all active:scale-95 backdrop-blur-sm',
-                  watchStatus === 'watchlater'
+                  watchStatus === 'WatchLater'
                     ? 'bg-primary/20 border-primary/50 text-primary'
                     : 'bg-white/10 border-white/20 text-white hover:bg-white/20',
                 ].join(' ')}
               >
-                {watchStatus === 'watchlater'
+                {watchStatus === 'WatchLater'
                   ? <CheckCircle2 size={13} />
                   : <Plus size={13} />
                 }
                 <span className="hidden xs:inline">
-                  {watchStatus === 'watchlater' ? 'In Watch Later' : 'Watch Later'}
+                  {watchStatus === 'WatchLater' ? 'In Watch Later' : 'Watch Later'}
                 </span>
                 <span className="xs:hidden">
-                  {watchStatus === 'watchlater' ? 'Saved' : 'Save'}
+                  {watchStatus === 'WatchLater' ? 'Saved' : 'Save'}
                 </span>
               </button>
             </div>

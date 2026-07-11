@@ -8,6 +8,7 @@ export type getContentListInWatchStatusInputType = z.infer<typeof getContentList
 
 export type getContentListInWatchStatusResponseType = {
     title: "string",
+    contentId: "string",
     genre: "string",
     Content_Type: "string",
     release_date: "string",

@@ -6,13 +6,13 @@ import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 type IconVariant = 'outline' | 'solid';
 
 interface IconProps {
-    name: string; // Changed to string to accept dynamic values
+    name: string;
     variant?: IconVariant;
     size?: number;
     className?: string;
     onClick?: () => void;
     disabled?: boolean;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 function Icon({
@@ -25,7 +25,7 @@ function Icon({
     ...props
 }: IconProps) {
     const iconSet = variant === 'solid' ? HeroIconsSolid : HeroIcons;
-    const IconComponent = iconSet[name as keyof typeof iconSet] as React.ComponentType<any>;
+    const IconComponent = iconSet[name as keyof typeof iconSet] as React.ComponentType<{ width: number; height: number; className: string; onClick?: () => void }>;
 
     if (!IconComponent) {
         return (

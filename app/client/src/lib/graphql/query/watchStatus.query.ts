@@ -19,6 +19,7 @@ export const GET_WATCH_STATUS_CONTENT_LIST = gql`
   query GetWatchStatusContentList($userId: ID!, $watchStatus: WatchStatusEnum!, $page: Int) {
     getContentListInWatchStatus(userId: $userId, watchStatus: $watchStatus, page: $page) {
       _id
+      contentId
       title
       genre
       Content_Type

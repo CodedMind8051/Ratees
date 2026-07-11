@@ -1,17 +1,17 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { Flame, Sparkles, LayoutGrid, ChevronRight, ChevronLeft } from 'lucide-react';
-import { WatchlistEntry } from '@/data/mockData';
 import ContentCard from '@/components/ui/content/ContentCard';
-import { ContentCardSkeleton } from '@/components/ui/content/ContentCard.skeleton';
+import { ContentCardSkeleton } from '@/components/ui/content/ContentCardSkeleton';
 import HeroBanner from './HeroBanner';
 import type { ContentItemsType } from '@/types/content.types';
+import type { WatchlistEntry, WatchStatus } from '@/types/watchlist';
 import { FETCH_COMPLETE_HOME_PAGE_DATA, FETCH_GENERAL_CONTENTS_FOR_HOME_PAGE } from '@/lib/graphql/query/content.query';
 import { useQuery, useLazyQuery } from '@apollo/client/react';
 
 interface HomePageContentProps {
-  onSelectMovie: (content: any) => void;
+  onSelectMovie: (content: ContentItemsType) => void;
   watchlist: WatchlistEntry[];
-  onStatusChange: (contentId: string, status: 'watched' | 'watching' | 'watchlater' | null) => void;
+  onStatusChange: (contentId: string, status: WatchStatus | null) => void;
 }
 
 interface HomePageQueryData {
@@ -132,7 +132,7 @@ function SkeletonGrid({ count = 21 }: { count?: number }) {
 
 export default function HomePageContent({ onSelectMovie, watchlist, onStatusChange }: HomePageContentProps) {
   const [activeGenre, setActiveGenre] = useState('All');
-  const [generalContent, setGeneralContent] = useState<ContentItemsType[]>([]);
+  const [extraContent, setExtraContent] = useState<ContentItemsType[]>([]);
   const [hasMore, setHasMore] = useState(true);
 
   const [sectionView, setSectionView] = useState<'home' | 'trending' | 'newReleases'>('home');
@@ -148,49 +148,46 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
 
   const [
     fetchMoreGeneralContent,
-    { loading: loadingGeneralContent, error: generalContentError, data: generalContentData },
+    { loading: loadingGeneralContent },
   ] = useLazyQuery<GeneralContentQueryData>(FETCH_GENERAL_CONTENTS_FOR_HOME_PAGE);
 
   const trendingContents: ContentItemsType[] = data?.FetchTrendingContents ?? [];
   const newReleaseContent: ContentItemsType[] = data?.FetchNewReleaseContents ?? [];
+  const initialContent = useMemo(
+    () => data?.FetchGeneralContentsForHomepage ?? [],
+    [data?.FetchGeneralContentsForHomepage]
+  );
+  const generalContent = useMemo(
+    () => [...initialContent, ...extraContent],
+    [initialContent, extraContent]
+  );
 
+  const handleLoadMore = useCallback(async () => {
+    if (loading || !hasMore || isFetchingMoreRef.current) return;
+    isFetchingMoreRef.current = true;
+    const nextPage = pageRef.current + 1;
+    pageRef.current = nextPage;
 
-  useEffect(() => {
-    if (loading || !data) return;
-
-    const initialContent = data.FetchGeneralContentsForHomepage ?? [];
-    setGeneralContent(initialContent);
-    if (initialContent.length === 0) {
-      setHasMore(false);
-    }
-  }, [loading, data]);
-
-
-  useEffect(() => {
-    if (loadingGeneralContent) return;
-    const newItems = generalContentData?.FetchGeneralContentsForHomepage;
-    if (!newItems) return;
-
-    setGeneralContent(prev => {
-      const existingIds = new Set(prev.map(item => item._id));
-      const uniqueNewItems = newItems.filter(item => !existingIds.has(item._id));
-      return [...prev, ...uniqueNewItems];
-    });
-
-    if (newItems.length === 0) {
-      setHasMore(false);
-    }
-    isFetchingMoreRef.current = false;
-  }, [loadingGeneralContent, generalContentData]);
-
-
-  useEffect(() => {
-    if (generalContentError) {
-      isFetchingMoreRef.current = false;
+    try {
+      const result = await fetchMoreGeneralContent({ variables: { page: nextPage } });
+      const newItems = result.data?.FetchGeneralContentsForHomepage;
+      if (newItems) {
+        setExtraContent(prev => {
+          const allCurrent = [...initialContent, ...prev];
+          const existingIds = new Set(allCurrent.map(item => item._id));
+          const uniqueNewItems = newItems.filter(item => !existingIds.has(item._id));
+          return [...prev, ...uniqueNewItems];
+        });
+        if (newItems.length === 0) {
+          setHasMore(false);
+        }
+      }
+    } catch {
       pageRef.current = Math.max(1, pageRef.current - 1);
+    } finally {
+      isFetchingMoreRef.current = false;
     }
-  }, [generalContentError]);
-
+  }, [loading, hasMore, fetchMoreGeneralContent, initialContent]);
 
   useEffect(() => {
     const node = loadMoreRef.current;
@@ -199,20 +196,14 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return;
-        if (loading || !hasMore || isFetchingMoreRef.current) return;
-
-        isFetchingMoreRef.current = true;
-        const nextPage = pageRef.current + 1;
-        pageRef.current = nextPage;
-
-        fetchMoreGeneralContent({ variables: { page: nextPage } });
+        handleLoadMore();
       },
       { rootMargin: '200px' }
     );
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, [loading, hasMore, fetchMoreGeneralContent]);
+  }, [handleLoadMore]);
 
   const filteredContent = useMemo(() => {
     if (activeGenre === 'All') return generalContent;

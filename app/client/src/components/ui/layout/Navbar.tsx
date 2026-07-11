@@ -41,10 +41,6 @@ export default function Navbar({ onSelectMovie }: NavbarProps) {
   }, [closeProfile]);
 
   useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
@@ -170,6 +166,7 @@ export default function Navbar({ onSelectMovie }: NavbarProps) {
                 <Link
                   key={href}
                   to={href}
+                  onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] font-medium transition-colors ${isActive
                       ? 'bg-orange-500/10 text-orange-500'
                       : 'text-muted-foreground hover:text-foreground hover:bg-secondary'

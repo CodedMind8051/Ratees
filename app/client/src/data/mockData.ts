@@ -1,18 +1,5 @@
-export type RatingKey = 'waste' | 'timepass' | 'good' | 'masterpiece';
-
-export const RATING_LABELS: Record<RatingKey, string> = {
-  waste: 'Waste of Time',
-  timepass: 'Time Pass',
-  good: 'Good Watch',
-  masterpiece: 'Masterpiece'
-};
-
-export const RATING_COLORS: Record<RatingKey, string> = {
-  waste: '#ef4444',
-  timepass: '#f97316',
-  good: '#eab308',
-  masterpiece: '#22c55e'
-};
+import type { RatingKey } from '@/types/rating.types';
+import type { WatchStatus } from '@/types/watchlist';
 
 export interface CastMember {
   id: string;
@@ -21,7 +8,7 @@ export interface CastMember {
   image: string;
 }
 
-export interface Review {
+export interface MockReview {
   id: string;
   userId: string;
   username: string;
@@ -32,7 +19,7 @@ export interface Review {
   isOwn?: boolean;
 }
 
-export interface ContentItem {
+export interface MockContentItem {
   id: string;
   title: string;
   release_date?: string
@@ -48,21 +35,12 @@ export interface ContentItem {
   description: string;
   platforms: string[];
   cast: CastMember[];
-  reviews: Review[];
+  reviews: MockReview[];
   ratingDistribution: Record<RatingKey, number>;
   aggregateRating: RatingKey;
 }
 
-export interface WatchlistEntry {
-  id: string;
-  contentId: string;
-  status: 'watched' | 'watching' | 'watchlater';
-  dateAdded: string;
-  personalRating?: RatingKey;
-  progress?: number;
-}
-
-export interface Playlist {
+export interface MockPlaylist {
   id: string;
   name: string;
   description: string;
@@ -71,18 +49,7 @@ export interface Playlist {
   updatedAt: string;
 }
 
-export interface FriendUser {
-  id: string;
-  name: string;
-  username: string;
-  avatar: string;
-  avatarImage?: string;
-  currentlyWatching: string;
-  watchlist: { contentId: string; status: 'watched' | 'watching' | 'watchlater' }[];
-  playlists: { id: string; name: string; items: string[] }[];
-}
-
-export const allContent: ContentItem[] = [
+export const allContent: MockContentItem[] = [
   {
     id: 'content-001',
     title: 'Oppenheimer',
@@ -463,22 +430,29 @@ export const allContent: ContentItem[] = [
   }];
 
 
-export const mockWatchlist: WatchlistEntry[] = [
-  { id: 'wl-001', contentId: 'content-001', status: 'watched', dateAdded: 'Jun 10, 2026', personalRating: 'masterpiece' },
-  { id: 'wl-002', contentId: 'content-003', status: 'watched', dateAdded: 'Jun 08, 2026', personalRating: 'masterpiece' },
-  { id: 'wl-003', contentId: 'content-006', status: 'watched', dateAdded: 'Apr 15, 2026', personalRating: 'masterpiece' },
-  { id: 'wl-004', contentId: 'content-012', status: 'watched', dateAdded: 'Mar 12, 2026', personalRating: 'masterpiece' },
-  { id: 'wl-005', contentId: 'content-002', status: 'watching', dateAdded: 'Jun 05, 2026', progress: 65 },
-  { id: 'wl-006', contentId: 'content-004', status: 'watching', dateAdded: 'Jun 01, 2026', progress: 80 },
-  { id: 'wl-007', contentId: 'content-010', status: 'watching', dateAdded: 'May 28, 2026', progress: 40 },
-  { id: 'wl-008', contentId: 'content-005', status: 'watchlater', dateAdded: 'Jun 11, 2026' },
-  { id: 'wl-009', contentId: 'content-008', status: 'watchlater', dateAdded: 'Jun 09, 2026' },
-  { id: 'wl-010', contentId: 'content-015', status: 'watchlater', dateAdded: 'Jun 07, 2026' },
-  { id: 'wl-011', contentId: 'content-017', status: 'watchlater', dateAdded: 'Jun 06, 2026' },
-  { id: 'wl-012', contentId: 'content-018', status: 'watchlater', dateAdded: 'Jun 04, 2026' }];
+export const mockWatchlist: {
+  id: string;
+  contentId: string;
+  status: WatchStatus;
+  dateAdded: string;
+  personalRating?: string;
+  progress?: number;
+}[] = [
+  { id: 'wl-001', contentId: 'content-001', status: 'Watched', dateAdded: 'Jun 10, 2026', personalRating: 'masterpiece' },
+  { id: 'wl-002', contentId: 'content-003', status: 'Watched', dateAdded: 'Jun 08, 2026', personalRating: 'masterpiece' },
+  { id: 'wl-003', contentId: 'content-006', status: 'Watched', dateAdded: 'Apr 15, 2026', personalRating: 'masterpiece' },
+  { id: 'wl-004', contentId: 'content-012', status: 'Watched', dateAdded: 'Mar 12, 2026', personalRating: 'masterpiece' },
+  { id: 'wl-005', contentId: 'content-002', status: 'Watching', dateAdded: 'Jun 05, 2026', progress: 65 },
+  { id: 'wl-006', contentId: 'content-004', status: 'Watching', dateAdded: 'Jun 01, 2026', progress: 80 },
+  { id: 'wl-007', contentId: 'content-010', status: 'Watching', dateAdded: 'May 28, 2026', progress: 40 },
+  { id: 'wl-008', contentId: 'content-005', status: 'WatchLater', dateAdded: 'Jun 11, 2026' },
+  { id: 'wl-009', contentId: 'content-008', status: 'WatchLater', dateAdded: 'Jun 09, 2026' },
+  { id: 'wl-010', contentId: 'content-015', status: 'WatchLater', dateAdded: 'Jun 07, 2026' },
+  { id: 'wl-011', contentId: 'content-017', status: 'WatchLater', dateAdded: 'Jun 06, 2026' },
+  { id: 'wl-012', contentId: 'content-018', status: 'WatchLater', dateAdded: 'Jun 04, 2026' }];
 
 
-export const mockPlaylists: Playlist[] = [
+export const mockPlaylists: MockPlaylist[] = [
   {
     id: 'playlist-001',
     name: 'Nolan Universe',
@@ -513,7 +487,16 @@ export const mockPlaylists: Playlist[] = [
   }];
 
 
-export const mockFriends: FriendUser[] = [
+export const mockFriends: {
+  id: string;
+  name: string;
+  username: string;
+  avatar: string;
+  avatarImage: string;
+  currentlyWatching: string;
+  watchlist: { contentId: string; status: WatchStatus }[];
+  playlists: { id: string; name: string; items: string[] }[];
+}[] = [
   {
     id: 'friend-001',
     name: 'Priya Sharma',
@@ -522,10 +505,10 @@ export const mockFriends: FriendUser[] = [
     avatarImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80',
     currentlyWatching: 'content-008',
     watchlist: [
-      { contentId: 'content-001', status: 'watched' },
-      { contentId: 'content-002', status: 'watched' },
-      { contentId: 'content-008', status: 'watching' },
-      { contentId: 'content-005', status: 'watchlater' },
+      { contentId: 'content-001', status: 'Watched' },
+      { contentId: 'content-002', status: 'Watched' },
+      { contentId: 'content-008', status: 'Watching' },
+      { contentId: 'content-005', status: 'WatchLater' },
     ],
     playlists: [
       { id: 'pf-001', name: 'Crime Dramas', items: ['content-002', 'content-005', 'content-018'] },
@@ -540,9 +523,9 @@ export const mockFriends: FriendUser[] = [
     avatarImage: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&q=80',
     currentlyWatching: 'content-004',
     watchlist: [
-      { contentId: 'content-004', status: 'watching' },
-      { contentId: 'content-010', status: 'watched' },
-      { contentId: 'content-016', status: 'watchlater' },
+      { contentId: 'content-004', status: 'Watching' },
+      { contentId: 'content-010', status: 'Watched' },
+      { contentId: 'content-016', status: 'WatchLater' },
     ],
     playlists: [
       { id: 'pf-003', name: 'Indian Originals', items: ['content-010', 'content-016', 'content-006'] },
@@ -556,10 +539,10 @@ export const mockFriends: FriendUser[] = [
     avatarImage: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=100&q=80',
     currentlyWatching: 'content-012',
     watchlist: [
-      { contentId: 'content-012', status: 'watching' },
-      { contentId: 'content-003', status: 'watched' },
-      { contentId: 'content-015', status: 'watchlater' },
-      { contentId: 'content-007', status: 'watchlater' },
+      { contentId: 'content-012', status: 'Watching' },
+      { contentId: 'content-003', status: 'Watched' },
+      { contentId: 'content-015', status: 'WatchLater' },
+      { contentId: 'content-007', status: 'WatchLater' },
     ],
     playlists: [
       { id: 'pf-004', name: 'Sci-Fi Essentials', items: ['content-012', 'content-003', 'content-011'] },
@@ -574,9 +557,9 @@ export const mockFriends: FriendUser[] = [
     avatarImage: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80',
     currentlyWatching: 'content-001',
     watchlist: [
-      { contentId: 'content-001', status: 'watching' },
-      { contentId: 'content-017', status: 'watched' },
-      { contentId: 'content-013', status: 'watchlater' },
+      { contentId: 'content-001', status: 'Watching' },
+      { contentId: 'content-017', status: 'Watched' },
+      { contentId: 'content-013', status: 'WatchLater' },
     ],
     playlists: [
       { id: 'pf-006', name: 'Award Winners', items: ['content-001', 'content-009', 'content-017'] },
@@ -590,9 +573,9 @@ export const mockFriends: FriendUser[] = [
     avatarImage: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80',
     currentlyWatching: 'content-006',
     watchlist: [
-      { contentId: 'content-006', status: 'watching' },
-      { contentId: 'content-014', status: 'watched' },
-      { contentId: 'content-018', status: 'watchlater' },
+      { contentId: 'content-006', status: 'Watching' },
+      { contentId: 'content-014', status: 'Watched' },
+      { contentId: 'content-018', status: 'WatchLater' },
     ],
     playlists: [
       { id: 'pf-007', name: 'Biopics & True Stories', items: ['content-006', 'content-005', 'content-001'] },

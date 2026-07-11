@@ -7,10 +7,12 @@ import { toast } from 'sonner';
 import { RatingKey } from '@/types/rating.types';
 import { RATING_LABELS, RATING_COLORS } from '@/constants/rating.constant';
 import type { ContentFullDetailType } from "@/types/content.types"
+import type { WatchStatus } from '@/types/watchlist';
+import { WATCH_STATUS_VALUES } from '@/types/watchlist';
 import RatingDistributionChart from './RatingDistributionChart';
 import { useQuery } from '@apollo/client/react';
 import { FETCH_FULL_CONTENT_DETAIL } from '@/lib/graphql/query/content.query';
-import { ReviewList } from '../review/reviewList';
+import { ReviewList } from '../review/ReviewList';
 import { useNavigate } from 'react-router-dom';
 import {
   useWatchStatus,
@@ -20,8 +22,8 @@ import {
 interface MovieDetailModalProps {
   contentId: string;
   onClose: () => void;
-  initialStatus?: 'watched' | 'watching' | 'watchlater' | null;
-  onStatusChange?: (contentId: string, status: 'watched' | 'watching' | 'watchlater' | null) => void;
+  initialStatus?: WatchStatus | null;
+  onStatusChange?: (contentId: string, status: WatchStatus | null) => void;
 }
 
 interface GetContentDetailsResponse {
@@ -30,10 +32,10 @@ interface GetContentDetailsResponse {
 
 const RATING_ORDER: RatingKey[] = ['waste', 'timepass', 'good', 'masterpiece'];
 
-const statusConfig = {
-  watched: { label: 'Watched', icon: CheckCircle2, color: 'text-green-400', bg: 'bg-green-400/10 border-green-400/30' },
-  watching: { label: 'Watching', icon: Eye, color: 'text-blue-400', bg: 'bg-blue-400/10 border-blue-400/30' },
-  watchlater: { label: 'Watch Later', icon: Clock, color: 'text-primary', bg: 'bg-primary/10 border-primary/30' },
+const statusConfig: Record<WatchStatus, { label: string; icon: typeof CheckCircle2; color: string; bg: string }> = {
+  Watched: { label: 'Watched', icon: CheckCircle2, color: 'text-green-400', bg: 'bg-green-400/10 border-green-400/30' },
+  Watching: { label: 'Watching', icon: Eye, color: 'text-blue-400', bg: 'bg-blue-400/10 border-blue-400/30' },
+  WatchLater: { label: 'Watch Later', icon: Clock, color: 'text-primary', bg: 'bg-primary/10 border-primary/30' },
 };
 
 const ratingBadgeClass: Record<RatingKey, string> = {
@@ -61,20 +63,13 @@ export default function MovieDetailModal({
 
   const content: ContentFullDetailType | undefined = contentData?.getContentDetails;
 
-  // Use API status, fallback to initialStatus, or null
-  const [activeStatus, setActiveStatus] = useState<'watched' | 'watching' | 'watchlater' | null>(initialStatus ?? null);
+  const [manualStatus, setManualStatus] = useState<WatchStatus | null | undefined>(undefined);
+  const activeStatus = (manualStatus !== undefined ? manualStatus : apiWatchStatus as WatchStatus | null) ?? initialStatus ?? null;
   const [playlistDropdownOpen, setPlaylistDropdownOpen] = useState(false);
   const [myRating, setMyRating] = useState<RatingKey | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
-
-  // Sync status from API when available
-  useEffect(() => {
-    if (apiWatchStatus) {
-      setActiveStatus(apiWatchStatus as 'watched' | 'watching' | 'watchlater');
-    }
-  }, [apiWatchStatus]);
 
   // Lock scroll + Escape key
   useEffect(() => {
@@ -99,15 +94,14 @@ export default function MovieDetailModal({
     return () => document.removeEventListener('mousedown', handler);
   }, [playlistDropdownOpen]);
 
-  const handleStatusToggle = async (status: 'watched' | 'watching' | 'watchlater') => {
+  const handleStatusToggle = async (status: WatchStatus) => {
     const next = activeStatus === status ? null : status;
-    setActiveStatus(next);
+    setManualStatus(next);
 
-    // Just call the parent callback - parent handles the API call
-    // This prevents duplicate API calls
-    onStatusChange?.(contentId, next);
-
-    toast.success(next ? `Added to ${statusConfig[status].label}` : 'Removed from watchlist');
+    if (onStatusChange) {
+      await onStatusChange(contentId, next);
+      toast.success(next ? `Added to ${statusConfig[status].label}` : 'Removed from watchlist');
+    }
   };
 
 
@@ -249,7 +243,7 @@ export default function MovieDetailModal({
 
               {/* ── Action row: status buttons + playlist ── */}
               <div className="flex flex-wrap gap-2 mb-6">
-                {(['watched', 'watching', 'watchlater'] as const).map(status => {
+                {WATCH_STATUS_VALUES.map(status => {
                   const cfg = statusConfig[status];
                   const Icon = cfg.icon;
                   const isActive = activeStatus === status;
@@ -417,7 +411,7 @@ export default function MovieDetailModal({
                   Cast & Crew
                 </p>
                 <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory">
-                  {contentDetails.casts?.map((member, index) => (
+                  {contentDetails.casts?.map((member) => (
                     <div className="shrink-0 text-center w-[72px] snap-start">
                       <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden mx-auto border-2 border-border ring-1 ring-white/5 bg-secondary/60 flex items-center justify-center">
                         {member?.profile_path ? (

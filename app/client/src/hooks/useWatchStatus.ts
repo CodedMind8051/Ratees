@@ -1,5 +1,6 @@
-import { useQuery, useMutation } from '@apollo/client/react';
+import { useQuery, useMutation, useApolloClient } from '@apollo/client/react';
 import { useAuth } from './useAuth';
+import type { WatchStatus } from '@/types/watchlist';
 import {
   GET_WATCH_STATUS,
   GET_WATCH_STATUS_CONTENT_LIST,
@@ -10,17 +11,17 @@ import {
 import { toast } from 'sonner';
 
 // Map frontend status to backend enum
-export const statusToBackend: Record<string, string> = {
-  watching: 'Watching',
-  watchlater: 'Watch_Later',
-  watched: 'Watched',
+export const statusToBackend: Record<WatchStatus, string> = {
+  Watching: 'Watching',
+  WatchLater: 'WatchLater',
+  Watched: 'Watched',
 };
 
 // Map backend enum to frontend status
-export const backendToStatus: Record<string, string> = {
-  Watching: 'watching',
-  Watch_Later: 'watchlater',
-  Watched: 'watched',
+export const backendToStatus: Record<string, WatchStatus> = {
+  Watching: 'Watching',
+  WatchLater: 'WatchLater',
+  Watched: 'Watched',
 };
 
 // Types for API responses
@@ -33,6 +34,7 @@ interface WatchStatusResponse {
 
 interface WatchStatusContentListItem {
   _id: string;
+  contentId: string;
   title: string;
   genre: string[];
   Content_Type: string;
@@ -47,7 +49,7 @@ interface WatchStatusContentListResponse {
 }
 
 // Get current user's watchlist for a specific status
-export function useWatchStatusContentList(watchStatus: 'watching' | 'watchlater' | 'watched') {
+export function useWatchStatusContentList(watchStatus: WatchStatus) {
   const { user } = useAuth();
   const backendStatus = statusToBackend[watchStatus];
 
@@ -89,30 +91,28 @@ export function useWatchStatus(contentId: string) {
 
 // Mutation hook for submitting/updating watch status
 export function useSubmitWatchStatus() {
+  const client = useApolloClient();
   const [submitWatchStatus, { loading }] = useMutation(SUBMIT_WATCH_STATUS, {
     context: {
       credentials: 'include',
     },
   });
 
-  const submitStatus = async (contentId: string, status: 'watching' | 'watchlater' | 'watched') => {
+  const submitStatus = async (contentId: string, status: WatchStatus) => {
     try {
       const backendStatus = statusToBackend[status];
-      console.log('Submitting watch status:', { contentId, watchStatus: backendStatus });
-
-      const result = await submitWatchStatus({
+      await submitWatchStatus({
         variables: {
           contentId,
           watchStatus: backendStatus,
         },
       });
-      console.log('Submit result:', result);
 
-      toast.success(`Added to ${status === 'watchlater' ? 'Watch Later' : status}`);
+      await client.refetchQueries({ include: ['GetWatchStatusContentList'] });
       return true;
-    } catch (error: any) {
-      console.error('Failed to submit watch status:', error);
-      toast.error(error.message || 'Failed to update watch status');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update watch status';
+      toast.error(message);
       return false;
     }
   };
@@ -122,30 +122,28 @@ export function useSubmitWatchStatus() {
 
 // Mutation hook for updating watch status
 export function useUpdateWatchStatus() {
+  const client = useApolloClient();
   const [updateWatchStatus, { loading }] = useMutation(UPDATE_WATCH_STATUS, {
     context: {
       credentials: 'include',
     },
   });
 
-  const updateStatus = async (contentId: string, status: 'watching' | 'watchlater' | 'watched') => {
+  const updateStatus = async (contentId: string, status: WatchStatus) => {
     try {
       const backendStatus = statusToBackend[status];
-      console.log('Updating watch status:', { contentId, watchStatus: backendStatus });
-
-      const result = await updateWatchStatus({
+      await updateWatchStatus({
         variables: {
           contentId,
           watchStatus: backendStatus,
         },
       });
-      console.log('Update result:', result);
 
-      toast.success(`Moved to ${status === 'watchlater' ? 'Watch Later' : status}`);
+      await client.refetchQueries({ include: ['GetWatchStatusContentList'] });
       return true;
-    } catch (error: any) {
-      console.error('Failed to update watch status:', error);
-      toast.error(error.message || 'Failed to update watch status');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update watch status';
+      toast.error(message);
       return false;
     }
   };
@@ -155,6 +153,7 @@ export function useUpdateWatchStatus() {
 
 // Mutation hook for deleting watch status
 export function useDeleteWatchStatus() {
+  const client = useApolloClient();
   const [deleteWatchStatus, { loading }] = useMutation(DELETE_WATCH_STATUS, {
     context: {
       credentials: 'include',
@@ -163,18 +162,15 @@ export function useDeleteWatchStatus() {
 
   const deleteStatus = async (contentId: string) => {
     try {
-      console.log('Deleting watch status:', { contentId });
-
-      const result = await deleteWatchStatus({
+      await deleteWatchStatus({
         variables: { contentId },
       });
-      console.log('Delete result:', result);
 
-      toast.success('Removed from watchlist');
+      await client.refetchQueries({ include: ['GetWatchStatusContentList'] });
       return true;
-    } catch (error: any) {
-      console.error('Failed to delete watch status:', error);
-      toast.error(error.message || 'Failed to remove from watchlist');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to remove from watchlist';
+      toast.error(message);
       return false;
     }
   };
@@ -190,8 +186,8 @@ export function useWatchStatusActions() {
 
   const setStatus = async (
     contentId: string,
-    newStatus: 'watching' | 'watchlater' | 'watched' | null,
-    currentStatus: 'watching' | 'watchlater' | 'watched' | null
+    newStatus: WatchStatus | null,
+    currentStatus: WatchStatus | null
   ) => {
     console.log('setStatus called:', { contentId, newStatus, currentStatus });
 

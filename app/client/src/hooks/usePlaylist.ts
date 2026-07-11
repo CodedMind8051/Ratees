@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useQuery, useMutation, useApolloClient } from '@apollo/client/react';
 import { toast } from 'sonner';
 import type {
@@ -59,6 +59,24 @@ function handleMutationError(error: unknown, action: string): boolean {
   return false;
 }
 
+interface FetchPlaylistsResponse {
+  getPlaylists: {
+    playlists: Playlist[];
+    totalDocs: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+interface FetchPlaylistItemsResponse {
+  getPlaylistItems: {
+    items: PlaylistItem[];
+    totalDocs: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
 // ============================================
 // USE PLAYLISTS HOOK (Simple)
 // ============================================
@@ -82,7 +100,7 @@ export function usePlaylists({ userID, page = 1, enabled = true }: UsePlaylistsO
     skip: !enabled || !userID,
   });
 
-  const playlists = (data as any)?.getPlaylists?.playlists || [];
+  const playlists = (data as FetchPlaylistsResponse)?.getPlaylists?.playlists || [];
 
   return {
     playlists: playlists as Playlist[],
@@ -119,7 +137,7 @@ export function usePlaylistItems({
     skip: !enabled || !playlistId,
   });
 
-  const items = (data as any)?.getPlaylistItems?.items || [];
+  const items = (data as FetchPlaylistItemsResponse)?.getPlaylistItems?.items || [];
 
   return {
     items: items as PlaylistItem[],
@@ -151,11 +169,10 @@ interface UseInfinitePlaylistsResult {
 
 export function useInfinitePlaylists({
   userID,
-  pageSize = 20,
   enabled = true,
 }: UseInfinitePlaylistsOptions): UseInfinitePlaylistsResult {
   const client = useApolloClient();
-  const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const [additionalPlaylists, setAdditionalPlaylists] = useState<Playlist[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -167,15 +184,9 @@ export function useInfinitePlaylists({
     notifyOnNetworkStatusChange: true,
   });
 
-  // Update playlists when data changes
-  useEffect(() => {
-    const playlistsData = (data as any)?.getPlaylists?.playlists;
-    const pagination = (data as any)?.getPlaylists;
-    if (playlistsData) {
-      setPlaylists(playlistsData as Playlist[]);
-      setHasMore(pagination?.currentPage < pagination?.totalPages);
-    }
-  }, [data, pageSize]);
+  const response = data as FetchPlaylistsResponse | undefined;
+  const apiPlaylists: Playlist[] = response?.getPlaylists?.playlists || [];
+  const playlists = [...apiPlaylists, ...additionalPlaylists];
 
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore || loadingRef.current) return;
@@ -191,13 +202,14 @@ export function useInfinitePlaylists({
         fetchPolicy: 'network-only',
       });
 
-      const newPlaylists = (moreData as any)?.getPlaylists?.playlists || [];
-      const pagination = (moreData as any)?.getPlaylists;
+      const moreResponse = moreData as FetchPlaylistsResponse;
+      const newPlaylists = moreResponse?.getPlaylists?.playlists || [];
+      const morePagination = moreResponse?.getPlaylists;
 
       if (newPlaylists.length > 0) {
-        setPlaylists(prev => [...prev, ...newPlaylists]);
+        setAdditionalPlaylists(prev => [...prev, ...newPlaylists]);
         setPage(nextPage);
-        setHasMore(pagination?.currentPage < pagination?.totalPages);
+        setHasMore(morePagination?.currentPage < morePagination?.totalPages);
       } else {
         setHasMore(false);
       }
@@ -207,7 +219,7 @@ export function useInfinitePlaylists({
       setLoadingMore(false);
       loadingRef.current = false;
     }
-  }, [loadingMore, hasMore, page, client, userID, pageSize]);
+  }, [loadingMore, hasMore, page, client, userID]);
 
   return {
     playlists,
@@ -242,11 +254,10 @@ interface UseInfinitePlaylistItemsResult {
 
 export function useInfinitePlaylistItems({
   playlistId,
-  pageSize = 40,
   enabled = true,
 }: UseInfinitePlaylistItemsOptions): UseInfinitePlaylistItemsResult {
   const client = useApolloClient();
-  const [items, setItems] = useState<PlaylistItem[]>([]);
+  const [additionalItems, setAdditionalItems] = useState<PlaylistItem[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -258,15 +269,9 @@ export function useInfinitePlaylistItems({
     notifyOnNetworkStatusChange: true,
   });
 
-  // Update items when data changes
-  useEffect(() => {
-    const itemsData = (data as any)?.getPlaylistItems?.items;
-    const pagination = (data as any)?.getPlaylistItems;
-    if (itemsData) {
-      setItems(itemsData as PlaylistItem[]);
-      setHasMore(pagination?.currentPage < pagination?.totalPages);
-    }
-  }, [data, pageSize]);
+  const response = data as FetchPlaylistItemsResponse | undefined;
+  const apiItems: PlaylistItem[] = response?.getPlaylistItems?.items || [];
+  const items = [...apiItems, ...additionalItems];
 
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore || loadingRef.current || !playlistId) return;
@@ -282,13 +287,14 @@ export function useInfinitePlaylistItems({
         fetchPolicy: 'network-only',
       });
 
-      const newItems = (moreData as any)?.getPlaylistItems?.items || [];
-      const pagination = (moreData as any)?.getPlaylistItems;
+      const moreResponse = moreData as FetchPlaylistItemsResponse;
+      const newItems = moreResponse?.getPlaylistItems?.items || [];
+      const morePagination = moreResponse?.getPlaylistItems;
 
       if (newItems.length > 0) {
-        setItems(prev => [...prev, ...newItems]);
+        setAdditionalItems(prev => [...prev, ...newItems]);
         setPage(nextPage);
-        setHasMore(pagination?.currentPage < pagination?.totalPages);
+        setHasMore(morePagination?.currentPage < morePagination?.totalPages);
       } else {
         setHasMore(false);
       }
@@ -298,7 +304,7 @@ export function useInfinitePlaylistItems({
       setLoadingMore(false);
       loadingRef.current = false;
     }
-  }, [loadingMore, hasMore, page, client, playlistId, pageSize]);
+  }, [loadingMore, hasMore, page, client, playlistId]);
 
   return {
     items,
@@ -330,7 +336,7 @@ export function useCreatePlaylist(): UseCreatePlaylistResult {
           variables: input,
         });
 
-        if ((data as any)?.createPlaylist) {
+        if ((data as Record<string, unknown>)?.createPlaylist) {
           toast.success(`Playlist "${input.playlistName}" created`);
           return true;
         }
@@ -366,7 +372,7 @@ export function useUpdatePlaylist(): UseUpdatePlaylistResult {
           variables: input,
         });
 
-        if ((data as any)?.updatePlaylist) {
+        if ((data as Record<string, unknown>)?.updatePlaylist) {
           toast.success('Playlist updated');
           return true;
         }
@@ -402,7 +408,7 @@ export function useDeletePlaylist(): UseDeletePlaylistResult {
           variables: input,
         });
 
-        if ((data as any)?.deletePlaylist) {
+        if ((data as Record<string, unknown>)?.deletePlaylist) {
           toast.success('Playlist deleted');
           return true;
         }
@@ -438,7 +444,7 @@ export function useAddToPlaylist(): UseAddToPlaylistResult {
           variables: input,
         });
 
-        if ((data as any)?.createPlaylistItem) {
+        if ((data as Record<string, unknown>)?.createPlaylistItem) {
           toast.success('Added to playlist');
           return true;
         }
@@ -474,7 +480,7 @@ export function useRemoveFromPlaylist(): UseRemoveFromPlaylistResult {
           variables: input,
         });
 
-        if ((data as any)?.deletePlaylistItem) {
+        if ((data as Record<string, unknown>)?.deletePlaylistItem) {
           toast.success('Removed from playlist');
           return true;
         }

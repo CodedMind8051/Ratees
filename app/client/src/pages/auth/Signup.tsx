@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { handelSignUpWithFiled } from "@/functions/auth.function";
+import { handleSignUpWithEmail } from "@/functions/auth.function";
 import AuthNavbar from "@/components/ui/layout/AuthNavbar";
 import GlowBackground from "@/components/ui/common/GlowBackground";
 import { Users, Sparkles, Film } from "lucide-react";
@@ -30,7 +30,7 @@ export default function Signup() {
   };
 
   const handleFinalSubmit = async () => {
-    await handelSignUpWithFiled(form, selectedAvatar!, setCurrentStep);
+    await handleSignUpWithEmail(form, selectedAvatar!);
     await new Promise((resolve) => setTimeout(resolve, 1200));
   };
 

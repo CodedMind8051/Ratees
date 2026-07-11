@@ -1,16 +1,20 @@
 import  { useState, useEffect } from 'react';
 import { X, BookMarked, ListVideo, Eye, CheckCircle2, Clock, Film, Tv } from 'lucide-react';
-import { FriendUser, allContent } from '@/data/mockData';
+import { allContent } from '@/data/mockData';
+import type { FriendUser } from '@/types/friend';
+import { WATCH_STATUS_VALUES } from '@/types/watchlist';
 
 interface UserProfileModalProps {
   user: FriendUser;
   onClose: () => void;
 }
 
-const statusConfig = {
-  watched: { label: 'Watched', icon: CheckCircle2, color: 'text-green-400', bg: 'bg-green-400/10 border-green-400/30' },
-  watching: { label: 'Watching', icon: Eye, color: 'text-blue-400', bg: 'bg-blue-400/10 border-blue-400/30' },
-  watchlater: { label: 'Watch Later', icon: Clock, color: 'text-primary', bg: 'bg-primary/10 border-primary/30' },
+import type { WatchStatus } from '@/types/watchlist';
+
+const statusConfig: Record<WatchStatus, { label: string; icon: typeof CheckCircle2; color: string; bg: string }> = {
+  Watched: { label: 'Watched', icon: CheckCircle2, color: 'text-green-400', bg: 'bg-green-400/10 border-green-400/30' },
+  Watching: { label: 'Watching', icon: Eye, color: 'text-blue-400', bg: 'bg-blue-400/10 border-blue-400/30' },
+  WatchLater: { label: 'Watch Later', icon: Clock, color: 'text-primary', bg: 'bg-primary/10 border-primary/30' },
 };
 
 export default function UserProfileModal({ user, onClose }: UserProfileModalProps) {
@@ -29,10 +33,10 @@ export default function UserProfileModal({ user, onClose }: UserProfileModalProp
   const getContent = (contentId: string) => allContent.find(c => c.id === contentId);
   const currentlyWatchingContent = getContent(user.currentlyWatching);
 
-  const watchlistByStatus = {
-    watching: user.watchlist.filter(w => w.status === 'watching'),
-    watched: user.watchlist.filter(w => w.status === 'watched'),
-    watchlater: user.watchlist.filter(w => w.status === 'watchlater'),
+  const watchlistByStatus: Record<WatchStatus, typeof user.watchlist> = {
+    Watching: user.watchlist.filter(w => w.status === 'Watching'),
+    Watched: user.watchlist.filter(w => w.status === 'Watched'),
+    WatchLater: user.watchlist.filter(w => w.status === 'WatchLater'),
   };
 
   return (
@@ -88,7 +92,7 @@ export default function UserProfileModal({ user, onClose }: UserProfileModalProp
               <p className="text-xs text-muted-foreground">Playlists</p>
             </div>
             <div className="text-center">
-              <p className="text-lg font-bold text-foreground">{user.watchlist.filter(w => w.status === 'watched').length}</p>
+              <p className="text-lg font-bold text-foreground">{user.watchlist.filter(w => w.status === 'Watched').length}</p>
               <p className="text-xs text-muted-foreground">Watched</p>
             </div>
           </div>
@@ -163,7 +167,7 @@ export default function UserProfileModal({ user, onClose }: UserProfileModalProp
 
           {activeTab === 'watchlist' && (
             <div className="space-y-5">
-              {(['watching', 'watched', 'watchlater'] as const).map(status => {
+              {WATCH_STATUS_VALUES.map(status => {
                 const items = watchlistByStatus[status];
                 if (items.length === 0) return null;
                 const cfg = statusConfig[status];

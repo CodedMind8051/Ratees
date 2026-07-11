@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { Send, Loader2 } from 'lucide-react';
-import { ReviewFormValues } from '@/types/review.types';
-import { useMutation } from '@apollo/client/react';
-import { SUBMIT_REVIEWS } from '@/lib/graphql/mutation/review.mutation';
+import type { ReviewFormValues } from '@/types/review.types';
 
 
 interface ReviewFormProps {

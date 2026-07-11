@@ -57,8 +57,14 @@ export const getPlaylists = async ({ page, userID, RequestUserId }: GetPlaylists
                 }
             },
             {
+                $addFields: {
+                        contentCount: {$size:"$contents"}
+                }
+            },
+            {
 
                 $sort: {
+                    contentCount: -1,
                     updatedAt: -1,
                 }
 
