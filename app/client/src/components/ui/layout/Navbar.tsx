@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import AppLogo from '@/components/ui/shadcn/AppLogo';
-import { Search, BookMarked, ListVideo, Home, ChevronDown, X, Menu, Bell, Users, LogIn } from 'lucide-react';
+import { Search, BookMarked, ListVideo, Home, ChevronDown, X, Menu, Bell, Users, LogIn, MessageCircle, Newspaper } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import ProfileDropdown from './ProfileDropdown';
 import SearchOverlay from '../common/SearchOverlay';
 import { ContentItemsType } from '@/types/content.types';
@@ -10,6 +11,8 @@ import ComingSoon from '@/components/ui/common/ComingSoon';
 
 const NAV_LINKS = [
   { href: '/', label: 'Home', icon: Home },
+  { href: '/news', label: 'News', icon: Newspaper },
+  { href: '/clubs', label: 'Clubs', icon: MessageCircle },
   { href: '/friends', label: 'Friends', icon: Users },
   { href: '/watchlist', label: 'Watchlist', icon: BookMarked },
   { href: '/playlists', label: 'Playlists', icon: ListVideo },
@@ -72,14 +75,14 @@ export default function Navbar({ onSelectMovie }: NavbarProps) {
       <nav className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-screen-xl mx-auto px-4 lg:px-6 h-14 flex items-center gap-2">
 
-          <Link to="/" className="flex items-center gap-2 shrink-0 mr-2">
+          <Link to="/" className="flex items-center gap-2 shrink-0">
             <AppLogo size={32} />
             <span className="font-semibold text-sm tracking-tight hidden sm:block">
               Rate<span className="text-orange-500">es</span>
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-0.5 flex-1">
+          <div className="hidden md:flex items-center gap-0.5 flex-1 ml-6">
             {NAV_LINKS.map(({ href, label, icon: Icon }) => {
               const isActive = pathname === href;
               return (
@@ -198,41 +201,76 @@ export default function Navbar({ onSelectMovie }: NavbarProps) {
             </button>
           </div>
         </div>
-
-        {mobileMenuOpen && (
-          <div
-            id="mobile-nav"
-            className="md:hidden border-t border-border bg-background/95 backdrop-blur-md px-3 pb-3 pt-2 flex flex-col gap-0.5 animate-in slide-in-from-top-1 duration-150"
-          >
-            {NAV_LINKS.map(({ href, label, icon: Icon }) => {
-              const isActive = pathname === href;
-              return (
-                <Link
-                  key={href}
-                  to={href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] font-medium transition-colors ${isActive
-                      ? 'bg-orange-500/10 text-orange-500'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-                    }`}
-                >
-                  <Icon size={17} strokeWidth={isActive ? 2.2 : 1.8} />
-                  {label}
-                </Link>
-              );
-            })}
-
-            <button
-              type="button"
-              onClick={() => { setSearchOpen(true); setMobileMenuOpen(false); }}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors mt-1 border-t border-border pt-3 cursor-pointer"
-            >
-              <Search size={17} strokeWidth={1.8} />
-              Search movies, shows, anime…
-            </button>
-          </div>
-        )}
       </nav>
+
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40 bg-black/60 md:hidden"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <motion.div
+              id="mobile-nav"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed top-0 right-0 bottom-0 z-50 w-72 bg-background border-l border-border shadow-2xl md:hidden flex flex-col"
+            >
+              <div className="flex items-center justify-between px-4 h-14 border-b border-border shrink-0">
+                <Link to="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
+                  <AppLogo size={28} />
+                  <span className="font-semibold text-sm">
+                    Rate<span className="text-orange-500">es</span>
+                  </span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors cursor-pointer"
+                  aria-label="Close menu"
+                >
+                  <X size={17} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-0.5">
+                {NAV_LINKS.map(({ href, label, icon: Icon }) => {
+                  const isActive = pathname === href;
+                  return (
+                    <Link
+                      key={href}
+                      to={href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] font-medium transition-colors ${isActive
+                          ? 'bg-orange-500/10 text-orange-500'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                        }`}
+                    >
+                      <Icon size={17} strokeWidth={isActive ? 2.2 : 1.8} />
+                      {label}
+                    </Link>
+                  );
+                })}
+
+                <button
+                  type="button"
+                  onClick={() => { setSearchOpen(true); setMobileMenuOpen(false); }}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors mt-1 border-t border-border pt-3 cursor-pointer"
+                >
+                  <Search size={17} strokeWidth={1.8} />
+                  Search movies, shows, anime…
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {searchOpen && (
         <SearchOverlay onClose={() => setSearchOpen(false)} onSelectMovie={onSelectMovie} />

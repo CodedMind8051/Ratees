@@ -132,7 +132,7 @@ export default function ComingSoon({ icon: Icon, eyebrow, title, description }: 
 
           <Link
             to="/"
-            className="flex items-center gap-2 rounded-xl border border-border px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            className="flex items-center gap-2 rounded-xl bg-primary/10 text-primary px-5 py-2.5 text-sm font-medium hover:bg-primary hover:text-white transition-all duration-200 active:scale-95"
           >
             <ArrowLeft size={15} />
             Back to Home

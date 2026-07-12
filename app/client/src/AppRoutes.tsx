@@ -5,6 +5,8 @@ import HomePage from "@/pages/home-page/Homepage";
 import WatchlistPage from "@/pages/watchlist-page/WatchlistPage";
 import PlaylistsPage from "@/pages/playlists-page/PlaylistsPage";
 import FriendsPage from "@/pages/friends-page/FriendsPage";
+import ClubsPage from "@/pages/clubs-page/ClubsPage";
+import NewsPage from "@/pages/news-page/NewsPage";
 import ProfilePage from "@/pages/profile-page/ProfilePage";
 import ProtectedRoute from "@/components/ui/common/ProtectedRoute";
 import AuthRoute from "@/components/ui/common/AuthRoute";
@@ -30,6 +32,8 @@ export default function AppRoutes() {
         }
       />
       <Route path="/friends" element={<FriendsPage />} />
+      <Route path="/clubs" element={<ClubsPage />} />
+      <Route path="/news" element={<NewsPage />} />
       <Route path="/profile/:userid" element={<ProfilePage />} />
       <Route
         path="/signup"
