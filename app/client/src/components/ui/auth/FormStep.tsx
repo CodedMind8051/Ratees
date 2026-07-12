@@ -1,6 +1,14 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Check, AlertCircle, Eye, EyeOff } from "lucide-react";
+import {  useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import {
+  AlertCircle,
+  Check,
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  User,
+} from "lucide-react";
 import GoogleButton from "@/components/buttons/GoogleButton";
 import { handleSignUpWithGoogle } from "@/functions/auth.function";
 
@@ -11,224 +19,299 @@ export type FormState = {
   confirmPassword: string;
 };
 
-type ValidationErrors = {
-  [key in keyof FormState]?: string;
-};
+type Errors = { [key in keyof FormState]?: string };
 
-interface FormStepProps {
+interface Props {
   form: FormState;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onNext: () => void;
 }
 
-export default function FormStep({ form, onChange, onNext }: FormStepProps) {
-  const [errors, setErrors] = useState<ValidationErrors>({});
+/* ─── Motion variants ─── */
+
+const container = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 8 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] as const },
+  },
+};
+
+/* ─── Password strength ─── */
+
+function getStrength(pw: string) {
+  if (!pw) return 0;
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (pw.length >= 12) score++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+  if (/\d/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  return Math.min(score, 4);
+}
+
+const strengthMeta = [
+  { label: "Weak", color: "bg-red-500" },
+  { label: "Fair", color: "bg-orange-500" },
+  { label: "Good", color: "bg-yellow-500" },
+  { label: "Strong", color: "bg-green-500" },
+];
+
+export default function FormStep({ form, onChange, onNext }: Props) {
+  const [errors, setErrors] = useState<Errors>({});
   const [touched, setTouched] = useState<Set<string>>(new Set());
   const [showPass, setShowPass] = useState(false);
-  const [showConfirmPass, setShowConfirmPass] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  const validateField = (name: string, value: string): string | undefined => {
+  const strength = useMemo(() => getStrength(form.password), [form.password]);
+
+  const validate = (name: string, value: string): string | undefined => {
     switch (name) {
       case "username":
         if (!value.trim()) return "Username is required";
-        if (value.length < 3) return "Username must be at least 3 characters";
-        if (!/^[a-zA-Z0-9_-]+$/.test(value)) return "Letters, numbers, underscores, and hyphens only";
-        return undefined;
+        if (value.length < 3) return "At least 3 characters";
+        if (!/^[a-zA-Z0-9_-]+$/.test(value)) return "Letters, numbers, _ and - only";
+        return;
       case "email":
         if (!value.trim()) return "Email is required";
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "Invalid email formatting";
-        return undefined;
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "Invalid email";
+        return;
       case "password":
         if (!value) return "Password is required";
-        if (value.length < 8) return "Password must be at least 8 characters";
-        return undefined;
+        if (value.length < 8) return "At least 8 characters";
+        return;
       case "confirmPassword":
         if (!value) return "Please confirm your password";
-        if (value !== form.password) return "Passwords do not match";
-        return undefined;
-      default:
-        return undefined;
+        if (value !== form.password) return "Passwords don't match";
+        return;
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     onChange(e);
-
-    // Real-time validation update for immediate checkmark response while typing
-    setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
+    setErrors((p) => ({ ...p, [name]: validate(name, value) }));
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setTouched((prev) => { const next = new Set(prev); next.add(name); return next; });
-    setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
+    setTouched((p) => new Set(p).add(name));
+    setErrors((p) => ({ ...p, [name]: validate(name, value) }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const validationErrors: ValidationErrors = {};
     const allTouched = new Set<string>();
-
-    Object.keys(form).forEach((key) => {
-      const fieldName = key as keyof FormState;
-      const error = validateField(fieldName, form[fieldName]);
-      if (error) validationErrors[fieldName] = error;
-      allTouched.add(fieldName);
+    const errs: Errors = {};
+    (Object.keys(form) as (keyof FormState)[]).forEach((k) => {
+      allTouched.add(k);
+      const err = validate(k, form[k]);
+      if (err) errs[k] = err;
     });
-
     setTouched(allTouched);
-    setErrors(validationErrors);
-
-    if (Object.values(validationErrors).some(Boolean)) return;
+    setErrors(errs);
+    if (Object.values(errs).some(Boolean)) return;
     onNext();
   };
 
   return (
     <>
-      <div className="text-center space-y-1.5 mb-8">
-        <p className="text-xs font-semibold tracking-[0.08em] uppercase bg-gradient-to-r from-orange-400 to-amber-200 bg-clip-text text-transparent">
-          Join Ratees
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-100">
-          Your next favorite movie starts here
-        </h1>
-      </div>
       <GoogleButton onClick={handleSignUpWithGoogle} />
-      <form onSubmit={handleSubmit} className="space-y-5">
 
-        <div className="my-6 flex items-center gap-4">
-          <div className="h-px bg-gradient-to-r from-transparent to-zinc-800/80 flex-1" />
-          <span className="text-[10px] font-bold tracking-[0.12em] text-zinc-600 uppercase select-none">
-            Or continue with
-          </span>
-          <div className="h-px bg-gradient-to-l from-transparent to-zinc-800/80 flex-1" />
-        </div>
+      <div className="my-5 flex items-center gap-3">
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/50">
+          or
+        </span>
+        <div className="h-px flex-1 bg-border" />
+      </div>
 
-        <div className="space-y-3.5">
-          {/* Username Field */}
-          <div className="space-y-1.5 w-full">
-            <div className="relative">
-              <input
-                type="text"
-                name="username"
-                value={form.username}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="Username"
-                className={`w-full h-11 pl-3.5 pr-10 rounded-lg text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-[3px] focus:ring-offset-0 focus:bg-zinc-950/80 transition-all ${errors.username && touched.has("username") ? "bg-red-950/10 border border-red-500/30" : "bg-zinc-900/40 border border-white/[0.05]"}`}
-              />
-              <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none z-10">
-                <AnimatePresence>
-                  {form.username && !errors.username && (
-                    <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
-                      <Check size={16} className="text-green-500 stroke-[2.5]" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+      <motion.form
+        onSubmit={handleSubmit}
+        className="space-y-3.5"
+        initial="hidden"
+        animate="visible"
+        variants={container}
+      >
+        <motion.div variants={item}>
+          <Input
+            icon={User}
+            name="username"
+            placeholder="Username"
+            value={form.username}
+            error={errors.username}
+            isTouched={touched.has("username")}
+            onChange={handleChange}
+            onBlur={handleBlur}
+          />
+        </motion.div>
+
+        <motion.div variants={item}>
+          <Input
+            icon={Mail}
+            name="email"
+            type="email"
+            placeholder="Email address"
+            value={form.email}
+            error={errors.email}
+            isTouched={touched.has("email")}
+            onChange={handleChange}
+            onBlur={handleBlur}
+          />
+        </motion.div>
+
+        <motion.div variants={item}>
+          <Input
+            icon={Lock}
+            name="password"
+            type="password"
+            placeholder="Password"
+            value={form.password}
+            error={errors.password}
+            isTouched={touched.has("password")}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            showToggle
+            isVisible={showPass}
+            onToggle={() => setShowPass(!showPass)}
+          />
+          {form.password && (
+            <div className="mt-1.5 flex items-center gap-2">
+              <div className="flex flex-1 gap-1">
+                {[0, 1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
+                      i < strength ? strengthMeta[strength - 1].color : "bg-border"
+                    }`}
+                  />
+                ))}
               </div>
+              <span className="w-10 shrink-0 text-right text-[10px] font-medium text-muted-foreground/60">
+                {strength > 0 ? strengthMeta[strength - 1].label : ""}
+              </span>
             </div>
-            {errors.username && touched.has("username") && (
-              <div className="text-red-400 text-[11px] flex items-center gap-1.5 pl-0.5"><AlertCircle size={12} />{errors.username}</div>
-            )}
-          </div>
+          )}
+        </motion.div>
 
-          {/* Email Field */}
-          <div className="space-y-1.5 w-full">
-            <div className="relative">
-              <input
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="Email address"
-                className={`w-full h-11 pl-3.5 pr-10 rounded-lg text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-[3px] focus:ring-offset-0 focus:bg-zinc-950/80 transition-all ${errors.email && touched.has("email") ? "bg-red-950/10 border border-red-500/30" : "bg-zinc-900/40 border border-white/[0.05]"}`}
-              />
-              <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none z-10">
-                <AnimatePresence>
-                  {form.email && !errors.email && (
-                    <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
-                      <Check size={16} className="text-green-500 stroke-[2.5]" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-            {errors.email && touched.has("email") && (
-              <div className="text-red-400 text-[11px] flex items-center gap-1.5 pl-0.5"><AlertCircle size={12} />{errors.email}</div>
-            )}
-          </div>
+        <motion.div variants={item}>
+          <Input
+            icon={Lock}
+            name="confirmPassword"
+            type="password"
+            placeholder="Confirm password"
+            value={form.confirmPassword}
+            error={errors.confirmPassword}
+            isTouched={touched.has("confirmPassword")}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            showToggle
+            isVisible={showConfirm}
+            onToggle={() => setShowConfirm(!showConfirm)}
+          />
+        </motion.div>
 
-          {/* Password Field */}
-          <div className="space-y-1.5 w-full relative">
-            <div className="relative">
-              <input
-                type={showPass ? "text" : "password"}
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="Password"
-                className={`w-full h-11 pl-3.5 pr-14 rounded-lg text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-[3px] transition-all ${errors.password && touched.has("password") ? "bg-red-950/10 border border-red-500/30" : "bg-zinc-900/40 border border-white/[0.05]"}`}
-              />
-              <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-2 z-10">
-                <AnimatePresence>
-                  {form.password && !errors.password && (
-                    <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
-                      <Check size={16} className="text-green-500 stroke-[2.5]" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                {form.password && (
-                  <button type="button" onClick={() => setShowPass(!showPass)} className="text-zinc-500 hover:text-zinc-300 focus:outline-none">
-                    {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                )}
-              </div>
-            </div>
-            {errors.password && touched.has("password") && (
-              <div className="text-red-400 text-[11px] flex items-center gap-1.5 pl-0.5"><AlertCircle size={12} />{errors.password}</div>
-            )}
-          </div>
-
-          {/* Confirm Password Field */}
-          <div className="space-y-1.5 w-full relative">
-            <div className="relative">
-              <input
-                type={showConfirmPass ? "text" : "password"}
-                name="confirmPassword"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="Confirm password"
-                className={`w-full h-11 pl-3.5 pr-14 rounded-lg text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-[3px] transition-all ${errors.confirmPassword && touched.has("confirmPassword") ? "bg-red-950/10 border border-red-500/30" : "bg-zinc-900/40 border border-white/[0.05]"}`}
-              />
-              <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-2 z-10">
-                <AnimatePresence>
-                  {form.confirmPassword && !errors.confirmPassword && (
-                    <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
-                      <Check size={16} className="text-green-500 stroke-[2.5]" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                {form.confirmPassword && (
-                  <button type="button" onClick={() => setShowConfirmPass(!showConfirmPass)} className="text-zinc-500 hover:text-zinc-300 focus:outline-none">
-                    {showConfirmPass ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                )}
-              </div>
-            </div>
-            {errors.confirmPassword && touched.has("confirmPassword") && (
-              <div className="text-red-400 text-[11px] flex items-center gap-1.5 pl-0.5"><AlertCircle size={12} />{errors.confirmPassword}</div>
-            )}
-          </div>
-        </div>
-
-        <button type="submit" className="w-full h-11 rounded-lg font-medium text-sm flex items-center justify-center bg-zinc-100 text-zinc-950 hover:bg-white active:scale-[0.98] cursor-pointer shadow-md transition-all duration-200">
-          Create account
-        </button>
-      </form>
+        <motion.div variants={item}>
+          <button
+            type="submit"
+            className="relative mt-2 flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-primary to-primary/80 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-200 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none cursor-pointer"
+          >
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(255,255,255,0.15),transparent_60%)]" />
+            Continue
+          </button>
+        </motion.div>
+      </motion.form>
     </>
+  );
+}
+
+/* ─── Inline Input ─── */
+
+type IconType = React.ComponentType<{ size?: number; className?: string }>;
+
+function Input({
+  icon: Icon,
+  name,
+  type = "text",
+  placeholder,
+  value,
+  error,
+  isTouched,
+  onChange,
+  onBlur,
+  showToggle,
+  isVisible,
+  onToggle,
+}: {
+  icon: IconType;
+  name: string;
+  type?: string;
+  placeholder: string;
+  value: string;
+  error: string | undefined;
+  isTouched: boolean;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
+  showToggle?: boolean;
+  isVisible?: boolean;
+  onToggle?: () => void;
+}) {
+  const [focused, setFocused] = useState(false);
+  const showError = error && isTouched;
+  const inputType = showToggle ? (isVisible ? "text" : "password") : type;
+
+  return (
+    <div className="space-y-1.5">
+      <div className="relative">
+        <Icon
+          size={16}
+          className={`pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-200 ${
+            showError ? "text-red-400/70" : focused ? "text-primary" : "text-muted-foreground/40"
+          }`}
+        />
+        <input
+          type={inputType}
+          name={name}
+          value={value}
+          onChange={onChange}
+          onFocus={() => setFocused(true)}
+          onBlur={(e) => {
+            setFocused(false);
+            onBlur(e);
+          }}
+          placeholder={placeholder}
+          className={`h-11 w-full rounded-xl border bg-background/50 pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground/40 outline-none transition-all duration-200 ${
+            showError
+              ? "border-red-500/30 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/20"
+              : "border-border hover:border-border/80 focus:border-primary/40 focus:ring-1 focus:ring-primary/20"
+          }`}
+        />
+        <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1">
+          {showToggle && value && (
+            <button
+              type="button"
+              onClick={onToggle}
+              tabIndex={-1}
+              className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            >
+              {isVisible ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
+          )}
+          {value && !error && isTouched && <Check size={15} className="text-green-500" />}
+        </div>
+      </div>
+      {showError && (
+        <div className="flex items-center gap-1.5 pl-1 text-[11px] text-red-400">
+          <AlertCircle size={11} />
+          <span>{error}</span>
+        </div>
+      )}
+    </div>
   );
 }

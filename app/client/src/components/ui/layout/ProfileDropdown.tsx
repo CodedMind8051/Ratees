@@ -196,6 +196,7 @@ export default function ProfileDropdown({ onClose, user }: ProfileDropdownProps)
     await authClient.signOut();
     toast.success('Logged out');
     onClose();
+    window.location.href = '/login';
   };
 
   const passwordsMismatch = confirmPassword.length > 0 && newPassword !== confirmPassword;
