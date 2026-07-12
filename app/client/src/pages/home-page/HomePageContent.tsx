@@ -297,7 +297,7 @@ export default function HomePageContent({ onSelectMovie, watchlist, onStatusChan
       <HeroBanner
         content={trendingContents[0]}
         onViewDetails={() => trendingContents[0] && onSelectMovie(trendingContents[0])}
-        watchStatus={trendingContents[0] ? getWatchStatus(trendingContents[0]._id) : null}
+        watchStatus={trendingContents[0] ? (watchlist.find(w => w.contentId === trendingContents[0]._id)?.status ?? null) : null}
         onStatusChange={onStatusChange}
       />
 

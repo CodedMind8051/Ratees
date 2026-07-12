@@ -32,7 +32,7 @@ export const watchStatusTypeDefs = `#graphql
         type Query {
           getWatchStatusOfContent(
             contentId: ID!
-          ): WatchStatus!
+          ): WatchStatus
         
           getContentListInWatchStatus(
             userId: ID!

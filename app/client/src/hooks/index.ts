@@ -3,7 +3,6 @@ export {
   useWatchStatusContentList,
   useWatchStatus,
   useSubmitWatchStatus,
-  useUpdateWatchStatus,
   useDeleteWatchStatus,
   useWatchStatusActions,
 } from './useWatchStatus';

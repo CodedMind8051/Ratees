@@ -34,6 +34,7 @@ type ContentsListDetails {
           genre: [String!]!
           poster: String!
           description: String!
+          totalNumberOfRating: Int!
           backdrop: String!
           Content_Type: String!
           runtime: String

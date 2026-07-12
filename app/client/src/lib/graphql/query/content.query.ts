@@ -34,6 +34,7 @@ const ContentFullDetail = `
     userRating
     total_seasons
     total_episodes
+    totalNumberOfRating
     Ratings { 
     masterpiecePercentage
     TimePassPercentage

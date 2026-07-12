@@ -27,11 +27,15 @@ export default function RatingDistributionChart({ distribution }: Props) {
 
   const chartData = [...data, HIDDEN_MAX_ENTRY];
 
-  const topRating = useMemo(() => {
-    const nonZero = data.filter(d => d.value > 0);
-    if (nonZero.length === 0) return null;
-    return nonZero.reduce((prev, cur) => (cur.value > prev.value ? cur : prev));
-  }, [data]);
+  const average = useMemo(() => {
+    const ws = distribution.waste ?? 0;
+    const tp = distribution.timepass ?? 0;
+    const gd = distribution.good ?? 0;
+    const mp = distribution.masterpiece ?? 0;
+    const total = ws + tp + gd + mp;
+    if (total === 0) return null;
+    return ((mp * 4 + gd * 3 + tp * 2 + ws * 1) / total).toFixed(1);
+  }, [distribution]);
 
   const reducedMotion =
     typeof window !== 'undefined'
@@ -43,8 +47,8 @@ export default function RatingDistributionChart({ distribution }: Props) {
       className="relative w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 select-none shrink-0"
       role="img"
       aria-label={
-        topRating
-          ? `Rating distribution chart. Top rating: ${topRating.name} at ${topRating.value}%`
+        average
+          ? `Rating distribution chart. Average rating: ${average} out of 4`
           : 'Rating distribution chart. No ratings yet.'
       }
     >
@@ -91,16 +95,13 @@ export default function RatingDistributionChart({ distribution }: Props) {
       </ResponsiveContainer>
 
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-        {topRating ? (
+        {average ? (
           <>
-            <span
-              className="text-lg sm:text-xl font-black tabular-nums leading-none"
-              style={{ color: topRating.fill }}
-            >
-              {topRating.value}%
+            <span className="text-lg sm:text-xl font-black tabular-nums leading-none text-foreground">
+              {average}
             </span>
-            <span className="text-[8px] sm:text-[9px] text-muted-foreground/60 font-semibold uppercase tracking-wider mt-0.5 leading-none text-center px-1 truncate max-w-full">
-              {topRating.name}
+            <span className="text-[9px] text-muted-foreground/50 font-semibold tracking-wider mt-0.5 leading-none">
+              / 4
             </span>
           </>
         ) : (

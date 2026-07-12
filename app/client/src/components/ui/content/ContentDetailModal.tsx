@@ -1,11 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import {
   X, Eye, Clock, CheckCircle2, Plus, Film, Tv, UserCircle,
-  ChevronDown, Monitor
+  ChevronDown, Monitor, Star, ThumbsUp, ThumbsDown
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { RatingKey } from '@/types/rating.types';
 import { RATING_LABELS, RATING_COLORS } from '@/constants/rating.constant';
+import { useRating, ratingToKey } from '@/hooks/useRating';
 import type { ContentFullDetailType } from "@/types/content.types"
 import type { WatchStatus } from '@/types/watchlist';
 import { WATCH_STATUS_VALUES } from '@/types/watchlist';
@@ -16,7 +18,11 @@ import { ReviewList } from '../review/ReviewList';
 import { useNavigate } from 'react-router-dom';
 import {
   useWatchStatus,
+  useWatchStatusActions,
 } from '@/hooks/useWatchStatus';
+import { useAuth } from '@/hooks/useAuth';
+import { usePlaylists, useCreatePlaylist, useAddToPlaylist } from '@/hooks/usePlaylist';
+import PlaylistFormModal from '@/components/ui/playlist/PlaylistFormModal';
 
 
 interface MovieDetailModalProps {
@@ -31,6 +37,12 @@ interface GetContentDetailsResponse {
 }
 
 const RATING_ORDER: RatingKey[] = ['waste', 'timepass', 'good', 'masterpiece'];
+const ratingIcons: Record<RatingKey, LucideIcon> = {
+  waste: ThumbsDown,
+  timepass: Clock,
+  good: ThumbsUp,
+  masterpiece: Star,
+};
 
 const statusConfig: Record<WatchStatus, { label: string; icon: typeof CheckCircle2; color: string; bg: string }> = {
   Watched: { label: 'Watched', icon: CheckCircle2, color: 'text-green-400', bg: 'bg-green-400/10 border-green-400/30' },
@@ -61,13 +73,39 @@ export default function MovieDetailModal({
   // Fetch watch status from API
   const { watchStatus: apiWatchStatus, loading: statusLoading } = useWatchStatus(contentId);
 
+  const { setStatus } = useWatchStatusActions();
+  const { submitRating: submitRatingAction, loading: ratingLoading } = useRating();
+
   const content: ContentFullDetailType | undefined = contentData?.getContentDetails;
+
+  const averageRating = useMemo(() => {
+    if (!content?.Ratings) return '—';
+    const mp = content.Ratings.masterpiecePercentage || 0;
+    const gd = content.Ratings.GoodWatchPercentage || 0;
+    const tp = content.Ratings.TimePassPercentage || 0;
+    const ws = content.Ratings.wasteOfTimePercentage || 0;
+    const total = mp + gd + tp + ws;
+    if (total === 0) return '—';
+    return ((mp * 4 + gd * 3 + tp * 2 + ws * 1) / total).toFixed(1);
+  }, [content?.Ratings]);
 
   const [manualStatus, setManualStatus] = useState<WatchStatus | null | undefined>(undefined);
   const activeStatus = (manualStatus !== undefined ? manualStatus : apiWatchStatus as WatchStatus | null) ?? initialStatus ?? null;
   const [playlistDropdownOpen, setPlaylistDropdownOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const [myRating, setMyRating] = useState<RatingKey | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const { user } = useAuth();
+  const { playlists, refetch: refetchPlaylists } = usePlaylists({ userID: user?.id || '', enabled: !!user?.id });
+  const { createPlaylist, loading: creatingPlaylist } = useCreatePlaylist();
+  const { addToPlaylist } = useAddToPlaylist();
+
+  useEffect(() => {
+    if (content?.userRating) {
+      setMyRating(ratingToKey[content.userRating] ?? null);
+    }
+  }, [content?.userRating]);
 
   const navigate = useNavigate();
 
@@ -95,21 +133,26 @@ export default function MovieDetailModal({
   }, [playlistDropdownOpen]);
 
   const handleStatusToggle = async (status: WatchStatus) => {
+    if (!user) { navigate('/login'); return; }
     const next = activeStatus === status ? null : status;
     setManualStatus(next);
 
     if (onStatusChange) {
       await onStatusChange(contentId, next);
       toast.success(next ? `Added to ${statusConfig[status].label}` : 'Removed from watchlist');
+    } else {
+      const success = await setStatus(contentId, next);
+      if (success) {
+        toast.success(next ? `Added to ${statusConfig[status].label}` : 'Removed from watchlist');
+      } else {
+        setManualStatus(activeStatus);
+      }
     }
   };
 
 
 
-  const playlists = ['Nolan Universe', 'Watch on a Rainy Night', 'Weekend Binge'];
-
-
-  if (contentLoading || statusLoading) {
+  if ((contentLoading && !contentData) || (statusLoading && !apiWatchStatus)) {
     return (
       <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
         <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
@@ -137,6 +180,7 @@ export default function MovieDetailModal({
     const contentDetails: ContentFullDetailType = content!;
 
     return (
+      <>
       <div
         className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
         onClick={onClose}
@@ -149,7 +193,7 @@ export default function MovieDetailModal({
           className={[
             'relative w-full bg-card border-border flex flex-col fade-in',
             'sm:max-w-3xl sm:rounded-2xl sm:border sm:max-h-[90vh]',
-            'rounded-t-2xl border-t border-x max-h-[95dvh]',
+            'rounded-2xl border max-h-[95dvh]',
           ].join(' ')}
           onClick={e => e.stopPropagation()}
         >
@@ -171,7 +215,7 @@ export default function MovieDetailModal({
             <button
               onClick={onClose}
               aria-label="Close"
-              className="absolute top-3 right-3 p-2 bg-black/60 backdrop-blur-sm rounded-full text-white hover:bg-black/80 active:scale-95 transition-all"
+              className="absolute top-3 right-3 p-2 bg-black/60 backdrop-blur-sm rounded-full text-white hover:bg-black/80 hover:scale-105 active:scale-95 transition-all cursor-pointer"
             >
               <X size={16} />
             </button>
@@ -215,9 +259,13 @@ export default function MovieDetailModal({
                     <span>{content?.release_date}</span>
                     <span className="opacity-40">·</span>
                     <span>
-                      {content?.runtime === "N/A" || !content?.runtime
-                        ? "Runtime: N/A"
-                        : `${Math.floor(content?.runtime / 60)} hr ${content?.runtime % 60} min`}
+                      {content?.Content_Type === 'tv'
+                        ? content?.total_seasons && content?.total_episodes
+                          ? `${content.total_seasons} season${content.total_seasons !== 1 ? 's' : ''} / ${content.total_episodes} episode${content.total_episodes !== 1 ? 's' : ''}`
+                          : 'TV Series'
+                        : content?.runtime === "N/A" || !content?.runtime
+                          ? "Runtime: N/A"
+                          : `${Math.floor(content?.runtime / 60)} hr ${content?.runtime % 60} min`}
                     </span>
                     <span className="opacity-40">·</span>
                     <span className="truncate">Dir. {content?.director}</span>
@@ -252,10 +300,10 @@ export default function MovieDetailModal({
                       key={`status-${status}`}
                       onClick={() => handleStatusToggle(status)}
                       className={[
-                        'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all duration-150 active:scale-95',
+                        'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all duration-150 active:scale-95 cursor-pointer',
                         isActive
                           ? `${cfg.bg} ${cfg.color}`
-                          : 'border-border text-muted-foreground hover:border-muted hover:text-foreground',
+                          : 'border-border text-muted-foreground hover:border-muted hover:text-foreground hover:bg-secondary/50 hover:scale-105',
                       ].join(' ')}
                     >
                       <Icon size={12} />
@@ -267,24 +315,40 @@ export default function MovieDetailModal({
                 {/* Playlist dropdown */}
                 <div className="relative" ref={dropdownRef}>
                   <button
-                    onClick={() => setPlaylistDropdownOpen(p => !p)}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-dashed border-primary/50 text-primary hover:bg-primary/10 transition-all active:scale-95"
+                    onClick={() => {
+                      if (!user) { navigate('/login'); return; }
+                      setPlaylistDropdownOpen(p => !p);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-dashed border-primary/50 text-primary hover:bg-primary/10 hover:scale-105 transition-all active:scale-95 cursor-pointer"
                   >
                     <Plus size={12} />
                     Add to List
                     <ChevronDown size={10} className={`ml-0.5 transition-transform ${playlistDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {playlistDropdownOpen && (
-                    <div className="absolute top-full left-0 mt-1.5 w-44 bg-card border border-border rounded-xl shadow-2xl z-30 py-1 fade-in overflow-hidden">
+                    <div className="absolute top-full left-0 mt-1.5 w-48 bg-card border border-border rounded-xl shadow-2xl z-30 py-1 fade-in overflow-hidden">
                       {playlists.map(pl => (
                         <button
-                          key={`pl-${pl}`}
-                          onClick={() => { setPlaylistDropdownOpen(false); toast.success(`Added to "${pl}"`); }}
-                          className="w-full text-left px-4 py-2.5 text-xs text-foreground hover:bg-secondary transition-colors"
+                          key={`pl-${pl._id}`}
+                          onClick={async () => {
+                            await addToPlaylist({ playlistId: pl._id, contentId });
+                            setPlaylistDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-xs text-foreground hover:bg-secondary hover:text-primary transition-colors cursor-pointer"
                         >
-                          {pl}
+                          <span className="truncate">{pl.playlistName}</span>
+                          <span className="text-muted-foreground ml-1.5">({pl.totalTracks})</span>
                         </button>
                       ))}
+                      <div className="border-t border-border mt-1 pt-1">
+                        <button
+                          onClick={() => { setCreateModalOpen(true); setPlaylistDropdownOpen(false); }}
+                          className="w-full text-left px-4 py-2.5 text-xs text-primary hover:bg-secondary transition-colors cursor-pointer"
+                        >
+                          <Plus size={12} className="inline mr-1.5 -mt-0.5" />
+                          New list
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -300,7 +364,7 @@ export default function MovieDetailModal({
                     contentDetails.whereTOwatch.map(platform => (
                       <div
                         key={`platform-${platform?.platform}`}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-secondary/60 border border-border rounded-xl text-xs font-medium text-foreground hover:bg-secondary transition-colors"
+                        className="flex items-center gap-2 px-3 py-1.5 bg-secondary/60 border border-border rounded-xl text-xs font-medium text-foreground hover:bg-secondary hover:scale-105 transition-all"
                       >
                         {platform?.logo ? (
                           <img
@@ -324,25 +388,48 @@ export default function MovieDetailModal({
               </div>
 
               {/* ── Community Rating ── */}
-              <div className="mb-6">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">
-                  Community Rating
-                </p>
+              <div className="bg-secondary/20 border border-border rounded-xl p-5 mb-8">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2">
+                    <Star size={12} className="text-primary" />
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                      Community Rating
+                    </p>
+                  </div>
+                  {content?.totalNumberOfRating ? (
+                    <p className="text-[11px] text-muted-foreground/60 font-medium">
+                      {content.totalNumberOfRating} member{content.totalNumberOfRating !== 1 ? 's' : ''} rated
+                    </p>
+                  ) : null}
+                </div>
+
                 {/* Stacked on mobile, side-by-side on sm+ */}
-                <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4 sm:gap-6">
+                <div className="flex flex-col sm:grid sm:grid-cols-2 gap-5 sm:gap-6">
                   <div className="space-y-3">
+                    {/* Average score */}
+                    <div className="flex items-baseline gap-1.5 pb-3 mb-3 border-b border-border">
+                      <span className="text-2xl font-bold text-foreground tabular-nums">
+                        {averageRating}
+                      </span>
+                      <span className="text-sm text-muted-foreground/70 font-medium">/ 4</span>
+                      {content?.totalNumberOfRating ? (
+                        <span className="text-[11px] text-muted-foreground/50 ml-auto">
+                          {content.totalNumberOfRating} rating{content.totalNumberOfRating !== 1 ? 's' : ''}
+                        </span>
+                      ) : null}
+                    </div>
+
                     {RATING_ORDER.map((key, index) => {
                       const pct = content?.Ratings[ratingOptions[index]!] || 0;
-
                       return (
-                        <div key={`dist-${key}`} className="flex items-center gap-3">
-
-                          <span className="text-xs font-medium w-24 shrink-0" style={{ color: RATING_COLORS[key] }}>
+                        <div key={`dist-${key}`} className="flex items-center gap-3 group/bar">
+                          <span className="text-xs font-semibold w-24 shrink-0 truncate" style={{ color: RATING_COLORS[key] }}>
                             {RATING_LABELS[key]}
                           </span>
-                          <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden">
+                          <div className="flex-1 h-2 bg-secondary rounded-full overflow-hidden">
                             <div
-                              className="h-full rounded-full transition-all duration-700"
+                              className="h-full rounded-full transition-all duration-500 group-hover/bar:brightness-110"
                               style={{ width: `${pct}%`, backgroundColor: RATING_COLORS[key] }}
                             />
                           </div>
@@ -353,56 +440,67 @@ export default function MovieDetailModal({
                       );
                     })}
                   </div>
-                  <div className="flex items-center justify-center sm:justify-end">
-                    <RatingDistributionChart distribution={{
-                      masterpiece: content?.Ratings?.masterpiecePercentage ? content?.Ratings?.masterpiecePercentage : 0,
-                      waste: content?.Ratings?.wasteOfTimePercentage ? content?.Ratings?.wasteOfTimePercentage : 0,
-                      timepass: content?.Ratings?.TimePassPercentage ? content?.Ratings?.TimePassPercentage : 0,
-                      good: content?.Ratings?.GoodWatchPercentage ? content?.Ratings?.GoodWatchPercentage : 0
-                    }} />
+
+                  <div className="flex items-center justify-center">
+                    <div className="transition-all duration-200 hover:scale-105 hover:brightness-110">
+                      <RatingDistributionChart distribution={{
+                        masterpiece: content?.Ratings?.masterpiecePercentage ? content?.Ratings?.masterpiecePercentage : 0,
+                        waste: content?.Ratings?.wasteOfTimePercentage ? content?.Ratings?.wasteOfTimePercentage : 0,
+                        timepass: content?.Ratings?.TimePassPercentage ? content?.Ratings?.TimePassPercentage : 0,
+                        good: content?.Ratings?.GoodWatchPercentage ? content?.Ratings?.GoodWatchPercentage : 0
+                      }} />
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* ── Rate This ── */}
-              <div className="bg-secondary/40 border border-border rounded-xl p-4 mb-8">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">
-                  Your Rating
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {RATING_ORDER.map(key => (
-                    <button
-                      key={`my-rating-${key}`}
-                      onClick={() => {
-                        const next = myRating === key ? null : key;
-                        setMyRating(next);
-                        if (next) toast.success(`Rated: ${RATING_LABELS[key]}`);
-                      }}
-                      className={[
-                        'px-4 py-2 rounded-full text-xs font-semibold border transition-all duration-150 active:scale-95',
-                        myRating === key
-                          ? `${ratingBadgeClass[key]} scale-105 shadow-md`
-                          : 'border-border text-muted-foreground hover:border-muted hover:text-foreground',
-                      ].join(' ')}
-                    >
-                      {RATING_LABELS[key]}
-                    </button>
-                  ))}
-                </div>
-                {myRating && (
-                  <p className="text-xs text-muted-foreground mt-3 flex items-center gap-2">
-                    Your rating:{' '}
-                    <span className="font-semibold" style={{ color: RATING_COLORS[myRating] }}>
-                      {RATING_LABELS[myRating]}
-                    </span>
-                    <button
-                      onClick={() => setMyRating(null)}
-                      className="underline underline-offset-2 hover:text-foreground transition-colors"
-                    >
-                      Remove
-                    </button>
+              <div className="bg-secondary/20 border border-border rounded-xl p-5 mb-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <ThumbsUp size={12} className="text-primary" />
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                    Your Rating
                   </p>
-                )}
+                  {myRating ? (
+                    <span className="text-[11px] text-muted-foreground/50 ml-auto">
+                      {myRating === null ? '' : `You rated: ${RATING_LABELS[myRating]}`}
+                    </span>
+                  ) : null}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {RATING_ORDER.map(key => {
+                    const isActive = myRating === key;
+                    const Icon = ratingIcons[key];
+                    return (
+                      <button
+                        key={`my-rating-${key}`}
+                        disabled={ratingLoading}
+                        onClick={async () => {
+                          if (!user) { navigate('/login'); return; }
+                          const success = await submitRatingAction(contentId, key);
+                          if (success) {
+                            if (isActive) {
+                              setMyRating(null);
+                              toast.success('Rating removed successfully');
+                            } else {
+                              setMyRating(key);
+                              toast.success(`Rated: ${RATING_LABELS[key]}`);
+                            }
+                          }
+                        }}
+                        className={[
+                          'flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold border transition-all duration-150 active:scale-95 cursor-pointer',
+                          isActive
+                            ? `${ratingBadgeClass[key]} scale-105 shadow-md`
+                            : 'border-border text-muted-foreground hover:border-muted hover:text-foreground hover:bg-secondary/50 hover:scale-105',
+                        ].join(' ')}
+                      >
+                        <Icon size={13} />
+                        {RATING_LABELS[key]}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* ── Cast & Crew ── */}
@@ -412,8 +510,8 @@ export default function MovieDetailModal({
                 </p>
                 <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory">
                   {contentDetails.casts?.map((member) => (
-                    <div className="shrink-0 text-center w-[72px] snap-start">
-                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden mx-auto border-2 border-border ring-1 ring-white/5 bg-secondary/60 flex items-center justify-center">
+                    <div className="shrink-0 text-center w-[72px] snap-start group">
+                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden mx-auto border-2 border-border ring-1 ring-white/5 group-hover:ring-primary/30 group-hover:scale-105 bg-secondary/60 flex items-center justify-center transition-all duration-200">
                         {member?.profile_path ? (
                           <img
                             src={`${import.meta.env.VITE_TMDB_POSTER_BASE_URL}/${member.profile_path}`}
@@ -424,7 +522,7 @@ export default function MovieDetailModal({
                           <UserCircle className="w-full h-full text-muted-foreground/40" />
                         )}
                       </div>
-                      <p className="text-[11px] font-medium text-foreground mt-2 leading-tight truncate">
+                      <p className="text-[11px] font-medium text-foreground mt-2 leading-tight truncate group-hover:text-primary transition-colors">
                         {member?.name ?? "Unknown"}
                       </p>
                       <p className="text-[10px] text-muted-foreground leading-tight truncate">
@@ -445,6 +543,26 @@ export default function MovieDetailModal({
           </div>
         </div>
       </div>
+
+      {createModalOpen && (
+        <PlaylistFormModal
+          playlist={null}
+          loading={creatingPlaylist}
+          onClose={() => setCreateModalOpen(false)}
+          onSubmit={async (name, _description, isPublic) => {
+            const created = await createPlaylist({ playlistName: name, description: _description, isPublic });
+            if (created) {
+              await refetchPlaylists();
+              const newPl = playlists.find(p => p.playlistName === name);
+              if (newPl) {
+                await addToPlaylist({ playlistId: newPl._id, contentId });
+              }
+            }
+            setCreateModalOpen(false);
+          }}
+        />
+      )}
+      </>
     )
   };
 }

@@ -5,7 +5,6 @@ import {
   GET_WATCH_STATUS,
   GET_WATCH_STATUS_CONTENT_LIST,
   SUBMIT_WATCH_STATUS,
-  UPDATE_WATCH_STATUS,
   DELETE_WATCH_STATUS,
 } from '@/lib/graphql/query/watchStatus.query';
 import { toast } from 'sonner';
@@ -76,6 +75,7 @@ export function useWatchStatus(contentId: string) {
   const { data, loading, error, refetch } = useQuery<WatchStatusResponse>(GET_WATCH_STATUS, {
     variables: { contentId },
     fetchPolicy: 'cache-and-network',
+    skip: !contentId,
   });
 
   const watchStatus = data?.getWatchStatusOfContent?.watchStatus;
@@ -108,7 +108,9 @@ export function useSubmitWatchStatus() {
         },
       });
 
-      await client.refetchQueries({ include: ['GetWatchStatusContentList'] });
+      await client.refetchQueries({
+        include: [GET_WATCH_STATUS_CONTENT_LIST],
+      });
       return true;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to update watch status';
@@ -118,37 +120,6 @@ export function useSubmitWatchStatus() {
   };
 
   return { submitStatus, loading };
-}
-
-// Mutation hook for updating watch status
-export function useUpdateWatchStatus() {
-  const client = useApolloClient();
-  const [updateWatchStatus, { loading }] = useMutation(UPDATE_WATCH_STATUS, {
-    context: {
-      credentials: 'include',
-    },
-  });
-
-  const updateStatus = async (contentId: string, status: WatchStatus) => {
-    try {
-      const backendStatus = statusToBackend[status];
-      await updateWatchStatus({
-        variables: {
-          contentId,
-          watchStatus: backendStatus,
-        },
-      });
-
-      await client.refetchQueries({ include: ['GetWatchStatusContentList'] });
-      return true;
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Failed to update watch status';
-      toast.error(message);
-      return false;
-    }
-  };
-
-  return { updateStatus, loading };
 }
 
 // Mutation hook for deleting watch status
@@ -166,7 +137,9 @@ export function useDeleteWatchStatus() {
         variables: { contentId },
       });
 
-      await client.refetchQueries({ include: ['GetWatchStatusContentList'] });
+      await client.refetchQueries({
+        include: [GET_WATCH_STATUS_CONTENT_LIST],
+      });
       return true;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to remove from watchlist';
@@ -178,33 +151,23 @@ export function useDeleteWatchStatus() {
   return { deleteStatus, loading };
 }
 
-// Combined hook for status changes (handles both create and update)
+// Combined hook for status changes
 export function useWatchStatusActions() {
   const { submitStatus, loading: submitLoading } = useSubmitWatchStatus();
-  const { updateStatus, loading: updateLoading } = useUpdateWatchStatus();
   const { deleteStatus, loading: deleteLoading } = useDeleteWatchStatus();
 
   const setStatus = async (
     contentId: string,
     newStatus: WatchStatus | null,
-    currentStatus: WatchStatus | null
   ) => {
-    console.log('setStatus called:', { contentId, newStatus, currentStatus });
-
     if (newStatus === null) {
-      // Remove from watchlist
       return deleteStatus(contentId);
-    } else if (currentStatus === null) {
-      // Create new status
-      return submitStatus(contentId, newStatus);
-    } else {
-      // Update existing status
-      return updateStatus(contentId, newStatus);
     }
+    return submitStatus(contentId, newStatus);
   };
 
   return {
     setStatus,
-    loading: submitLoading || updateLoading || deleteLoading,
+    loading: submitLoading || deleteLoading,
   };
 }

@@ -1,5 +1,7 @@
 import { Play, Plus, CheckCircle2, Film, Tv, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import type { ContentItemsType } from '@/types/content.types';
 import type { WatchStatus } from '@/types/watchlist';
 
@@ -73,12 +75,15 @@ function HeroBannerSkeleton() {
 }
 
 export default function HeroBanner({ content, onViewDetails, watchStatus, onStatusChange }: HeroBannerProps) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   if (!content) {
     return <HeroBannerSkeleton />;
   }
 
   const handleQuickAdd = async () => {
+    if (!user) { navigate('/login'); return; }
     const next = watchStatus === 'WatchLater' ? null : 'WatchLater';
     await onStatusChange(content._id, next);
     toast.success(next ? 'Added to Watch Later' : 'Removed from Watch Later');

@@ -47,8 +47,8 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
             [
                 {
                     $match: {
-                     title: { $regex: validatedQuery.replace(/[-\/?!@]/g, " "), $options: "i" }
-  
+                        title: { $regex: validatedQuery.replace(/[-\/?!@]/g, " "), $options: "i" }
+
                     }
                 },
                 {
@@ -143,7 +143,7 @@ const SearchContentsController = async ({ query, page }: SearchContentInput) => 
 
     }
     catch (error) {
-       return handelGraphqlError(error)
+        return handelGraphqlError(error)
     }
 }
 
@@ -203,15 +203,19 @@ const FetchContentDetailsController = async ({ ContentId }: ContentDetailsInput)
                     whereTOwatch: 1,
                     runtime: 1,
                     userRating: "$userRating.rating",
-                    totalNumberOfRating: "$Ratings.totalNumberOfRatings",
+                    totalNumberOfRating: { $ifNull: ["$Ratings.totalNumberOfRatings", 0] },
                     Ratings: {
                         masterpiecePercentage: {
                             $multiply: [
                                 {
-                                    $divide: [
-                                        "$Ratings.MasterPieceRating.totalCount",
-                                        "$Ratings.totalNumberOfRatings"
+                                    $cond: [
+                                        { $gt: ["$Ratings.MasterPieceRating.totalCount", 0] },
+                                        {
+                                            $divide: ["$Ratings.MasterPieceRating.totalCount", "$Ratings.totalNumberOfRatings"]
+                                        },
+                                        0
                                     ]
+
                                 },
                                 100
                             ]
@@ -219,9 +223,12 @@ const FetchContentDetailsController = async ({ ContentId }: ContentDetailsInput)
                         TimePassPercentage: {
                             $multiply: [
                                 {
-                                    $divide: [
-                                        "$Ratings.TimePassRating.totalCount",
-                                        "$Ratings.totalNumberOfRatings"
+                                    $cond: [
+                                        { $gt: ["$Ratings.TimePassRating.totalCount", 0] },
+                                        {
+                                            $divide: ["$Ratings.TimePassRating.totalCount", "$Ratings.totalNumberOfRatings"]
+                                        },
+                                        0
                                     ]
                                 },
                                 100
@@ -230,9 +237,12 @@ const FetchContentDetailsController = async ({ ContentId }: ContentDetailsInput)
                         GoodWatchPercentage: {
                             $multiply: [
                                 {
-                                    $divide: [
-                                        "$Ratings.GoodWatchRating.totalCount",
-                                        "$Ratings.totalNumberOfRatings"
+                                    $cond: [
+                                        { $gt: ["$Ratings.GoodWatchRating.totalCount", 0] },
+                                        {
+                                            $divide: ["$Ratings.GoodWatchRating.totalCount", "$Ratings.totalNumberOfRatings"]
+                                        },
+                                        0
                                     ]
                                 },
                                 100
@@ -241,9 +251,12 @@ const FetchContentDetailsController = async ({ ContentId }: ContentDetailsInput)
                         wasteOfTimePercentage: {
                             $multiply: [
                                 {
-                                    $divide: [
-                                        "$Ratings.wasteOfTime.totalCount",
-                                        "$Ratings.totalNumberOfRatings"
+                                    $cond: [
+                                        { $gt: ["$Ratings.wasteOfTime.totalCount", 0] },
+                                        {
+                                            $divide: ["$Ratings.wasteOfTime.totalCount", "$Ratings.totalNumberOfRatings"]
+                                        },
+                                        0
                                     ]
                                 },
                                 100
@@ -259,10 +272,10 @@ const FetchContentDetailsController = async ({ ContentId }: ContentDetailsInput)
             throwGraphqlError("Content Details not found", "NOT_FOUND", 404, true)
         }
 
-
         return contentDetails[0]
 
     } catch (error) {
+
         return handelGraphqlError(error)
     }
 
@@ -311,7 +324,7 @@ const FetchTrendingContents = async () => {
 
 
     } catch (error) {
-       return handelGraphqlError(error)
+        return handelGraphqlError(error)
     }
 
 
@@ -360,7 +373,7 @@ const fetchNewReleaseContents = async () => {
 
 
     } catch (error) {
-       return handelGraphqlError(error)
+        return handelGraphqlError(error)
     }
 }
 
@@ -415,7 +428,7 @@ const FetchGeneralContentsForHomepage = async (page: PageNumberType) => {
         return ContentsData.docs
 
     } catch (error) {
-      return  handelGraphqlError(error)
+        return handelGraphqlError(error)
     }
 
 }

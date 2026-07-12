@@ -26,7 +26,6 @@ type Ratings = {
   TimePassPercentage?: number 
   GoodWatchPercentage?: number 
   wasteOfTimePercentage?: number 
-  totalNumberOfRating?: number 
 }
 
 
@@ -36,6 +35,7 @@ export interface ContentFullDetailType extends ContentItemsType {
   casts?: Cast[];
   director?: string
   userRating?: number
+  totalNumberOfRating?: number
   total_seasons?: number;
   total_episodes?: number;
   Ratings: Ratings

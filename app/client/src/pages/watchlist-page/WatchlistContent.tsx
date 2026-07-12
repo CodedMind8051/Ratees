@@ -60,18 +60,18 @@ export default function WatchlistContent() {
 
   // Handle status change from modal
   const handleStatusChange = async (contentId: string, status: WatchStatus | null) => {
-    await setStatus(contentId, status, currentStatus);
+    await setStatus(contentId, status);
   };
 
   // Handle remove from watchlist
   const handleRemove = async (contentId: string) => {
-    await setStatus(contentId, null, currentStatus);
+    await setStatus(contentId, null);
     toast.success('Removed from watchlist');
   };
 
   // Handle move status
   const handleMoveStatus = async (contentId: string, newStatus: WatchStatus) => {
-    await setStatus(contentId, newStatus, currentStatus);
+    await setStatus(contentId, newStatus);
     toast.success(`Moved to ${tabConfig[newStatus].label}`);
   };
 

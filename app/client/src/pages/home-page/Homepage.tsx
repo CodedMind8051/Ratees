@@ -2,14 +2,14 @@ import { useState } from 'react';
 import Navbar from '@/components/ui/layout/Navbar';
 import HomePageContent from '@/pages/home-page/HomePageContent';
 import MovieDetailModal from '@/components/ui/content/ContentDetailModal';
-import { mockWatchlist } from '@/data/mockData';
 import type { ContentItemsType } from '@/types/content.types';
 import type { WatchStatus } from '@/types/watchlist';
+import type { WatchlistEntry } from '@/types/watchlist';
 import { useWatchStatusActions } from '@/hooks/useWatchStatus';
 
 export default function HomePage() {
   const [selectedContentId, setSelectedContentId] = useState<string | null>(null);
-  const [watchlist] = useState(mockWatchlist);
+  const [watchlist, setWatchlist] = useState<WatchlistEntry[]>([]);
   const { setStatus } = useWatchStatusActions();
 
   const getWatchStatus = (contentId: string) => {
@@ -17,7 +17,21 @@ export default function HomePage() {
   };
 
   const handleStatusChange = async (contentId: string, status: WatchStatus | null) => {
-    await setStatus(contentId, status, null);
+    const success = await setStatus(contentId, status);
+    if (success) {
+      setWatchlist(prev => {
+        if (status === null) {
+          return prev.filter(w => w.contentId !== contentId);
+        }
+        const existing = prev.find(w => w.contentId === contentId);
+        if (existing) {
+          return prev.map(w =>
+            w.contentId === contentId ? { ...w, status } : w
+          );
+        }
+        return [...prev, { id: `wl-${Date.now()}`, contentId, status, dateAdded: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }];
+      });
+    }
   };
 
   const handleSelectMovie = (content: ContentItemsType) => {

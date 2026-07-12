@@ -23,7 +23,7 @@ export function ReviewForm({ onSubmit, submitting }: ReviewFormProps) {
     const canSubmit = comment.trim().length > 0 && !submitting;
 
     return (
-        <div className="bg-secondary/20 border border-border rounded-xl p-4 space-y-3">
+        <div className="bg-secondary/20 border border-border rounded-xl p-4 space-y-3 transition-all duration-200 hover:border-muted hover:bg-secondary/30">
 
             <textarea
                 value={comment}
@@ -35,7 +35,7 @@ export function ReviewForm({ onSubmit, submitting }: ReviewFormProps) {
           w-full bg-card border border-border rounded-lg px-3 py-2.5 text-sm
           text-foreground placeholder:text-muted-foreground/50
           focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary
-          resize-none transition-colors
+          resize-none transition-all duration-150 hover:border-muted
         "
             />
 
@@ -50,7 +50,7 @@ export function ReviewForm({ onSubmit, submitting }: ReviewFormProps) {
                     className="
             flex items-center gap-2 px-4 py-2 rounded-lg
             bg-primary text-primary-foreground text-sm font-semibold
-            hover:bg-amber-400 active:scale-95
+            hover:bg-amber-400 hover:scale-105 active:scale-95
             disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100
             transition-all duration-150
             hover:cursor-pointer

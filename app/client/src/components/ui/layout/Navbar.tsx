@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import AppLogo from '@/components/ui/shadcn/AppLogo';
-import { Search, BookMarked, ListVideo, Home, ChevronDown, X, Menu, Bell, Users } from 'lucide-react';
-import ProfileDropdown from '../../ProfileDropdown';
+import { Search, BookMarked, ListVideo, Home, ChevronDown, X, Menu, Bell, Users, LogIn } from 'lucide-react';
+import ProfileDropdown from './ProfileDropdown';
 import SearchOverlay from '../common/SearchOverlay';
 import { ContentItemsType } from '@/types/content.types';
+import { useAuth } from '@/hooks/useAuth';
+import ComingSoon from '@/components/ui/common/ComingSoon';
 
 const NAV_LINKS = [
   { href: '/', label: 'Home', icon: Home },
@@ -19,17 +21,24 @@ interface NavbarProps {
 
 export default function Navbar({ onSelectMovie }: NavbarProps) {
   const { pathname } = useLocation();
+  const { user } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+  const notificationRef = useRef<HTMLDivElement>(null);
 
   const closeProfile = useCallback(() => setProfileOpen(false), []);
+  const closeNotification = useCallback(() => setNotificationOpen(false), []);
 
   useEffect(() => {
     function handleOutside(e: MouseEvent | TouchEvent) {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         closeProfile();
+      }
+      if (notificationRef.current && !notificationRef.current.contains(e.target as Node)) {
+        closeNotification();
       }
     }
     document.addEventListener('mousedown', handleOutside);
@@ -38,7 +47,7 @@ export default function Navbar({ onSelectMovie }: NavbarProps) {
       document.removeEventListener('mousedown', handleOutside);
       document.removeEventListener('touchstart', handleOutside);
     };
-  }, [closeProfile]);
+  }, [closeProfile, closeNotification]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -49,11 +58,14 @@ export default function Navbar({ onSelectMovie }: NavbarProps) {
       if (e.key === 'Escape') {
         setMobileMenuOpen(false);
         closeProfile();
+        closeNotification();
       }
     }
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [closeProfile]);
+  }, [closeProfile, closeNotification]);
+
+  
 
   return (
     <>
@@ -112,34 +124,66 @@ export default function Navbar({ onSelectMovie }: NavbarProps) {
 
             <div className="hidden md:block w-px h-5 bg-border mx-1" />
 
-            <button
-              type="button"
-              className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors cursor-pointer"
-              aria-label="Notifications"
-            >
-              <Bell size={17} />
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-orange-500 rounded-full border border-background" aria-hidden="true" />
-            </button>
-
-            <div className="relative" ref={profileRef}>
+            <div className="relative" ref={notificationRef}>
               <button
                 type="button"
-                onClick={() => setProfileOpen(prev => !prev)}
-                className="flex items-center gap-2 pl-1.5 pr-2 py-1 rounded-lg hover:bg-secondary transition-colors cursor-pointer"
-                aria-label="Profile menu"
-                aria-expanded={profileOpen}
+                onClick={() => setNotificationOpen(prev => !prev)}
+                className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors cursor-pointer"
+                aria-label="Notifications"
+                aria-expanded={notificationOpen}
                 aria-haspopup="true"
               >
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-[10px] font-semibold text-white shrink-0">
-                  AR
-                </div>
-                <span className="text-[13px] font-medium hidden sm:block">Arjun</span>
-                <ChevronDown
-                  size={12}
-                  className={`text-muted-foreground transition-transform duration-200 hidden sm:block ${profileOpen ? 'rotate-180' : ''}`}
-                />
+                <Bell size={17} />
+                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-orange-500 rounded-full border border-background" aria-hidden="true" />
               </button>
-              {profileOpen && <ProfileDropdown onClose={closeProfile} />}
+
+              {notificationOpen && (
+                <div className="fixed inset-x-2 top-20 sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-[480px] max-h-[70vh] sm:max-h-[600px] bg-background bg-black/80 rounded-xl shadow-2xl border border-border overflow-y-auto z-50">
+                  <div className="sticky top-0 z-10 bg-primary/10 px-4 py-3 border-b border-border">
+                    <div className="flex items-center gap-2">
+                      <Bell size={16} className="text-primary" />
+                      <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
+                    </div>
+                  </div>
+                  <ComingSoon
+                    icon={Bell}
+                    eyebrow="Notifications"
+                    title="Coming Soon"
+                    description="Stay tuned for real-time updates on your watchlist, reviews from friends, and more."
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="relative" ref={profileRef}>
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => setProfileOpen(prev => !prev)}
+                  className="flex items-center gap-2 pl-1.5 pr-2 py-1 rounded-lg hover:bg-secondary transition-colors cursor-pointer"
+                  aria-label="Profile menu"
+                  aria-expanded={profileOpen}
+                  aria-haspopup="true"
+                >
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-[10px] font-semibold text-white shrink-0">
+                    <img src={user?.image ? user.image : "/assets/no_image.png"} alt="" className='rounded-full' />
+                  </div>
+                  <span className="text-[13px] font-medium hidden sm:block">{user.name}</span>
+                  <ChevronDown
+                    size={12}
+                    className={`text-muted-foreground transition-transform duration-200 hidden sm:block ${profileOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                >
+                  <LogIn size={14} />
+                  <span className="hidden sm:inline">Login</span>
+                </Link>
+              )}
+              {profileOpen && <ProfileDropdown user={user} onClose={closeProfile} />}
             </div>
 
             <button
