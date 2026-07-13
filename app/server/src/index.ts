@@ -1,7 +1,6 @@
 import dotenv from "dotenv"
-dotenv.config({
-    path: './.env'
-})
+
+dotenv.config()
 
 import { app, startGraphqlServer } from "./app"
 import { ConnectDb } from "./db/index"

@@ -25,6 +25,12 @@ app.use(sessionMiddleware)
 
 app.all('/api/auth/*any', toNodeHandler(auth));
 
+app.get("/", (req: Request, res: Response) => {
+    res.status(200).json({
+        success: true,
+        message: "Server is running"
+    })
+})
 
 app.use("/api/inngest", serve({
     client: inngest,
