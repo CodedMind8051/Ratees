@@ -23,12 +23,12 @@ const STEPS: FlowStep[] = ["FORM", "AVATAR"];
 const STEP_LABELS = { FORM: "Account", AVATAR: "Avatar" };
 
 const mobilePos = [
-  "top-[3%] left-[4%] w-[18%] -rotate-6",
-  "top-[3%] right-[4%] w-[18%] rotate-6",
-  "top-[22%] left-[2%] w-[20%] rotate-3",
-  "top-[22%] right-[2%] w-[18%] -rotate-3",
-  "bottom-[16%] left-[3%] w-[18%] rotate-8",
-  "bottom-[16%] right-[3%] w-[16%] rotate-12",
+  "top-[3%] left-[4%] w-[16%] -rotate-6",
+  "top-[3%] right-[4%] w-[16%] rotate-6",
+  "top-[20%] left-[2%] w-[17%] rotate-3",
+  "top-[20%] right-[2%] w-[16%] -rotate-3",
+  "bottom-[14%] left-[3%] w-[16%] rotate-8",
+  "bottom-[14%] right-[3%] w-[14%] rotate-12",
 ];
 
 const desktopPos = [
@@ -72,7 +72,7 @@ export default function Signup() {
   const stepIndex = STEPS.indexOf(step);
 
   return (
-    <main className="relative min-h-screen bg-background text-foreground antialiased overflow-hidden selection:bg-primary/30">
+    <main className="relative min-h-screen w-full max-w-[100vw] overflow-x-hidden overflow-y-auto bg-background text-foreground antialiased selection:bg-primary/30">
 
       {/* Scattered poster images */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -83,7 +83,7 @@ export default function Signup() {
           return (
             <div
               key={`m-${c._id}`}
-              className={`absolute lg:hidden opacity-35 transition-opacity duration-500 ${mobilePos[i]}`}
+              className={`absolute lg:hidden opacity-30 transition-opacity duration-500 ${mobilePos[i]}`}
             >
               <div className="aspect-[2/3] w-full overflow-hidden rounded-lg border border-border/10 shadow-xl">
                 <img
@@ -124,7 +124,7 @@ export default function Signup() {
         {/* Vignette — full radial only on desktop; lighter linear fade on mobile
             so posters stay visible instead of being swallowed by the overlay */}
         <div className="absolute inset-0 hidden lg:block bg-[radial-gradient(ellipse_at_center,transparent_30%,#09090b_85%)]" />
-        <div className="absolute inset-0 lg:hidden bg-gradient-to-b from-background/50 via-background/20 to-background/75" />
+        <div className="absolute inset-0 lg:hidden bg-gradient-to-b from-background/55 via-background/25 to-background/80" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-transparent to-background/60" />
       </div>
 
@@ -133,8 +133,8 @@ export default function Signup() {
       <div className="relative z-10 flex min-h-screen flex-col">
         <AuthNavbar />
 
-        <div className="flex flex-1 items-center justify-center px-4 py-10 sm:py-16 lg:py-20">
-          <div className="grid w-full max-w-[1040px] items-center gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-12">
+        <div className="flex flex-1 items-center justify-center px-4 py-8 sm:py-16 lg:py-20">
+          <div className="grid w-full max-w-[1040px] items-center gap-6 sm:gap-10 lg:grid-cols-2 lg:gap-12">
 
             {/* ── Left (desktop) ── */}
             <div className="hidden lg:block">
@@ -185,7 +185,8 @@ export default function Signup() {
               </motion.div>
             </div>
 
-            {/* ── Mobile trending filmstrip (in-flow, always fully visible) ── */}
+            {/* ── Mobile trending strip — fixed grid, never scrolls, nothing
+                can hide off-screen ── */}
             {scattered.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
@@ -199,14 +200,14 @@ export default function Signup() {
                     Join the community
                   </span>
                 </div>
-                <div className="flex justify-center gap-2.5 overflow-x-auto px-2 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="mx-auto grid max-w-[340px] grid-cols-5 gap-2">
                   {scattered.slice(0, 5).map((c: any) => {
                     const src = imgUrl(c.poster, POSTER_BASE);
                     if (!src) return null;
                     return (
                       <div
                         key={`strip-${c._id}`}
-                        className="h-[92px] w-16 shrink-0 overflow-hidden rounded-lg border border-border/40 bg-card shadow-lg"
+                        className="aspect-[2/3] w-full overflow-hidden rounded-lg border border-border/40 bg-card shadow-lg"
                       >
                         <img
                           src={src}
@@ -230,32 +231,33 @@ export default function Signup() {
               transition={{ duration: 0.5, delay: 0.05 }}
               className="mx-auto w-full max-w-[420px] lg:mx-0 lg:ml-auto"
             >
-              <div className="relative rounded-2xl border border-border/50 bg-card/80 backdrop-blur-2xl p-6 sm:p-8 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)]">
+              <div className="relative rounded-2xl border border-border/50 bg-card/80 backdrop-blur-2xl p-5 xs:p-6 sm:p-8 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)]">
                 <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-b from-primary/[0.03] via-transparent to-transparent" />
                 <div className="pointer-events-none absolute top-0 left-1/2 h-px w-1/3 -translate-x-1/2 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
                 <div className="relative">
-                  <div className="mb-6 sm:mb-8 text-center">
-                    <div className="mx-auto mb-4 sm:mb-5 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 ring-1 ring-primary/20">
-                      <Clapperboard size={22} className="text-primary" />
+                  <div className="mb-5 sm:mb-8 text-center">
+                    <div className="mx-auto mb-3 sm:mb-5 flex h-11 w-11 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 ring-1 ring-primary/20">
+                      <Clapperboard size={20} className="text-primary sm:hidden" />
+                      <Clapperboard size={24} className="hidden text-primary sm:block" />
                     </div>
-                    <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    <h1 className="text-lg sm:text-2xl font-bold tracking-tight">
                       {step === "FORM" ? "Create your account" : "Pick an avatar"}
                     </h1>
-                    <p className="mt-2 text-sm text-muted-foreground/70">
+                    <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-muted-foreground/70">
                       {step === "FORM" ? "Join a community of film lovers" : "Choose an image that represents you"}
                     </p>
                   </div>
 
                   {/* Step indicator */}
-                  <div className="mb-6 sm:mb-8 flex items-center justify-center gap-2 sm:gap-3">
+                  <div className="mb-5 sm:mb-8 flex items-center justify-center gap-1.5 sm:gap-3">
                     {STEPS.map((s, i) => {
                       const isActive = i === stepIndex;
                       const isPast = i < stepIndex;
                       return (
-                        <div key={s} className="flex items-center gap-2">
+                        <div key={s} className="flex items-center gap-1.5 sm:gap-2">
                           <div
-                            className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all ${
+                            className={`flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full text-[11px] sm:text-xs font-bold transition-all ${
                               isActive
                                 ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
                                 : isPast
@@ -266,14 +268,14 @@ export default function Signup() {
                             {isPast ? "✓" : i + 1}
                           </div>
                           <span
-                            className={`text-xs font-medium transition-colors ${
+                            className={`text-[11px] sm:text-xs font-medium transition-colors ${
                               isActive ? "text-foreground" : "text-muted-foreground/50"
                             }`}
                           >
                             {STEP_LABELS[s]}
                           </span>
                           {i < STEPS.length - 1 && (
-                            <div className={`mx-1 h-px w-6 sm:w-8 transition-colors ${isPast ? "bg-primary/30" : "bg-border/50"}`} />
+                            <div className={`mx-0.5 sm:mx-1 h-px w-5 sm:w-8 transition-colors ${isPast ? "bg-primary/30" : "bg-border/50"}`} />
                           )}
                         </div>
                       );
@@ -302,7 +304,7 @@ export default function Signup() {
                     </motion.div>
                   </AnimatePresence>
 
-                  <p className="mt-8 text-center text-xs text-muted-foreground/60">
+                  <p className="mt-6 sm:mt-8 text-center text-xs text-muted-foreground/60">
                     Already have an account?{" "}
                     <a href="/login" className="font-semibold text-primary transition-colors hover:text-primary/80">
                       Sign in

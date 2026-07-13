@@ -14,6 +14,8 @@ type FormSignIn = {
   password: string
 }
 
+const HomePageUrl = import.meta.env.VITE_APP_URL
+
 const handleSignUpWithEmail = async (
   form: FormSignUp,
   image: string,
@@ -24,16 +26,15 @@ const handleSignUpWithEmail = async (
       email: form.email,
       password: form.password,
       name: form.username,
-      callbackURL: "http://localhost:5173",
+      callbackURL: HomePageUrl,
     },
     {
       onSuccess: async () => {
-        window.location.href = "http://localhost:5173"
+        window.location.href = HomePageUrl
       },
       onError: async (ctx) => {
         toast.error(ctx.error.message, {
           icon: React.createElement(CircleX, { className: 'text-red-500' }),
-          position: "top-center",
           duration: 10000,
         })
       },
@@ -49,13 +50,12 @@ const handleSignInWithEmail = async (
       email: form.email,
       password: form.password,
       rememberMe: true,
-      callbackURL: "http://localhost:5173",
+      callbackURL: HomePageUrl,
     },
     {
       onError: async (ctx) => {
         toast.error(ctx.error.message, {
           icon: React.createElement(CircleX, { className: 'text-red-500' }),
-          position: "top-center",
           duration: 10000,
         })
       },
@@ -67,13 +67,12 @@ const handleSignUpWithGoogle = async () => {
   await authClient.signIn.social(
     {
       provider: "google",
-      callbackURL: "http://localhost:5173",
+      callbackURL: HomePageUrl
     },
     {
       onError: async (ctx) => {
         toast.error(ctx.error.message, {
           icon: React.createElement(CircleX, { className: 'text-red-500' }),
-          position: "top-center",
           duration: 10000,
         })
       },
