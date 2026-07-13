@@ -101,3 +101,5 @@ export function useAuth() {
     refetch,
   };
 }
+
+export default useAuth
