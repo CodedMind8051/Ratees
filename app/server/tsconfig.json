@@ -4,7 +4,11 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "module": "ESNext",
-    "target": "esnext",
+    "target": "ESNext",
+
+    "rootDir": "./src",
+    "outDir": "./dist",
+
     "types": [],
     "sourceMap": true,
     "declaration": true,
@@ -17,6 +21,8 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true,
-  }
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
