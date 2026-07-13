@@ -18,23 +18,25 @@ export function useAuth() {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const checkSession = useCallback(async () => {
-    if (!mountedRef.current || checkingRef.current) return;
+    if (!mountedRef.current || checkingRef.current) {
+      return;
+    }
 
     checkingRef.current = true;
 
     try {
       const session = await authClient.getSession();
 
-      if (!mountedRef.current) return;
-
-      const sessionData = session as {
+      const sessionData = session as unknown as {
         data?: {
           user?: SessionUser;
         };
         error?: {
-          message: string;
+          message?: string;
         };
       };
+
+      if (!mountedRef.current) return;
 
       if (sessionData?.data?.user) {
         const userData = sessionData.data.user;
@@ -51,7 +53,7 @@ export function useAuth() {
         setUser(null);
 
         if (sessionData?.error) {
-          setError(sessionData.error.message);
+          setError(sessionData.error.message ?? "Session error");
         } else {
           setError(null);
         }
@@ -61,6 +63,7 @@ export function useAuth() {
 
       if (mountedRef.current) {
         setUser(null);
+        setError("Failed to fetch session");
       }
     } finally {
       checkingRef.current = false;
@@ -90,6 +93,8 @@ export function useAuth() {
   }, [checkSession]);
 
   const refetch = async () => {
+    if (checkingRef.current) return;
+
     setLoading(true);
     await checkSession();
   };
