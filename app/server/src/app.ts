@@ -25,9 +25,8 @@ app.use(express.static("public"));
 
 app.use((req, res, next) => {
 
-console.log("🔥 Inngest route hit 1");
   if (req.path.startsWith("/api/inngest")) {
-console.log("🔥 Inngest route hit 2");
+
     return next();
   }
 
