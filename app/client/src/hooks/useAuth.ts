@@ -73,7 +73,7 @@ export function useAuth() {
 
         timeoutRef.current = setTimeout(() => {
           checkSession();
-        }, 2000);
+        }, 10000);
       }
     }
   }, []);
