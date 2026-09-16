@@ -14,7 +14,7 @@ pids
 *.pid.lock
 
 # Dependency directories
-node_modules/
+*node_modules/
 jspm_packages/
 
 # TypeScript
@@ -56,3 +56,4 @@ out/
 .DS_Store
 Thumbs.db
 .aider*
+.turbo*

@@ -1,0 +1,17 @@
+{
+    "name": "@ratees/constants",
+    "version": "1.0.0",
+    "description": "",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "type": "module",
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch"
+    },
+    "devDependencies": {
+        "typescript": "^7.0.2"
+    },
+    "author": "",
+    "license": "ISC"
+}

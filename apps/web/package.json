@@ -1,5 +1,5 @@
 {
-  "name": "@ratees/client",
+  "name": "@ratees/web",
   "version": "1.0.0",
   "type": "module",
   "description": "Frontend client for Ratees providing a user interface for browsing movies, managing watchlists, and interacting with the platform.",

@@ -3,7 +3,7 @@ import dotenv from "dotenv"
 dotenv.config()
 
 import { app, startGraphqlServer } from "./app"
-import { ConnectDb } from "./db/index"
+import { ConnectDb } from "@ratees/db"
 
 
 ConnectDb()
@@ -15,6 +15,6 @@ ConnectDb()
             console.log(`✅ Server is running successfully on port: ${process.env.PORT || 5000}`)
         })
 
-    }).catch((err) => {
+    }).catch((err:Error) => {
         console.log("❌ MongoDb connection failed", err)
     })

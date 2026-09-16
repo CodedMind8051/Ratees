@@ -6,7 +6,7 @@ import { handelGraphqlError } from "../utils/handelError.utils"
 import { Review } from "../models/review.model"
 import mongoose from "mongoose"
 import { Content } from "../models/content.model"
-import { User } from "../models/user.model"
+import { User } from "@ratees/db/models/user.model"
 
 
 const submitReviewController = async ({ userId, ContentId, review }: SubmitReviewType): Promise<boolean> => {

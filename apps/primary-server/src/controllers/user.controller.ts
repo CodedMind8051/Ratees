@@ -1,4 +1,4 @@
-import { User } from "../models/user.model";
+import { User } from "@ratees/db";
 import { auth } from "../utils/auth.utils";
 import { fromNodeHeaders } from "better-auth/node";
 import { handelGraphqlError } from "../utils/handelError.utils";

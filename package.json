@@ -1,0 +1,52 @@
+{
+  "name": "ratees",
+  "version": "1.0.0",
+  "packageManager": "npm@9.2.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "description": "Backend server for Ratees handling authentication, content management, ratings, reviews, playlists, watch tracking, and social features.",
+  "keywords": [
+    "movie",
+    "social-media",
+    "movie-app",
+    "fullstack",
+    "mern",
+    "react",
+    "typescript",
+    "nodejs",
+    "express",
+    "postgresql",
+    "prisma",
+    "watchlist",
+    "movie-tracker",
+    "movie-reviews",
+    "playlist",
+    "recommendation-system",
+    "content-discovery",
+    "social-platform",
+    "anime",
+    "movies",
+    "web-series"
+  ],
+  "homepage": "https://github.com/CodedMind8051/Ratees#readme",
+  "bugs": {
+    "url": "https://github.com/CodedMind8051/Ratees/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CodedMind8051/Ratees.git"
+  },
+  "license": "Apache-2.0",
+  "author": "Coded_Mind__",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build"
+  },
+  "devDependencies": {
+    "@types/node": "^26.5.1",
+    "turbo": "^2.10.13"
+  }
+}

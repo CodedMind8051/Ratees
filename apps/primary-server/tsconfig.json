@@ -5,11 +5,11 @@
     "allowSyntheticDefaultImports": true,
     "module": "ESNext",
     "target": "ESNext",
-
+      
     "rootDir": "./src",
     "outDir": "./dist",
 
-    "types": [],
+    "types": ["node"],
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,

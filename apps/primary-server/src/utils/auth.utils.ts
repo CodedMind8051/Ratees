@@ -1,8 +1,8 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { MongoClient } from "mongodb";
-import { DbName } from "../constants";
-import { UserAdditionalField } from "../models/user.model";
+import { DbName } from "@ratees/constants";
+import { UserAdditionalField } from "@ratees/db/models/user.model";
 import { UserSessionExpiresIn, UserSessionUpdateIn } from "../constants"
 
 
