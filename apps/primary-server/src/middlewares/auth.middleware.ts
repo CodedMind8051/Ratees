@@ -1,7 +1,7 @@
 import { auth } from "../utils/auth.utils";
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response, NextFunction } from "express";
-import { asyncHandler } from "../utils/AsyncHandler.utils";
+import { asyncHandler } from "@ratees/utils";
 import type { MyContextType } from "../types/graphql.types";
 import { throwGraphqlError } from "../utils/throwGraphqlError.utils";
 

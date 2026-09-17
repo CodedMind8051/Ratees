@@ -1,0 +1,80 @@
+import mongoose, { Schema } from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+
+const ClubSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: [true, "Club name is required"],
+      trim: true,
+      minlength: [3, "Club name must be at least 3 characters"],
+      maxlength: [100, "Club name cannot exceed 100 characters"],
+    },
+    description: {
+      type: String,
+      trim: true,
+      maxlength: [1000, "Description cannot exceed 1000 characters"],
+      default: "",
+    },
+    password: {
+      type: String,
+      trim: true,
+      default: null,
+      select: false,
+    },
+    thumbnail: {
+      type: String,
+      trim: true,
+      default: null,
+      validate: {
+        validator: function (v: string | null) {
+          if (!v) return true;
+          try {
+            new URL(v);
+            return true;
+          } catch {
+            return false;
+          }
+        },
+        message: "Thumbnail must be a valid URL",
+      },
+    },
+    ispublic: {
+      type: Boolean,
+      default: true,
+      required: true,
+    },
+    maxMemberLimit: {
+      type: Number,
+      required: [true, "maxMemberLimit is required"],
+      default: 50,
+      min: [1, "maxMemberLimit must be at least 1"],
+      max: [10000, "maxMemberLimit cannot exceed 10000"],
+      validate: {
+        validator: Number.isInteger,
+        message: "maxMemberLimit must be an integer",
+      },
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// Indexes
+ClubSchema.index({ ispublic: 1 });
+ClubSchema.index({ name: 1 });
+ClubSchema.index({ createdAt: -1 });
+
+
+ClubSchema.pre("validate", function (next: any) {
+  if (!this.ispublic && !this.password) {
+    // Private club without password is allowed? Enforce if you want strict:
+    // return next(new Error("Private clubs must have a password"));
+  }
+  next();
+});
+
+(ClubSchema as any).plugin(mongooseAggregatePaginate);
+
+export const Club = mongoose.models.Club || mongoose.model("Club", ClubSchema);
