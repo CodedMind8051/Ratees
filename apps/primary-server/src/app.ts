@@ -49,7 +49,7 @@ const startGraphqlServer = async () => {
 }
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-
+    
     console.error(err.message)
 
     res.status(500).json({

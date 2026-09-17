@@ -1,5 +1,5 @@
 import mongoose from "mongoose"
-import { DbName } from "@ratees/constants";
+import { DbName } from "@ratees/constants/src/constants";
 
 
 let isConnected = false

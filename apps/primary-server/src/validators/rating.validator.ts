@@ -1,4 +1,4 @@
-import { objectIdSchema } from "./common.validator"
+import { objectIdSchema } from "@ratees/validators"
 import z from "zod"
 
 export const deleteRatingSchema = z.object({

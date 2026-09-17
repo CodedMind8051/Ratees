@@ -53,23 +53,23 @@ MembersOfClubSchema.index({ userId: 1 });
 MembersOfClubSchema.index({ banned: 1 });
 
 
-MembersOfClubSchema.pre("validate", function (next: any) {
-  if (this.banned) {
-    if (!this.bannedBY) {
-      return next(new Error("bannedBY is required when banned is true"));
-    }
-    if (!this.bannedReason || this.bannedReason.trim().length === 0) {
-      // allow empty but warn; not blocking
-    }
-  } else {
-    // if not banned, ensure bannedBY and bannedReason are cleared for consistency (optional)
-    // we keep as is but could nullify
-    if (this.bannedBY) {
-      // keep, but ideally null
-    }
-  }
-  next();
-});
+// MembersOfClubSchema.pre("validate", function (next: any) {
+//   if (this.banned) {
+//     if (!this.bannedBY) {
+//       return next(new Error("bannedBY is required when banned is true"));
+//     }
+//     if (!this.bannedReason || this.bannedReason.trim().length === 0) {
+//       // allow empty but warn; not blocking
+//     }
+//   } else {
+//     // if not banned, ensure bannedBY and bannedReason are cleared for consistency (optional)
+//     // we keep as is but could nullify
+//     if (this.bannedBY) {
+//       // keep, but ideally null
+//     }
+//   }
+//   next();
+// });
 
 (MembersOfClubSchema as any).plugin(mongooseAggregatePaginate);
 

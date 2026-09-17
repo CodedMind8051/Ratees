@@ -15,5 +15,3 @@ export const pageSchema = z
     })
     .int("Page number must be an integer")
     .positive("Page number must be greater than 0")
-
-

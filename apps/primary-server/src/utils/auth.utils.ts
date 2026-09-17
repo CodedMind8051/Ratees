@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { MongoClient } from "mongodb";
 import { DbName } from "@ratees/constants";
-import { UserAdditionalField } from "@ratees/db/models/user.model";
+import { UserAdditionalField } from "@ratees/db/src/models/user.model";
 import { UserSessionExpiresIn, UserSessionUpdateIn } from "../constants"
 
 

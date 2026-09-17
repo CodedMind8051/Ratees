@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { SearchContentsSchema, ContentDetailsInputSchema, FetchContentsForHomepageSchema } from "../validators/content.validator"
-import { pageSchema } from "../validators/common.validator"
+import { pageSchema } from "@ratees/validators"
 import mongoose from "mongoose"
 
 export type SearchContentInput = z.infer<typeof SearchContentsSchema>

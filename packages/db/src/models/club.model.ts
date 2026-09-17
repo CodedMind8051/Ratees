@@ -1,5 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+import { hashPassword } from "@ratees/utils/src/bcrypt.utils.js"
+
 
 const ClubSchema = new Schema(
   {
@@ -67,12 +69,21 @@ ClubSchema.index({ name: 1 });
 ClubSchema.index({ createdAt: -1 });
 
 
-ClubSchema.pre("validate", function (next: any) {
-  if (!this.ispublic && !this.password) {
-    // Private club without password is allowed? Enforce if you want strict:
-    // return next(new Error("Private clubs must have a password"));
+ClubSchema.pre("save", async function () {
+
+  try {
+
+    if(!this.password && (this.isModified("password") || this.isNew) && !this.ispublic) {
+      throw new Error("Password is required");
+    }
+    
+    if (this.password && !this.ispublic && (this.isModified("password") || this.isNew)) {
+      this.password = await hashPassword(this.password as string);
+    }
+
+  } catch (error) {
+    throw error;
   }
-  next();
 });
 
 (ClubSchema as any).plugin(mongooseAggregatePaginate);

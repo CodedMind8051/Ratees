@@ -1,5 +1,5 @@
 import z from "zod"
-import { objectIdSchema } from "./common.validator"
+import { objectIdSchema } from "@ratees/validators"
 
 export const GetUserSchema = z.object({
     userId: objectIdSchema("userId")

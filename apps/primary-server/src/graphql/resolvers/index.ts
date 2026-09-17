@@ -4,6 +4,7 @@ import { reviewResolver } from "./review.resolver";
 import { playlistResolver } from "./playlist.resolver";
 import { watchStatusResolver } from "./watchStatus.resolver";
 import { userResolver } from "./user.resolver";
+import { clubResolver } from "./club.resolver";
 
 const resolvers = [
     contentResolver,
@@ -11,7 +12,8 @@ const resolvers = [
     reviewResolver,
     playlistResolver,
     watchStatusResolver,
-    userResolver
+    userResolver,
+    clubResolver
 ]
 
 export { resolvers }
