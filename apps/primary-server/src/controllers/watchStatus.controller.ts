@@ -81,9 +81,6 @@ export const updateWatchStatusOfContent = async ({
         })
 
 
-        console.log(verifiedContentId)
-
-
         const updateWatchStatus = await WatchStatus.updateOne(
             {
                 userId: new mongoose.Types.ObjectId(verifiedUserId),
@@ -100,8 +97,6 @@ export const updateWatchStatusOfContent = async ({
             userId: new mongoose.Types.ObjectId(verifiedUserId),
             contentId: new mongoose.Types.ObjectId(verifiedContentId),
         });
-
-        console.log(doc);
         if (updateWatchStatus.matchedCount === 0) {
             throwGraphqlError("Watch status not found.", "WATCH_STATUS_NOT_FOUND", 404, true)
         }

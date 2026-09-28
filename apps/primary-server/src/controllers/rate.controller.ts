@@ -1,10 +1,11 @@
 import { Rate, RatingState } from "../models/rating.model";
-import type { SubmitRatingInput, deleteRatingType } from "../types/rating.types";
+import type { SubmitRatingInput } from "../types/rating.types";
 import { validate } from "../utils/validate.utils";
-import { RateSchema, deleteRatingSchema } from "../validators/rating.validator";
+import { RateSchema } from "../validators/rating.validator";
 import { throwGraphqlError } from "../utils/throwGraphqlError.utils";
 import { handelGraphqlError } from "../utils/handelError.utils";
 import mongoose from "mongoose";
+import { logger } from "@ratees/utils";
 
 export const SubmitRatingController = async ({ userId, ContentId, rating }: SubmitRatingInput): Promise<boolean> => {
     const session = await mongoose.startSession();
@@ -62,7 +63,7 @@ export const SubmitRatingController = async ({ userId, ContentId, rating }: Subm
                 {
                     session
                 }
-        )
+            )
 
             contentRatings[ratingOptions[existingUserRating.rating - 1]!].totalCount -= 1
             contentRatings.totalNumberOfRatings -= 1
@@ -130,7 +131,7 @@ export const SubmitRatingController = async ({ userId, ContentId, rating }: Subm
         return true
 
     } catch (error) {
-console.log(error)
+        logger.error(error)
         if (session.inTransaction()) await session.abortTransaction()
         return handelGraphqlError(error)
 

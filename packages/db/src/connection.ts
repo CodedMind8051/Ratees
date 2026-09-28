@@ -1,5 +1,6 @@
 import mongoose from "mongoose"
 import { DbName } from "@ratees/constants/src/constants";
+import { logger } from "@ratees/utils";
 
 
 let isConnected = false
@@ -11,16 +12,16 @@ const ConnectDb = async () => {
         }
 
         if (isConnected) {
-            console.log("✅ Already connected to MongoDB");
+            logger.warn("Already connected to MongoDB");
             return;
         }
 
         const connectionInstance = await mongoose.connect(`${process.env.MongoDb_Url}/${DbName}`);
         isConnected = connectionInstance.connection.readyState === 1;
-        console.log("✅ Connected to MongoDB:", connectionInstance.connection.host);
+        logger.info({ host: connectionInstance.connection.host }, "✅ Connected to MongoDB");
 
     } catch (error) {
-        console.log("❌ MONGODB connection FAILED ", error);
+        logger.error(error, "❌ MONGODB connection FAILED ");
         process.exit(1)
     }
 }

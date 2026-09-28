@@ -13,16 +13,8 @@ export const clubTypeDefs = `#graphql
              updatedAt: Date!
          }
 
-         type ClubPagination {
-             clubs: [Club!]!
-             totalPages: Int!
-             totalDocs: Int!
-             currentPage: Int!
-         }
-
          type Query {
-             getClub(clubId: ID!): Club!,
-             getClubs(page: Int!): ClubPagination!,
+             getClub(clubId: ID!): Club!
          }
 
          type SearchClubsResponse {

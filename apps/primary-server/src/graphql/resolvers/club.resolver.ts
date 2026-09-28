@@ -1,7 +1,7 @@
-import { createClub, getClub, getClubs, updateClub, deleteClub, searchClubs } from "../../controllers/club.controller";
+import { createClub, getClub, updateClub, deleteClub, searchClubs } from "../../controllers/club.controller";
 import { isAuthenticated } from "../../middlewares/auth.middleware";
 import type { MyContextType } from "../../types/graphql.types";
-import type { CreateClubInputType, UpdateClubInputType, DeleteClubInputType, GetClubInputType, GetClubsInputType, SearchClubsInputType } from "../../types/club.types";
+import type { CreateClubInputType, UpdateClubInputType, DeleteClubInputType, GetClubInputType, SearchClubsInputType } from "../../types/club.types";
 
 export const clubResolver = {
     Query: {
@@ -14,16 +14,6 @@ export const clubResolver = {
 
             const club = await getClub({ clubId })
             return club
-        },
-        getClubs: async (_: any,
-            {
-                page
-            }: GetClubsInputType,
-            context: MyContextType
-        ) => {
-
-            const clubs = await getClubs({ page })
-            return clubs
         },
         searchClubs: async (_: any,
             {

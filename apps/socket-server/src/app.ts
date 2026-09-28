@@ -1,11 +1,12 @@
 import express from "express"
 import cors from "cors";
 import type { Request, Response, NextFunction } from "express";
+import { logger } from "@ratees/utils";
 
 const app = express()
 
 if(!process.env.CORS_ORIGIN){
-    console.log("Please mention the CORS link to env.")
+    logger.error("Please mention the CORS link to env.")
 }
 
 app.use(cors({
@@ -25,7 +26,7 @@ app.get("/",(req,res)=>{
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
-    console.error(err.message)
+    logger.error(err.message)
 
     res.status(500).json({
         success: false,

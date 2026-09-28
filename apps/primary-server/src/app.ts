@@ -8,6 +8,7 @@ import { serve } from "inngest/express";
 import { inngest, functions } from "./inngest/index.inngest"
 import type { Request, Response, NextFunction } from "express";
 import { sessionMiddleware } from "./middlewares/auth.middleware"
+import { logger } from "@ratees/utils";
 
 const app = express();
 
@@ -44,14 +45,13 @@ const startGraphqlServer = async () => {
             }),
         );
     } catch (error) {
-        console.log("❌ Failed to start Apollo server", error)
+        logger.error(error, "❌ Failed to start Apollo server")
     }
 }
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    
-    console.error(err.message)
 
+    logger.error(err.message)
     res.status(500).json({
         success: false,
         message: "Internal Server Error"

@@ -38,11 +38,7 @@ export const getClubSchema = z.object({
     clubId: objectIdSchema("clubId")
 })
 
-export const getClubsSchema = z.object({
-    page: pageSchema
-})
-
 export const searchClubsSchema = z.object({
-    searchTerm: z.string().trim().min(1, "Search query must be at least 1 character").max(100, "Search query cannot exceed 100 characters"),
+    searchTerm: z.string().trim().min(1, "Search query must be at least 1 character").max(100, "Search query cannot exceed 100 characters").optional().default(""),
     page: pageSchema
 })

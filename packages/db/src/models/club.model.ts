@@ -86,6 +86,9 @@ ClubSchema.pre("save", async function () {
   }
 });
 
+
+
+
 (ClubSchema as any).plugin(mongooseAggregatePaginate);
 
 export const Club = mongoose.models.Club || mongoose.model("Club", ClubSchema);

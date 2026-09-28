@@ -1,11 +1,12 @@
 import { server } from "./socket/index.js"
+import { logger } from "@ratees/utils";
 
 const PORT = process.env.PORT || 3000;
 
 try {
     server.listen(PORT, () => {
-        console.log(`✅ Socket-Server is running successfully on port ${PORT}`);
+        logger.info({ port: PORT }, `✅ Socket-Server is running successfully on port ${PORT}`);
     });
 } catch (error) {
-    console.log("❌ Failed to Socket-Server start ", error)
+    logger.error(error, "❌ Failed to Socket-Server start ")
 }

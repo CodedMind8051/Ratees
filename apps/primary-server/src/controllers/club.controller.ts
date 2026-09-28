@@ -2,11 +2,13 @@ import { Club } from "@ratees/db";
 import { MembersOfClub } from "@ratees/db";
 import { ClubJoinRequest } from "@ratees/db";
 import { validate } from "../utils/validate.utils";
-import { createClubSchema, updateClubSchema, deleteClubSchema, getClubSchema, getClubsSchema , searchClubsSchema} from "../validators/club.validator";
+import { createClubSchema, updateClubSchema, deleteClubSchema, getClubSchema, searchClubsSchema } from "../validators/club.validator";
 import { throwGraphqlError } from "../utils/throwGraphqlError.utils";
 import { handelGraphqlError } from "../utils/handelError.utils";
-import type { CreateClubInputType, UpdateClubInputType, DeleteClubInputType, GetClubInputType, GetClubsInputType, ClubResponseType,SearchClubsInputType } from "../types/club.types";
+import type { CreateClubInputType, UpdateClubInputType, DeleteClubInputType, GetClubInputType, ClubResponseType, SearchClubsInputType } from "../types/club.types";
 import mongoose from "mongoose";
+import { redisKeys, ttl, getCatchedData, setCachedData, deleteCachedData, hashPassword } from "@ratees/utils";
+
 
 export const createClub = async (clubData: CreateClubInputType): Promise<boolean> => {
 
@@ -30,7 +32,7 @@ export const createClub = async (clubData: CreateClubInputType): Promise<boolean
 
         if (validatedIsPublic && validatedPassword) {
             throwGraphqlError("Password should not be provided for public clubs", "PASSWORD_NOT_ALLOWED", 400, true)
-        }    
+        }
 
         const existedClub = await Club.exists({
             name: validatedName
@@ -84,11 +86,19 @@ export const getClub = async ({ clubId }: GetClubInputType) => {
 
         const { clubId: validatedClubId } = validate(getClubSchema, { clubId });
 
+        const catchClub = await getCatchedData(redisKeys.club(validatedClubId));
+
+        if (catchClub) {
+            return catchClub;
+        }
+
         const club = await Club.findById(new mongoose.Types.ObjectId(validatedClubId));
 
         if (!club) {
             throwGraphqlError("Club not found", "CLUB_NOT_FOUND", 404, true)
         }
+
+        await setCachedData(redisKeys.club(validatedClubId), club, ttl.club);
 
         return club;
 
@@ -97,71 +107,16 @@ export const getClub = async ({ clubId }: GetClubInputType) => {
     }
 }
 
-export const getClubs = async ({ page }: GetClubsInputType): Promise<ClubResponseType> => {
-
-    try {
-
-        const { page: validatedPage } = validate(getClubsSchema, { page });
-
-        const aggregate = Club.aggregate([
-            {
-                $sort: {
-                    createdAt: -1
-                }
-            },
-            {
-                $project: {
-                    name: 1,
-                    description: 1,
-                    thumbnail: 1,
-                    ispublic: 1,
-                    maxMemberLimit: 1,
-                    createdAt: 1,
-                    updatedAt: 1
-                }
-            }
-        ]);
-
-        const clubs = await (Club as any).aggregatePaginate(aggregate, {
-            page: validatedPage,
-            limit: 20,
-        });
-
-
-        if (validatedPage > clubs.totalPages && clubs.totalDocs > 0) {
-            throwGraphqlError(
-                "Page not found",
-                "PAGE_NOT_FOUND",
-                404,
-                true
-            );
-        }
-
-        if (!clubs || clubs.totalDocs === 0) {
-            return {
-                clubs: [],
-                totalPages: 0,
-                totalDocs: 0,
-                currentPage: validatedPage
-            };
-        }
-
-
-        return {
-            clubs: clubs.docs,
-            totalPages: clubs.totalPages,
-            totalDocs: clubs.totalDocs,
-            currentPage: clubs.page || 1
-        };
-
-    } catch (error) {
-        return handelGraphqlError(error)
-    }
-};
-
 export const searchClubs = async ({ searchTerm, page }: SearchClubsInputType): Promise<ClubResponseType> => {
     try {
+
         const { searchTerm: validatedSearchTerm, page: validatedPage } = validate(searchClubsSchema, { searchTerm, page });
+
+        const cachedClubs = await getCatchedData(redisKeys.search(validatedSearchTerm, validatedPage));
+
+        if (cachedClubs) {
+            return cachedClubs;
+        }
 
         const aggregate = Club.aggregate([
             {
@@ -213,13 +168,16 @@ export const searchClubs = async ({ searchTerm, page }: SearchClubsInputType): P
             };
         }
 
-
-        return {
+        const response: ClubResponseType = {
             clubs: clubs.docs,
             totalPages: clubs.totalPages,
             totalDocs: clubs.totalDocs,
-            currentPage: clubs.page || 1
+            currentPage: validatedPage
         };
+
+        await setCachedData(redisKeys.search(validatedSearchTerm, validatedPage), response, ttl.search);
+
+        return response;
 
     } catch (error) {
         return handelGraphqlError(error)
@@ -287,7 +245,7 @@ export const updateClub = async ({
         const updateFields: any = {};
         if (validatedName !== undefined) updateFields.name = validatedName;
         if (validatedDescription !== undefined) updateFields.description = validatedDescription;
-        if (validatedPassword !== undefined) updateFields.password = validatedPassword;
+        if (validatedPassword !== undefined) !validatedPassword ? updateFields.password = null : updateFields.password = await hashPassword(validatedPassword);
         if (validatedThumbnail !== undefined) updateFields.thumbnail = validatedThumbnail;
         if (validatedIsPublic !== undefined) updateFields.ispublic = validatedIsPublic;
         if (validatedMaxMemberLimit !== undefined) updateFields.maxMemberLimit = validatedMaxMemberLimit;
@@ -305,6 +263,8 @@ export const updateClub = async ({
         if (!clubUpdated.acknowledged) {
             throwGraphqlError("Failed to update club", "CLUB_UPDATE_FAILED", 500, true)
         }
+
+        await deleteCachedData(redisKeys.club(validatedClubId));
 
         return true
 
@@ -338,6 +298,10 @@ export const deleteClub = async ({ clubId, userId }: DeleteClubInputType): Promi
             session: session
         });
 
+        if (clubDeleted.deletedCount === 0) {
+            throwGraphqlError("Club not exists..", "NOT_FOUND", 404, true)
+        }
+
         await MembersOfClub.deleteMany({
             clubId: new mongoose.Types.ObjectId(validatedClubId)
         }, {
@@ -350,11 +314,10 @@ export const deleteClub = async ({ clubId, userId }: DeleteClubInputType): Promi
             session: session
         });
 
-        if (clubDeleted.deletedCount === 0) {
-            throwGraphqlError("Club not exists..", "NOT_FOUND", 404, true)
-        }
-
         await session.commitTransaction();
+
+        await deleteCachedData(redisKeys.club(validatedClubId));
+
 
         return true;
 

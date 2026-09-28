@@ -1,5 +1,6 @@
 import type { emailInput } from "../types/email.types"
 import { Resend } from 'resend';
+import { logger } from "@ratees/utils";
 
 
 const resend = new Resend(process.env.Resend_ApiKey as string);
@@ -18,12 +19,12 @@ export const SendEmail = async ({ to, subject, message }: emailInput) => {
         });
 
         if (error) {
-            return console.error({ error });
+            return logger.error({ error });
         }
 
         return { success: true, data };
 
     } catch (error) {
-        console.error({ error });
+        logger.error({ error });
     }
 }
