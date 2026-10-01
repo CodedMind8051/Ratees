@@ -1,7 +1,7 @@
 import {redisClient} from "./connection.utils"
 import { logger } from "../pinoLogger.utils";
 
-const getCatchedData = async (key: string) => {
+const getCachedData = async (key: string) => {
     try {
         const cachedData = await redisClient.get(key);  
 
@@ -34,4 +34,4 @@ const deleteCachedData = async (key: string) => {
     }
 }
 
-export {getCatchedData,setCachedData,deleteCachedData}
+export {getCachedData,setCachedData,deleteCachedData}

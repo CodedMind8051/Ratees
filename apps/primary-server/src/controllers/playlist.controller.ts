@@ -58,7 +58,7 @@ export const getPlaylists = async ({ page, userID, RequestUserId }: GetPlaylists
             },
             {
                 $addFields: {
-                        contentCount: {$size:"$contents"}
+                    contentCount: { $size: "$contents" }
                 }
             },
             {
@@ -168,53 +168,65 @@ export const updatePlaylist = async ({
     description,
     isPublic
 }: UpdatePlaylistInputType): Promise<boolean> => {
+    
 
-    const {
-        playlistId: validatedPlaylistId,
-        userId: validatedUserId,
-        playlistName: validatedPlaylistName,
-        description: validatedDescription,
-        isPublic: validatedIsPublic } = validate(updatePlaylistSchema, {
-            playlistId,
-            userId,
-            playlistName,
-            description,
-            isPublic
-        });
-
-    const existingPlaylist = await Playlist.exists({
-        playlistName: validatedPlaylistName,
-        userId: new mongoose.Types.ObjectId(validatedUserId),
-        _id: { $ne: new mongoose.Types.ObjectId(validatedPlaylistId) },
-    });
-
-    if (existingPlaylist) {
-        throwGraphqlError(
-            "You already have a playlist with this name.",
-            "PLAYLIST_NAME_ALREADY_EXISTS",
-            409,
-            true
-        );
-    }
-
-    const playlistUpdated = await Playlist.updateOne({
-        _id: new mongoose.Types.ObjectId(validatedPlaylistId),
-        userId: new mongoose.Types.ObjectId(validatedUserId)
-    }, {
-        playlistName: validatedPlaylistName,
-        description: validatedDescription,
-        isPublic: validatedIsPublic
-    });
-
-    if (playlistUpdated.matchedCount === 0) {
-        throwGraphqlError("Playlist not found", "PLAYLIST_NOT_FOUND", 404, true)
-    }
-
-    if (!playlistUpdated.acknowledged || !playlistUpdated) {
-        throwGraphqlError("Failed to update playlist", "PLAYLIST_UPDATE_FAILED", 500, true)
-    }
-
-    return true
+  try {
+      const {
+          playlistId: validatedPlaylistId,
+          userId: validatedUserId,
+          playlistName: validatedPlaylistName,
+          description: validatedDescription,
+          isPublic: validatedIsPublic } = validate(updatePlaylistSchema, {
+              playlistId,
+              userId,
+              playlistName,
+              description,
+              isPublic
+          });
+  
+      if (validatedPlaylistName) {
+          const existingPlaylist = await Playlist.exists({
+              playlistName: validatedPlaylistName,
+              userId: new mongoose.Types.ObjectId(validatedUserId),
+              _id: { $ne: new mongoose.Types.ObjectId(validatedPlaylistId) },
+          });
+  
+          if (existingPlaylist) {
+              throwGraphqlError(
+                  "You already have a playlist with this name.",
+                  "PLAYLIST_NAME_ALREADY_EXISTS",
+                  409,
+                  true
+              );
+          }
+      }
+  
+  
+      const updatedFields: any = {};
+  
+      if (validatedPlaylistName !== undefined) updatedFields.playlistName = validatedPlaylistName;
+      if (validatedDescription !== undefined) updatedFields.description = validatedDescription;
+      if (validatedIsPublic !== undefined) updatedFields.isPublic = validatedIsPublic;
+  
+      const playlistUpdated = await Playlist.updateOne({
+          _id: new mongoose.Types.ObjectId(validatedPlaylistId),
+          userId: new mongoose.Types.ObjectId(validatedUserId)
+      }, {
+          $set: updatedFields
+      });
+  
+      if (playlistUpdated.matchedCount === 0) {
+          throwGraphqlError("Playlist not found", "PLAYLIST_NOT_FOUND", 404, true)
+      }
+  
+      if (!playlistUpdated.acknowledged || !playlistUpdated) {
+          throwGraphqlError("Failed to update playlist", "PLAYLIST_UPDATE_FAILED", 500, true)
+      }
+  
+      return true
+  } catch (error) {
+      return handelGraphqlError(error)
+  }
 }
 
 export const deletePlaylist = async ({ playlistId, userId }: DeletePlaylistInputType): Promise<boolean> => {

@@ -8,6 +8,7 @@ const ClubSchema = new Schema(
     name: {
       type: String,
       required: [true, "Club name is required"],
+      unique: true,
       trim: true,
       minlength: [3, "Club name must be at least 3 characters"],
       maxlength: [100, "Club name cannot exceed 100 characters"],
@@ -65,7 +66,7 @@ const ClubSchema = new Schema(
 
 // Indexes
 ClubSchema.index({ ispublic: 1 });
-ClubSchema.index({ name: 1 });
+ClubSchema.index({ name: 1,description: 1 });
 ClubSchema.index({ createdAt: -1 });
 
 
@@ -85,9 +86,6 @@ ClubSchema.pre("save", async function () {
     throw error;
   }
 });
-
-
-
 
 (ClubSchema as any).plugin(mongooseAggregatePaginate);
 

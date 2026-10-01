@@ -7,8 +7,7 @@ import { throwGraphqlError } from "../utils/throwGraphqlError.utils";
 import { handelGraphqlError } from "../utils/handelError.utils";
 import type { CreateClubInputType, UpdateClubInputType, DeleteClubInputType, GetClubInputType, ClubResponseType, SearchClubsInputType } from "../types/club.types";
 import mongoose from "mongoose";
-import { redisKeys, ttl, getCatchedData, setCachedData, deleteCachedData, hashPassword } from "@ratees/utils";
-
+import { redisKeys, ttl, getCachedData, setCachedData, deleteCachedData, hashPassword } from "@ratees/utils";
 
 export const createClub = async (clubData: CreateClubInputType): Promise<boolean> => {
 
@@ -86,7 +85,7 @@ export const getClub = async ({ clubId }: GetClubInputType) => {
 
         const { clubId: validatedClubId } = validate(getClubSchema, { clubId });
 
-        const catchClub = await getCatchedData(redisKeys.club(validatedClubId));
+        const catchClub = await getCachedData(redisKeys.club(validatedClubId));
 
         if (catchClub) {
             return catchClub;
@@ -112,7 +111,7 @@ export const searchClubs = async ({ searchTerm, page }: SearchClubsInputType): P
 
         const { searchTerm: validatedSearchTerm, page: validatedPage } = validate(searchClubsSchema, { searchTerm, page });
 
-        const cachedClubs = await getCatchedData(redisKeys.search(validatedSearchTerm, validatedPage));
+        const cachedClubs = await getCachedData(redisKeys.search(validatedSearchTerm.trim().toLowerCase(), validatedPage));
 
         if (cachedClubs) {
             return cachedClubs;
@@ -242,13 +241,27 @@ export const updateClub = async ({
             }
         }
 
-        const updateFields: any = {};
+        let updateFields: any = {};
         if (validatedName !== undefined) updateFields.name = validatedName;
         if (validatedDescription !== undefined) updateFields.description = validatedDescription;
         if (validatedPassword !== undefined) !validatedPassword ? updateFields.password = null : updateFields.password = await hashPassword(validatedPassword);
         if (validatedThumbnail !== undefined) updateFields.thumbnail = validatedThumbnail;
         if (validatedIsPublic !== undefined) updateFields.ispublic = validatedIsPublic;
         if (validatedMaxMemberLimit !== undefined) updateFields.maxMemberLimit = validatedMaxMemberLimit;
+
+        const club = await Club.findById(new mongoose.Types.ObjectId(validatedClubId)).select("+password");
+
+        if (!club) {
+            throwGraphqlError("Club not found", "CLUB_NOT_FOUND", 404, true)
+        }
+
+        if (club.ispublic === false && validatedIsPublic === true) {
+            updateFields.password = null;
+        }
+
+        if (!validatedIsPublic && validatedPassword === null && club.ispublic === false) {
+            throwGraphqlError("Password is required for private clubs", "PASSWORD_REQUIRED", 400, true)
+        }
 
         const clubUpdated = await Club.updateOne({
             _id: new mongoose.Types.ObjectId(validatedClubId)
