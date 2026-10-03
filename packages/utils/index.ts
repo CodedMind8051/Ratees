@@ -6,3 +6,4 @@ export { getCachedData , setCachedData, deleteCachedData} from "./src/redis/redi
 export { redisKeys } from "./src/redis/redisKeys.utils.js"
 export {ttl} from "./src/redis/constants.js"
 export { logger } from "./src/pinoLogger.utils.js"
+export { auth } from "./src/betterAuth.utils.js"

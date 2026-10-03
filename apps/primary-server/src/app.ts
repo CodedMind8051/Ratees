@@ -3,7 +3,7 @@ import cors from "cors";
 import { expressMiddleware } from '@as-integrations/express5';
 import { CreateApolloServer } from "./graphql/index";
 import { toNodeHandler } from "better-auth/node";
-import { auth } from "./utils/auth.utils";
+import { auth } from "@ratees/utils/src/betterAuth.utils.js";
 import { serve } from "inngest/express";
 import { inngest, functions } from "./inngest/index.inngest"
 import type { Request, Response, NextFunction } from "express";

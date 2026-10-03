@@ -1,4 +1,4 @@
-import { auth } from "../utils/auth.utils";
+import { auth } from "@ratees/utils/src/betterAuth.utils.js";
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response, NextFunction } from "express";
 import { asyncHandler } from "@ratees/utils";

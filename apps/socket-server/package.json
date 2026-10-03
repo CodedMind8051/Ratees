@@ -12,12 +12,18 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@ratees/db": "*",
+    "@ratees/utils": "*",
+    "better-auth": "^1.6.11",
     "cors": "^2.8.6",
+    "dotenv": "^16.3.1",
     "express": "^5.2.1",
     "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
-    "@types/node": "^26.5.1"
+    "@types/node": "^26.5.1",
+    "tsx": "^4.22.1",
+    "typescript": "^6.0.3"
   }
 }

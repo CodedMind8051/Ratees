@@ -2,6 +2,8 @@ import express from "express"
 import cors from "cors";
 import type { Request, Response, NextFunction } from "express";
 import { logger } from "@ratees/utils";
+import { BaseEndpoint } from "./constants.js";
+
 
 const app = express()
 
@@ -20,9 +22,10 @@ app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ limit: "2mb", extended: true }));
 
 
-app.get("/",(req,res)=>{
-    res.send("hiii")
-})
+//routes
+// app.use(BaseEndpoint)
+
+
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 

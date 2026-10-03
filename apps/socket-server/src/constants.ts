@@ -1,0 +1,1 @@
+export const BaseEndpoint = "/api/v1";
